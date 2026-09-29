@@ -1,0 +1,82 @@
+"""Inmetro — PSIE, medidores de velocidade aferidos (todo o país, todos os órgãos).
+
+`https://servicos.rbmlq.gov.br/dados-abertos/{UF}/medidores.json`, mensal, Creative Commons
+(metadados em dados-abertos/metadados_medidores_velocidade.pdf). Sem coordenada: o local é
+texto ("GO-469, KM 027+244M" ou um endereço). Aqui só vira `Meter`; quem casa com os
+radares conhecidos é `datakit.inmetro_status`.
+"""
+from __future__ import annotations
+
+import json
+import os
+from dataclasses import dataclass
+from datetime import date, datetime
+from typing import List, Optional, Tuple
+
+from datakit.common.lrs import parse_km, parse_road
+from datakit.common.ufs import UF_BBOX
+from datakit.sources._http import get_bytes
+
+URL = "https://servicos.rbmlq.gov.br/dados-abertos/{uf}/medidores.json"
+
+
+@dataclass(frozen=True)
+class Meter:
+    uf: str
+    municipio: str
+    local: str
+    fixed: bool
+    valid: bool                    # aferição dentro da validade e último resultado "Aprovado"
+    road: Optional[Tuple[str, int]]  # ("BR", 60) / ("GO", 469)
+    km: Optional[float]
+    limit_kmh: Optional[int]       # menor velocidade nominal entre as faixas
+
+
+def parse(records: list, uf: str, today: date) -> List[Meter]:
+    out: List[Meter] = []
+    for r in records:
+        local = str(r.get("LocalVerificacao") or "")
+        try:
+            validade = datetime.strptime(str(r.get("DataValidade") or ""), "%d/%m/%Y").date()
+        except ValueError:
+            validade = None
+        valid = validade is not None and validade >= today and r.get("UltimoResultado") == "Aprovado"
+        speeds = []
+        for f in r.get("Faixas") or []:
+            v = str(f.get("VelocidadeNominal") or "").strip()
+            if v.isdigit() and 20 <= int(v) <= 130:
+                speeds.append(int(v))
+        road = parse_road(local)
+        km = parse_km(local) if road else None
+        out.append(Meter(
+            uf=str(r.get("SiglaUf") or uf).upper(), municipio=str(r.get("Municipio") or ""),
+            local=local, fixed=r.get("TipoMedidor") == "Fixo", valid=valid,
+            road=road, km=km, limit_kmh=min(speeds) if speeds else None,
+        ))
+    return out
+
+
+def load(raw_dir: str, today: Optional[date] = None) -> List[Meter]:
+    """Todas as UFs; UF que falha no download fica de fora (e é avisada)."""
+    today = today or date.today()
+    folder = os.path.join(raw_dir, "inmetro")
+    os.makedirs(folder, exist_ok=True)
+    meters: List[Meter] = []
+    for uf in sorted(UF_BBOX):
+        path = os.path.join(folder, f"{uf}.json")
+        try:
+            data = get_bytes(URL.format(uf=uf))
+            with open(path, "wb") as f:
+                f.write(data)
+        except Exception as e:  # noqa: BLE001
+            if not os.path.exists(path):
+                print(f"[inmetro] {uf}: FALHOU ({type(e).__name__}: {e})")
+                continue
+            print(f"[inmetro] {uf}: download falhou, usando cópia anterior")
+        try:
+            with open(path, encoding="utf-8-sig") as f:
+                records = json.load(f)
+        except ValueError:
+            continue  # DF volta vazio: os medidores de Brasília estão dentro de GO
+        meters.extend(parse(records, uf, today))
+    return meters

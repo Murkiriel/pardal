@@ -1,3 +1,4 @@
 __pycache__/
 *.pyc
-gerador/
+# downloads das fontes, tiles e pacotes intermediários do gerador (vários GB)
+gerador/data/
