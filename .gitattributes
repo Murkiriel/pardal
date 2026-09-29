@@ -1,0 +1,7 @@
+# Dados: sem conversão de fim de linha (o catalog.json traz o sha256 de cada arquivo)
+*.csv -text
+*.gz binary
+*.json -text
+*.geojson -text
+*.gpx -text
+*.kml -text

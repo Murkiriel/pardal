@@ -1,0 +1,1323 @@
+{
+ "schema": 1,
+ "built_at": "2026-09-29T20:58:37Z",
+ "base_url": "",
+ "ufs": {
+  "AC": {
+   "nome": "Acre",
+   "bbox": [
+    -11.15,
+    -74.02,
+    -7.11,
+    -66.62
+   ],
+   "built_at": "2026-09-29T20:49:39Z",
+   "artifact_built_at": "2026-09-29T20:49:39Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT"
+    ]
+   },
+   "radares": {
+    "file": "estados/AC/radares.csv",
+    "bytes": 241,
+    "sha256": "57e79ff7fc76f65b3d4fe953300998d4eb77481e44f86decaebbfea3888435c8",
+    "count": 5
+   },
+   "limites": {
+    "file": "estados/AC/limites.csv",
+    "bytes": 232133,
+    "sha256": "72461f2e47d5133ba2ac971268dbcb152b9fb3dee807a411c1c516b70bcbf7c1",
+    "count": 6301
+   },
+   "counts": {
+    "cameras": 5,
+    "cameras_with_limit": 0,
+    "cameras_inactive": 0,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 6301,
+    "structs": 377
+   },
+   "estruturas": {
+    "file": "estados/AC/estruturas.csv",
+    "bytes": 18800,
+    "sha256": "bb7075ee899b58f8918bbd81bb53033af1c84f75d090deb802cb3f83e910c782",
+    "count": 377
+   }
+  },
+  "AL": {
+   "nome": "Alagoas",
+   "bbox": [
+    -10.51,
+    -38.24,
+    -8.81,
+    -35.15
+   ],
+   "built_at": "2026-09-29T20:48:10Z",
+   "artifact_built_at": "2026-09-29T20:48:10Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/AL/radares.csv",
+    "bytes": 4082,
+    "sha256": "caa5b5397283080cd710771664189e7be0917f75d39c962fec0afb997e7e8652",
+    "count": 108
+   },
+   "limites": {
+    "file": "estados/AL/limites.csv",
+    "bytes": 973152,
+    "sha256": "7c55d907c8cea8a812f66487020bdb2720036b2817ee004625e9c0f7c7997883",
+    "count": 25443
+   },
+   "counts": {
+    "cameras": 108,
+    "cameras_with_limit": 34,
+    "cameras_inactive": 6,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 25443,
+    "structs": 942
+   },
+   "estruturas": {
+    "file": "estados/AL/estruturas.csv",
+    "bytes": 46367,
+    "sha256": "6fda6d0b9a598bf67bb872f8e7d687baab6c1d70a55819cffdf6beb80a347491",
+    "count": 942
+   }
+  },
+  "AM": {
+   "nome": "Amazonas",
+   "bbox": [
+    -9.82,
+    -73.8,
+    2.25,
+    -56.1
+   ],
+   "built_at": "2026-09-29T20:49:42Z",
+   "artifact_built_at": "2026-09-29T20:49:42Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/AM/radares.csv",
+    "bytes": 693,
+    "sha256": "c96147d5939de3e60c1060ff55c8a2ff567e3deee44a1e24e4606a4ff2e3a024",
+    "count": 17
+   },
+   "limites": {
+    "file": "estados/AM/limites.csv",
+    "bytes": 743643,
+    "sha256": "1191cd3bb7b38e314b128835242c29a08b37bd44501158062c9b0637aa60c276",
+    "count": 20381
+   },
+   "counts": {
+    "cameras": 17,
+    "cameras_with_limit": 11,
+    "cameras_inactive": 2,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 20381,
+    "structs": 669
+   },
+   "estruturas": {
+    "file": "estados/AM/estruturas.csv",
+    "bytes": 32796,
+    "sha256": "18f8b0f08a751852546bb35e9136f61d83fb6c7cd02463270bb4b7dc68d8bd7e",
+    "count": 669
+   }
+  },
+  "AP": {
+   "nome": "Amapá",
+   "bbox": [
+    -1.24,
+    -54.88,
+    4.44,
+    -49.87
+   ],
+   "built_at": "2026-09-29T20:49:43Z",
+   "artifact_built_at": "2026-09-29T20:49:43Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT"
+    ]
+   },
+   "radares": {
+    "file": "estados/AP/radares.csv",
+    "bytes": 161,
+    "sha256": "74f45f69fcf0e2278316a6ce5dd5fc646701c4a069ff177e0ece4b0f12169138",
+    "count": 3
+   },
+   "limites": {
+    "file": "estados/AP/limites.csv",
+    "bytes": 189320,
+    "sha256": "ffe5eb2bb02a8e14f90c191090c9a883995c154ec7057cd2d070cabdae37a93e",
+    "count": 4865
+   },
+   "counts": {
+    "cameras": 3,
+    "cameras_with_limit": 0,
+    "cameras_inactive": 0,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 4865,
+    "structs": 163
+   },
+   "estruturas": {
+    "file": "estados/AP/estruturas.csv",
+    "bytes": 7754,
+    "sha256": "2a303e11d9a76c6fb5f28a239464bfa7e76099a95c0eaaa660d9ed8bb845b419",
+    "count": 163
+   }
+  },
+  "BA": {
+   "nome": "Bahia",
+   "bbox": [
+    -18.35,
+    -46.62,
+    -8.53,
+    -37.34
+   ],
+   "built_at": "2026-09-29T20:48:34Z",
+   "artifact_built_at": "2026-09-29T20:48:31Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/BA/radares.csv",
+    "bytes": 19130,
+    "sha256": "9ca04f3b52a9fcaa04949cdb8e534743d02fde6b6e356591b237ab7eea01426a",
+    "count": 499
+   },
+   "limites": {
+    "file": "estados/BA/limites.csv",
+    "bytes": 7752125,
+    "sha256": "fd6bcb5393219979e6f0a404215caa2f3926552b8589e65bf7a990c6f6a1eb90",
+    "count": 199931
+   },
+   "counts": {
+    "cameras": 499,
+    "cameras_with_limit": 209,
+    "cameras_inactive": 21,
+    "sections": 0,
+    "red_lights": 6,
+    "limits": 199931,
+    "structs": 6217
+   },
+   "estruturas": {
+    "file": "estados/BA/estruturas.csv",
+    "bytes": 316508,
+    "sha256": "841b6c63228ee12028957967ae64ed0109581578862636321206a37b9acdf27a",
+    "count": 6217
+   }
+  },
+  "CE": {
+   "nome": "Ceará",
+   "bbox": [
+    -7.86,
+    -41.42,
+    -2.78,
+    -37.25
+   ],
+   "built_at": "2026-09-29T20:48:42Z",
+   "artifact_built_at": "2026-09-29T20:48:41Z",
+   "cobertura": {
+    "nivel": "federal+municipal",
+    "fontes": [
+     "DNIT",
+     "OSM",
+     "PMF"
+    ]
+   },
+   "radares": {
+    "file": "estados/CE/radares.csv",
+    "bytes": 32443,
+    "sha256": "3ce66d646d07fb06b52f967e3a4653a887e30497d89c9c2e61660cdf4c858bf2",
+    "count": 861
+   },
+   "limites": {
+    "file": "estados/CE/limites.csv",
+    "bytes": 2551022,
+    "sha256": "eb1d25b3e33cb7de55c1fe391f696f20b3fbb4da44fb049f5f6d23282b031869",
+    "count": 68693
+   },
+   "counts": {
+    "cameras": 861,
+    "cameras_with_limit": 407,
+    "cameras_inactive": 19,
+    "sections": 5,
+    "red_lights": 113,
+    "limits": 68693,
+    "structs": 3168
+   },
+   "estruturas": {
+    "file": "estados/CE/estruturas.csv",
+    "bytes": 155257,
+    "sha256": "9d68ab3d7aa437e1035e0076b58dc692e482e538f8d333bb6fcfaff30d16e370",
+    "count": 3168
+   }
+  },
+  "DF": {
+   "nome": "Distrito Federal",
+   "bbox": [
+    -16.05,
+    -48.29,
+    -15.5,
+    -47.31
+   ],
+   "built_at": "2026-09-29T20:45:30Z",
+   "artifact_built_at": "2026-09-29T20:45:30Z",
+   "cobertura": {
+    "nivel": "federal+estadual",
+    "fontes": [
+     "ANTT",
+     "DER-GO",
+     "DETRAN-DF",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/DF/radares.csv",
+    "bytes": 114365,
+    "sha256": "567a18915bb11e933f7c0b8a219447e3f6a91fd644b7ce5fa7eefc84123175ab",
+    "count": 2644
+   },
+   "limites": {
+    "file": "estados/DF/limites.csv",
+    "bytes": 956866,
+    "sha256": "74299c20d039e21d4a226c9807c129506d7ee2ca3524010f4d496bd0c21e6e48",
+    "count": 26986
+   },
+   "counts": {
+    "cameras": 2644,
+    "cameras_with_limit": 1226,
+    "cameras_inactive": 0,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 26986,
+    "structs": 730
+   },
+   "estruturas": {
+    "file": "estados/DF/estruturas.csv",
+    "bytes": 37255,
+    "sha256": "6606972cf9fcd839e6d90fb0c95039b78b229fb3ea10aa05f788ecee53ec678a",
+    "count": 730
+   }
+  },
+  "ES": {
+   "nome": "Espírito Santo",
+   "bbox": [
+    -21.3,
+    -41.88,
+    -17.89,
+    -39.66
+   ],
+   "built_at": "2026-09-29T20:52:53Z",
+   "artifact_built_at": "2026-09-29T20:52:51Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/ES/radares.csv",
+    "bytes": 13138,
+    "sha256": "57c64300d28d65c7bf9bfc0f6930dd2d716187059b2e8f2ae4a2a6e423f2354b",
+    "count": 333
+   },
+   "limites": {
+    "file": "estados/ES/limites.csv",
+    "bytes": 3965110,
+    "sha256": "9f93de7105c2ce85c901d6b4ee4959cec5560817bebe4774443bcc6523705418",
+    "count": 113228
+   },
+   "counts": {
+    "cameras": 333,
+    "cameras_with_limit": 223,
+    "cameras_inactive": 31,
+    "sections": 5,
+    "red_lights": 4,
+    "limits": 113228,
+    "structs": 7320
+   },
+   "estruturas": {
+    "file": "estados/ES/estruturas.csv",
+    "bytes": 373345,
+    "sha256": "1940327b1080998d41b4d7ed3cebaa998353d1382b88f2e7366969c9ac588e4e",
+    "count": 7320
+   }
+  },
+  "GO": {
+   "nome": "Goiás",
+   "bbox": [
+    -19.5,
+    -53.25,
+    -12.4,
+    -45.9
+   ],
+   "built_at": "2026-09-29T20:45:53Z",
+   "artifact_built_at": "2026-09-29T20:45:51Z",
+   "cobertura": {
+    "nivel": "federal+estadual",
+    "fontes": [
+     "ANTT",
+     "DER-GO",
+     "DETRAN-DF",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/GO/radares.csv",
+    "bytes": 62166,
+    "sha256": "6123bf517f7fefe4ecd38b69ef37eb76203094af9c610c34c49b50f0707b73a4",
+    "count": 1515
+   },
+   "limites": {
+    "file": "estados/GO/limites.csv",
+    "bytes": 4570531,
+    "sha256": "7b233a81b263aba4cf9d5f070c4a90d158c24b7a3f23b1a2b512b9ca6057ceb2",
+    "count": 120941
+   },
+   "counts": {
+    "cameras": 1515,
+    "cameras_with_limit": 1401,
+    "cameras_inactive": 3,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 120941,
+    "structs": 4915
+   },
+   "estruturas": {
+    "file": "estados/GO/estruturas.csv",
+    "bytes": 250690,
+    "sha256": "13ff9ff5c0c4793c7e4cb0da7d5931cb7781900b105655a8ac582757da128be4",
+    "count": 4915
+   }
+  },
+  "MA": {
+   "nome": "Maranhão",
+   "bbox": [
+    -10.26,
+    -48.75,
+    -1.04,
+    -41.8
+   ],
+   "built_at": "2026-09-29T20:48:49Z",
+   "artifact_built_at": "2026-09-29T20:48:48Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/MA/radares.csv",
+    "bytes": 5627,
+    "sha256": "208fadb8778628fc189c4df443bad901470112127e6bfdda475be935c66e0a2b",
+    "count": 148
+   },
+   "limites": {
+    "file": "estados/MA/limites.csv",
+    "bytes": 2107982,
+    "sha256": "62cf3e778a1cc3dd504c860c90d5b9708bb71b90cf84283297f635c8bb382829",
+    "count": 56144
+   },
+   "counts": {
+    "cameras": 148,
+    "cameras_with_limit": 105,
+    "cameras_inactive": 6,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 56144,
+    "structs": 1519
+   },
+   "estruturas": {
+    "file": "estados/MA/estruturas.csv",
+    "bytes": 74456,
+    "sha256": "1546cbcd636b5965474b3f864a970ecccbe1eb9f4834633c1c709d36092d4e53",
+    "count": 1519
+   }
+  },
+  "MG": {
+   "nome": "Minas Gerais",
+   "bbox": [
+    -22.92,
+    -51.05,
+    -14.23,
+    -39.86
+   ],
+   "built_at": "2026-09-29T20:54:11Z",
+   "artifact_built_at": "2026-09-29T20:54:00Z",
+   "cobertura": {
+    "nivel": "federal+estadual",
+    "fontes": [
+     "ANTT",
+     "BHTRANS",
+     "DER-SP",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/MG/radares.csv",
+    "bytes": 77152,
+    "sha256": "35d7324aafb7d14fc7650679dc0a60a5edef388835ace2047c12c0fbf5938035",
+    "count": 1936
+   },
+   "limites": {
+    "file": "estados/MG/limites.csv",
+    "bytes": 15004276,
+    "sha256": "a91725ebc1186f11990bae4f2112bfe4825790f58d05d674dd120d592a942fcd",
+    "count": 408664
+   },
+   "counts": {
+    "cameras": 1936,
+    "cameras_with_limit": 1373,
+    "cameras_inactive": 22,
+    "sections": 2,
+    "red_lights": 233,
+    "limits": 408664,
+    "structs": 19722
+   },
+   "estruturas": {
+    "file": "estados/MG/estruturas.csv",
+    "bytes": 1005847,
+    "sha256": "97e8eaf1031052bdbd84e586bac5e5be3074c813b4a75cb5e4bcce44a1423e17",
+    "count": 19722
+   }
+  },
+  "MS": {
+   "nome": "Mato Grosso do Sul",
+   "bbox": [
+    -24.07,
+    -58.17,
+    -17.16,
+    -50.92
+   ],
+   "built_at": "2026-09-29T20:46:03Z",
+   "artifact_built_at": "2026-09-29T20:46:02Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/MS/radares.csv",
+    "bytes": 7803,
+    "sha256": "505866b7aea330b975b2cda9bda58eb43085f057e289f5159ac5a6b594d0ed0a",
+    "count": 199
+   },
+   "limites": {
+    "file": "estados/MS/limites.csv",
+    "bytes": 2376069,
+    "sha256": "9020310fa7c869eaa65a9567c9be43ecc7c4d5b93355bc39d5372454132fae99",
+    "count": 62016
+   },
+   "counts": {
+    "cameras": 199,
+    "cameras_with_limit": 134,
+    "cameras_inactive": 10,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 62016,
+    "structs": 2199
+   },
+   "estruturas": {
+    "file": "estados/MS/estruturas.csv",
+    "bytes": 112174,
+    "sha256": "11db27775232d545bed9d878ade4162cb80c00625879373878e27f1e2700a542",
+    "count": 2199
+   }
+  },
+  "MT": {
+   "nome": "Mato Grosso",
+   "bbox": [
+    -18.04,
+    -61.63,
+    -7.35,
+    -50.22
+   ],
+   "built_at": "2026-09-29T20:46:23Z",
+   "artifact_built_at": "2026-09-29T20:46:20Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/MT/radares.csv",
+    "bytes": 9836,
+    "sha256": "f667d02ef2523d996671d82b91bcafb6f9c49d43d146081f4d88707e432a9ea5",
+    "count": 251
+   },
+   "limites": {
+    "file": "estados/MT/limites.csv",
+    "bytes": 4889733,
+    "sha256": "cf518befd4656543e62683187e5b4f523175369af9f84919cda51f6906d32df5",
+    "count": 129679
+   },
+   "counts": {
+    "cameras": 251,
+    "cameras_with_limit": 181,
+    "cameras_inactive": 0,
+    "sections": 0,
+    "red_lights": 4,
+    "limits": 129679,
+    "structs": 5426
+   },
+   "estruturas": {
+    "file": "estados/MT/estruturas.csv",
+    "bytes": 275157,
+    "sha256": "08196bd8abc114ed6c54472320e1fe4072ea9140c1462bf2c90af74497095b65",
+    "count": 5426
+   }
+  },
+  "PA": {
+   "nome": "Pará",
+   "bbox": [
+    -9.84,
+    -58.9,
+    2.59,
+    -46.06
+   ],
+   "built_at": "2026-09-29T20:49:55Z",
+   "artifact_built_at": "2026-09-29T20:49:54Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/PA/radares.csv",
+    "bytes": 5760,
+    "sha256": "d8d8bda9f4e5406395dfaaa5f348add0965db7bc6a599ce0d7d6a43483105ca0",
+    "count": 150
+   },
+   "limites": {
+    "file": "estados/PA/limites.csv",
+    "bytes": 3004796,
+    "sha256": "55e78d2ed94d16a43b4730fba5d112e911574ebfccb2ffb6050db16cad44fbf8",
+    "count": 80309
+   },
+   "counts": {
+    "cameras": 150,
+    "cameras_with_limit": 94,
+    "cameras_inactive": 0,
+    "sections": 2,
+    "red_lights": 0,
+    "limits": 80309,
+    "structs": 3780
+   },
+   "estruturas": {
+    "file": "estados/PA/estruturas.csv",
+    "bytes": 185243,
+    "sha256": "5147165466fb6c8093b7721f07d769961ec4b6be7f0fd3dda86c0347afbe563a",
+    "count": 3780
+   }
+  },
+  "PB": {
+   "nome": "Paraíba",
+   "bbox": [
+    -8.3,
+    -38.77,
+    -6.02,
+    -34.79
+   ],
+   "built_at": "2026-09-29T20:48:53Z",
+   "artifact_built_at": "2026-09-29T20:48:52Z",
+   "cobertura": {
+    "nivel": "federal+municipal",
+    "fontes": [
+     "DNIT",
+     "OSM",
+     "PMJP"
+    ]
+   },
+   "radares": {
+    "file": "estados/PB/radares.csv",
+    "bytes": 10835,
+    "sha256": "f4d0ef6069cf8fad5079a7c764c2f853ef602b1f440951b59e1f6171003c8952",
+    "count": 284
+   },
+   "limites": {
+    "file": "estados/PB/limites.csv",
+    "bytes": 1618170,
+    "sha256": "b5cc693eff6b585fda4cd941a6387a8bed6102680d003b70469f30cd31ecaa2c",
+    "count": 46434
+   },
+   "counts": {
+    "cameras": 284,
+    "cameras_with_limit": 192,
+    "cameras_inactive": 14,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 46434,
+    "structs": 1376
+   },
+   "estruturas": {
+    "file": "estados/PB/estruturas.csv",
+    "bytes": 67449,
+    "sha256": "9b341da9d062a1eccaab4edf5e83ba3d073413af9ab419323074f12eaaee4295",
+    "count": 1376
+   }
+  },
+  "PE": {
+   "nome": "Pernambuco",
+   "bbox": [
+    -9.48,
+    -41.36,
+    -7.27,
+    -34.81
+   ],
+   "built_at": "2026-09-29T20:48:59Z",
+   "artifact_built_at": "2026-09-29T20:48:58Z",
+   "cobertura": {
+    "nivel": "federal+estadual+municipal",
+    "fontes": [
+     "DER-PE",
+     "DNIT",
+     "OSM",
+     "PCR"
+    ]
+   },
+   "radares": {
+    "file": "estados/PE/radares.csv",
+    "bytes": 16556,
+    "sha256": "4ef5d645fc19a6deacc381fca586406a4c2efe322a7a6611f987fda2adfe08ba",
+    "count": 438
+   },
+   "limites": {
+    "file": "estados/PE/limites.csv",
+    "bytes": 2346728,
+    "sha256": "e50b69606d8f5a8b3c700e5362c7ec5f459cc9dfd9a7d2076741122180342ac6",
+    "count": 62875
+   },
+   "counts": {
+    "cameras": 438,
+    "cameras_with_limit": 295,
+    "cameras_inactive": 28,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 62875,
+    "structs": 3636
+   },
+   "estruturas": {
+    "file": "estados/PE/estruturas.csv",
+    "bytes": 178189,
+    "sha256": "53e39364292e327ba23b20bde576ea255cc82a298e8ae09d656b3567f07da1eb",
+    "count": 3636
+   }
+  },
+  "PI": {
+   "nome": "Piauí",
+   "bbox": [
+    -10.93,
+    -45.99,
+    -2.74,
+    -40.37
+   ],
+   "built_at": "2026-09-29T20:49:06Z",
+   "artifact_built_at": "2026-09-29T20:49:04Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/PI/radares.csv",
+    "bytes": 2569,
+    "sha256": "63270f59850ed2d3eebf4ef27734a60beee3d646710644f9d4f4bb6ddca1c4fa",
+    "count": 67
+   },
+   "limites": {
+    "file": "estados/PI/limites.csv",
+    "bytes": 2316107,
+    "sha256": "898bf18dbacc1c02afde597943241a748c91c577c57f975178bd6655498e4f3c",
+    "count": 62351
+   },
+   "counts": {
+    "cameras": 67,
+    "cameras_with_limit": 39,
+    "cameras_inactive": 4,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 62351,
+    "structs": 1192
+   },
+   "estruturas": {
+    "file": "estados/PI/estruturas.csv",
+    "bytes": 58531,
+    "sha256": "40d9bf5ec2963b24d5755b8007a98ab91c8eb4a57f99332001d8b9c0aba57973",
+    "count": 1192
+   }
+  },
+  "PR": {
+   "nome": "Paraná",
+   "bbox": [
+    -26.72,
+    -54.62,
+    -22.52,
+    -48.02
+   ],
+   "built_at": "2026-09-29T20:57:49Z",
+   "artifact_built_at": "2026-09-29T20:57:45Z",
+   "cobertura": {
+    "nivel": "federal+estadual",
+    "fontes": [
+     "ANTT",
+     "DER-SP",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/PR/radares.csv",
+    "bytes": 51823,
+    "sha256": "4309998282eba958396538a67b46bc6b3f23a5638b24db95c823d54331f2860d",
+    "count": 1313
+   },
+   "limites": {
+    "file": "estados/PR/limites.csv",
+    "bytes": 6765304,
+    "sha256": "ac42f482a0b259421eb8300bc0e37f92d739d9319a8a3a4b45da3bc35f940550",
+    "count": 190115
+   },
+   "counts": {
+    "cameras": 1313,
+    "cameras_with_limit": 1086,
+    "cameras_inactive": 7,
+    "sections": 30,
+    "red_lights": 9,
+    "limits": 190115,
+    "structs": 8890
+   },
+   "estruturas": {
+    "file": "estados/PR/estruturas.csv",
+    "bytes": 453415,
+    "sha256": "3057300eba8e43478e3762d107e2a0bf5b17d403737a732c5d15e315e41a4022",
+    "count": 8890
+   }
+  },
+  "RJ": {
+   "nome": "Rio de Janeiro",
+   "bbox": [
+    -23.37,
+    -44.89,
+    -20.76,
+    -40.96
+   ],
+   "built_at": "2026-09-29T20:54:31Z",
+   "artifact_built_at": "2026-09-29T20:54:28Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM",
+     "RIO"
+    ]
+   },
+   "radares": {
+    "file": "estados/RJ/radares.csv",
+    "bytes": 50396,
+    "sha256": "7748e6a48696b792767b521db2a31a66e3800c507b96c680ecf95f09d4c5b552",
+    "count": 1276
+   },
+   "limites": {
+    "file": "estados/RJ/limites.csv",
+    "bytes": 6168680,
+    "sha256": "16478e1234472cc8ff3c4badb84b9c7cbee3657357b1ec97ea7084416a04c6ef",
+    "count": 184019
+   },
+   "counts": {
+    "cameras": 1276,
+    "cameras_with_limit": 1050,
+    "cameras_inactive": 2,
+    "sections": 1,
+    "red_lights": 201,
+    "limits": 184019,
+    "structs": 7848
+   },
+   "estruturas": {
+    "file": "estados/RJ/estruturas.csv",
+    "bytes": 400273,
+    "sha256": "dd286938365f09a6fc4ada4302e2a5656a41c9f77b5a0344105e3cc0db440f84",
+    "count": 7848
+   }
+  },
+  "RN": {
+   "nome": "Rio Grande do Norte",
+   "bbox": [
+    -6.99,
+    -38.58,
+    -4.83,
+    -34.96
+   ],
+   "built_at": "2026-09-29T20:49:09Z",
+   "artifact_built_at": "2026-09-29T20:49:08Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/RN/radares.csv",
+    "bytes": 6318,
+    "sha256": "8cc3153b42f553f19a72f2f33c6bd1b85ac721d4c63b16e622e43783841b3efd",
+    "count": 168
+   },
+   "limites": {
+    "file": "estados/RN/limites.csv",
+    "bytes": 1135665,
+    "sha256": "b5f31e607f1a960c739a7347e5dac6e5cd926254c611cca4c9db61cf14b13f91",
+    "count": 30107
+   },
+   "counts": {
+    "cameras": 168,
+    "cameras_with_limit": 61,
+    "cameras_inactive": 18,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 30107,
+    "structs": 809
+   },
+   "estruturas": {
+    "file": "estados/RN/estruturas.csv",
+    "bytes": 39666,
+    "sha256": "42ccfc41575889463ca2900bea1e38876421005cd6fbdbae798c320a930e25ef",
+    "count": 809
+   }
+  },
+  "RO": {
+   "nome": "Rondônia",
+   "bbox": [
+    -13.69,
+    -66.81,
+    -7.97,
+    -59.77
+   ],
+   "built_at": "2026-09-29T20:49:59Z",
+   "artifact_built_at": "2026-09-29T20:49:58Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/RO/radares.csv",
+    "bytes": 1012,
+    "sha256": "e274315cd97ea84848819be359b6ca634e664cec7dbff38a00cb2352c14dc0e0",
+    "count": 25
+   },
+   "limites": {
+    "file": "estados/RO/limites.csv",
+    "bytes": 1193341,
+    "sha256": "dcf472f12a451209d89762d98be10a48865c2c5888926a4c62b168377f2b61d6",
+    "count": 31845
+   },
+   "counts": {
+    "cameras": 25,
+    "cameras_with_limit": 15,
+    "cameras_inactive": 1,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 31845,
+    "structs": 2164
+   },
+   "estruturas": {
+    "file": "estados/RO/estruturas.csv",
+    "bytes": 109405,
+    "sha256": "46afc1d687b80e43e1c810b63eb81a2a0e53c13dc2a017a393a8af50d0796671",
+    "count": 2164
+   }
+  },
+  "RR": {
+   "nome": "Roraima",
+   "bbox": [
+    -1.58,
+    -64.82,
+    5.27,
+    -58.89
+   ],
+   "built_at": "2026-09-29T20:50:01Z",
+   "artifact_built_at": "2026-09-29T20:50:01Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/RR/radares.csv",
+    "bytes": 1050,
+    "sha256": "d8516127d300cf270b7b8007b90cfd0f193ed44bdbdc41733c959889680326fd",
+    "count": 27
+   },
+   "limites": {
+    "file": "estados/RR/limites.csv",
+    "bytes": 345771,
+    "sha256": "9087937e4a3dc42007ad7598fa74dc73a1a389d974fd664b8bec705b47020f70",
+    "count": 9559
+   },
+   "counts": {
+    "cameras": 27,
+    "cameras_with_limit": 21,
+    "cameras_inactive": 4,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 9559,
+    "structs": 496
+   },
+   "estruturas": {
+    "file": "estados/RR/estruturas.csv",
+    "bytes": 23347,
+    "sha256": "917561847a301ce584d85e9a66e93895e529e605826bd96c9a270b596afbeecc",
+    "count": 496
+   }
+  },
+  "RS": {
+   "nome": "Rio Grande do Sul",
+   "bbox": [
+    -33.75,
+    -57.65,
+    -27.08,
+    -49.69
+   ],
+   "built_at": "2026-09-29T20:58:20Z",
+   "artifact_built_at": "2026-09-29T20:58:16Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/RS/radares.csv",
+    "bytes": 39128,
+    "sha256": "34acfe4e5d17fa8fcb9e87e2e3b213a0891eed6454a1c4e636cd282b4dfbbde7",
+    "count": 964
+   },
+   "limites": {
+    "file": "estados/RS/limites.csv",
+    "bytes": 7949324,
+    "sha256": "239d89ea0d5b4ade0cfbe9e3288af956a08c2d40b5caa2d2574e5a30c044b82b",
+    "count": 219958
+   },
+   "counts": {
+    "cameras": 964,
+    "cameras_with_limit": 604,
+    "cameras_inactive": 262,
+    "sections": 84,
+    "red_lights": 4,
+    "limits": 219958,
+    "structs": 10306
+   },
+   "estruturas": {
+    "file": "estados/RS/estruturas.csv",
+    "bytes": 525631,
+    "sha256": "c0a6b109cbc51fcfe4e482e40f2afb756814e6edee18435f74b5902fb4d49600",
+    "count": 10306
+   }
+  },
+  "SC": {
+   "nome": "Santa Catarina",
+   "bbox": [
+    -29.36,
+    -53.84,
+    -25.95,
+    -48.35
+   ],
+   "built_at": "2026-09-29T20:58:36Z",
+   "artifact_built_at": "2026-09-29T20:58:33Z",
+   "cobertura": {
+    "nivel": "federal+estadual",
+    "fontes": [
+     "ANTT",
+     "DER-SP",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/SC/radares.csv",
+    "bytes": 47028,
+    "sha256": "302f5a8ab2a439e3e883292d8f28212404c79c1a287470bfbdecf6c6e7c6d7fe",
+    "count": 1091
+   },
+   "limites": {
+    "file": "estados/SC/limites.csv",
+    "bytes": 4744343,
+    "sha256": "0d40be481ba299c7f4cec4e18a1b8144e2fd10c5a2563c164c51810644d35f87",
+    "count": 132594
+   },
+   "counts": {
+    "cameras": 1091,
+    "cameras_with_limit": 859,
+    "cameras_inactive": 110,
+    "sections": 189,
+    "red_lights": 68,
+    "limits": 132594,
+    "structs": 11133
+   },
+   "estruturas": {
+    "file": "estados/SC/estruturas.csv",
+    "bytes": 567808,
+    "sha256": "5b695088e92f8fc3c8f1784278ac9dbe7583f38e99d67da355b8b6d39f44d91e",
+    "count": 11133
+   }
+  },
+  "SE": {
+   "nome": "Sergipe",
+   "bbox": [
+    -11.57,
+    -38.25,
+    -9.51,
+    -36.39
+   ],
+   "built_at": "2026-09-29T20:49:11Z",
+   "artifact_built_at": "2026-09-29T20:49:11Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/SE/radares.csv",
+    "bytes": 5742,
+    "sha256": "ee6c3c2955a0ff483b8955d77572553cdc436f86bd51506940e882be88a9b05e",
+    "count": 147
+   },
+   "limites": {
+    "file": "estados/SE/limites.csv",
+    "bytes": 617752,
+    "sha256": "4c5c60762aadf23acbdf1822bcb6bd66daedcdc326fbd47dff56b43280641eb6",
+    "count": 15926
+   },
+   "counts": {
+    "cameras": 147,
+    "cameras_with_limit": 107,
+    "cameras_inactive": 6,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 15926,
+    "structs": 986
+   },
+   "estruturas": {
+    "file": "estados/SE/estruturas.csv",
+    "bytes": 50207,
+    "sha256": "46107ad2077150349161ed195772911bec04a92317da2740d805d3eec73d57d5",
+    "count": 986
+   }
+  },
+  "SP": {
+   "nome": "São Paulo",
+   "bbox": [
+    -25.31,
+    -53.11,
+    -19.78,
+    -44.16
+   ],
+   "built_at": "2026-09-29T20:55:32Z",
+   "artifact_built_at": "2026-09-29T20:55:14Z",
+   "cobertura": {
+    "nivel": "federal+estadual",
+    "fontes": [
+     "ANTT",
+     "DER-SP",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/SP/radares.csv",
+    "bytes": 187958,
+    "sha256": "62bcd99946b7725b57373efc447e0524e888f04e8a64579a826486ee02b58a6b",
+    "count": 4772
+   },
+   "limites": {
+    "file": "estados/SP/limites.csv",
+    "bytes": 16344421,
+    "sha256": "a5501f430f490b39121c47348a617e8d1fdb073217649c4880aeca9e657b8839",
+    "count": 456466
+   },
+   "counts": {
+    "cameras": 4772,
+    "cameras_with_limit": 2585,
+    "cameras_inactive": 52,
+    "sections": 31,
+    "red_lights": 46,
+    "limits": 456466,
+    "structs": 20092
+   },
+   "estruturas": {
+    "file": "estados/SP/estruturas.csv",
+    "bytes": 1024717,
+    "sha256": "c7766520f852088ed9591efc5246c53f4f2ae81056e807be05c3c02ce9280ca0",
+    "count": 20092
+   }
+  },
+  "TO": {
+   "nome": "Tocantins",
+   "bbox": [
+    -13.47,
+    -50.74,
+    -5.17,
+    -45.7
+   ],
+   "built_at": "2026-09-29T20:50:07Z",
+   "artifact_built_at": "2026-09-29T20:50:06Z",
+   "cobertura": {
+    "nivel": "federal",
+    "fontes": [
+     "ANTT",
+     "DNIT",
+     "OSM"
+    ]
+   },
+   "radares": {
+    "file": "estados/TO/radares.csv",
+    "bytes": 2885,
+    "sha256": "c75c4583c6f5236723c8a5b7ee066119b5a2efc764a9be8ee91793984a1b12dd",
+    "count": 74
+   },
+   "limites": {
+    "file": "estados/TO/limites.csv",
+    "bytes": 1807424,
+    "sha256": "444602cd5138e95f419be942baf40a7dcad7031d486035016e343dfa455b87fa",
+    "count": 47954
+   },
+   "counts": {
+    "cameras": 74,
+    "cameras_with_limit": 44,
+    "cameras_inactive": 4,
+    "sections": 0,
+    "red_lights": 0,
+    "limits": 47954,
+    "structs": 1019
+   },
+   "estruturas": {
+    "file": "estados/TO/estruturas.csv",
+    "bytes": 50900,
+    "sha256": "7d0b45389ef0ce28c939c75bf410cc59ee2ee9983a6a08f620fcf47aa3d3469a",
+    "count": 1019
+   }
+  },
+  "BR": {
+   "nome": "Brasil (tudo)",
+   "bbox": [
+    -34.0,
+    -74.5,
+    6.0,
+    -32.0
+   ],
+   "built_at": "2026-09-29T20:58:48Z",
+   "cobertura": {
+    "nivel": "bundle",
+    "fontes": [
+     "AC+AL+AM+AP+BA+CE+DF+ES+GO+MA+MG+MS+MT+PA+PB+PE+PI+PR+RJ+RN+RO+RR+RS+SC+SE+SP+TO"
+    ]
+   },
+   "radares": {
+    "file": "brasil/radares.csv",
+    "bytes": 774519,
+    "sha256": "53e5028e691f20f39e4aae8dd80a2d7e208e08d2d75e63e337d814fe67918fe5",
+    "count": 19315
+   },
+   "limites": {
+    "file": "brasil/limites.csv",
+    "bytes": 44118368,
+    "sha256": "cb37eca291b76ee1b740a43dcabffc19d6e80dfe3283d73e8a51818e77530d63",
+    "count": 1378546
+   },
+   "limites_estimados": {
+    "file": "brasil/limites_estimados.csv",
+    "bytes": 58549424,
+    "sha256": "da36f33ef470d7e4b75638180e3c6d8008173d195d215298752a815848db4040",
+    "count": 1435214
+   },
+   "estruturas": {
+    "file": "brasil/estruturas.csv",
+    "bytes": 6433161,
+    "sha256": "fcaddc395abf1a5f49670ebb5dcc542e08090f513213d2eb36caa629ee346496",
+    "count": 126948
+   },
+   "counts": {
+    "cameras": 19315,
+    "limits": 1378546,
+    "limits_estimated": 1435214,
+    "structs": 126948
+   },
+   "ufs_incluidas": [
+    "AC",
+    "AL",
+    "AM",
+    "AP",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MG",
+    "MS",
+    "MT",
+    "PA",
+    "PB",
+    "PE",
+    "PI",
+    "PR",
+    "RJ",
+    "RN",
+    "RO",
+    "RR",
+    "RS",
+    "SC",
+    "SE",
+    "SP",
+    "TO"
+   ]
+  }
+ }
+}
