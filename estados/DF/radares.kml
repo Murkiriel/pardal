@@ -104,7 +104,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.060730,-16.027588,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.069702,-16.027405,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.061096,-16.027405,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.979094,-16.027217,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 349° (norte)</description><Point><coordinates>-47.979094,-16.027217,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.073608,-16.027100,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.979004,-16.026978,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.069275,-16.026794,0</coordinates></Point></Placemark>
@@ -121,7 +121,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.065979,-16.026001,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.979492,-16.025879,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.063904,-16.025818,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.979528,-16.025611,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 169° (sul)</description><Point><coordinates>-47.979528,-16.025611,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.979341,-16.025594,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.068909,-16.025513,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.979649,-16.025451,0</coordinates></Point></Placemark>
@@ -156,7 +156,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.801086,-16.018982,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.061890,-16.018799,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.083984,-16.018494,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.980917,-16.018444,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 348° (norte)</description><Point><coordinates>-47.980917,-16.018444,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.061890,-16.018311,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.980713,-16.018311,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.061707,-16.017883,0</coordinates></Point></Placemark>
@@ -228,7 +228,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.115784,-15.999084,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.077515,-15.997986,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.077393,-15.997986,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.986028,-15.994278,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 169° (sul)</description><Point><coordinates>-47.986028,-15.994278,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.077087,-15.993286,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.076294,-15.991882,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.076111,-15.991882,0</coordinates></Point></Placemark>
@@ -287,8 +287,8 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.823181,-15.948120,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.823181,-15.947998,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.000610,-15.947876,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.793160,-15.945574,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.789458,-15.945438,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 110° (leste)</description><Point><coordinates>-47.793160,-15.945574,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 256° (oeste)</description><Point><coordinates>-47.789458,-15.945438,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.824402,-15.945312,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.602600,-15.945129,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.727783,-15.943604,0</coordinates></Point></Placemark>
@@ -304,7 +304,7 @@
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.756897,-15.937622,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.228394,-15.937500,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.750488,-15.937500,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.755913,-15.937443,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 76° (leste)</description><Point><coordinates>-47.755913,-15.937443,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.227417,-15.937378,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.750000,-15.937012,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.223511,-15.936707,0</coordinates></Point></Placemark>
@@ -346,7 +346,7 @@
 <Placemark><name>Radar 30 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.771729,-15.906189,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.951782,-15.905884,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.051086,-15.905396,0</coordinates></Point></Placemark>
-<Placemark><name>Radar 80 km/h</name><description>Fonte: ANTT</description><Point><coordinates>-48.137158,-15.905098,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 80 km/h</name><description>Fonte: ANTT · sentido 252° (oeste)</description><Point><coordinates>-48.137158,-15.905098,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-48.136780,-15.905047,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.136292,-15.904907,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.051514,-15.904907,0</coordinates></Point></Placemark>
@@ -390,7 +390,7 @@
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.950989,-15.892029,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.950989,-15.891907,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.797913,-15.890686,0</coordinates></Point></Placemark>
-<Placemark><name>Radar 60 km/h</name><description>Fonte: ANTT</description><Point><coordinates>-48.086677,-15.890481,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 60 km/h</name><description>Fonte: ANTT · sentido 73° (leste)</description><Point><coordinates>-48.086677,-15.890481,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.799927,-15.890076,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.780823,-15.889282,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.805481,-15.888611,0</coordinates></Point></Placemark>
@@ -1584,7 +1584,7 @@
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.789612,-15.800781,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.130798,-15.800720,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.922180,-15.800720,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.076976,-15.800628,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 53° (nordeste)</description><Point><coordinates>-48.076976,-15.800628,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.122986,-15.800598,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.965698,-15.800598,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.946106,-15.800598,0</coordinates></Point></Placemark>
@@ -1624,7 +1624,7 @@
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.087891,-15.799194,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.943481,-15.799194,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.868896,-15.799194,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.087775,-15.799192,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 308° (noroeste)</description><Point><coordinates>-48.087775,-15.799192,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-48.056415,-15.799166,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.914308,-15.799032,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.139709,-15.799011,0</coordinates></Point></Placemark>
@@ -1686,10 +1686,10 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.943481,-15.797119,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.938599,-15.796997,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.849426,-15.796997,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.191315,-15.796992,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 287° (oeste)</description><Point><coordinates>-48.191315,-15.796992,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-48.191641,-15.796916,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.173600,-15.796900,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.091763,-15.796892,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 71° (leste)</description><Point><coordinates>-48.173600,-15.796900,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 123° (sudeste)</description><Point><coordinates>-48.091763,-15.796892,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.120483,-15.796875,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.859009,-15.796875,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.091797,-15.796814,0</coordinates></Point></Placemark>
@@ -1732,7 +1732,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.914795,-15.795593,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.852112,-15.795593,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.845886,-15.795593,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.169900,-15.795500,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 253° (oeste)</description><Point><coordinates>-48.169900,-15.795500,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.109192,-15.795410,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.969727,-15.795410,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.914429,-15.795410,0</coordinates></Point></Placemark>
@@ -1740,7 +1740,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.849976,-15.795410,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.849609,-15.795410,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.846802,-15.795410,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.064663,-15.795336,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 252° (oeste)</description><Point><coordinates>-48.064663,-15.795336,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.064392,-15.795288,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.942993,-15.795288,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.890808,-15.795288,0</coordinates></Point></Placemark>
@@ -1829,7 +1829,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.015808,-15.792908,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.934509,-15.792908,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.125793,-15.792786,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.102011,-15.792690,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 112° (leste)</description><Point><coordinates>-48.102011,-15.792690,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: OSM</description><Point><coordinates>-48.101961,-15.792618,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.895996,-15.792603,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.882385,-15.792603,0</coordinates></Point></Placemark>
@@ -1867,7 +1867,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.849609,-15.791809,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.847412,-15.791809,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.847107,-15.791809,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.155530,-15.791690,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 73° (leste)</description><Point><coordinates>-48.155530,-15.791690,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.848389,-15.791687,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.846619,-15.791687,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.845703,-15.791687,0</coordinates></Point></Placemark>
@@ -1887,7 +1887,7 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.940430,-15.791321,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.937988,-15.791321,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.850891,-15.791321,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.104685,-15.791312,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 292° (oeste)</description><Point><coordinates>-48.104685,-15.791312,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.898376,-15.791199,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.870483,-15.791199,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.001709,-15.791077,0</coordinates></Point></Placemark>
@@ -1952,8 +1952,8 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.937683,-15.789185,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.936829,-15.789185,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.934387,-15.789185,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.111460,-15.789087,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.221140,-15.789030,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 112° (leste)</description><Point><coordinates>-48.111460,-15.789087,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 262° (oeste)</description><Point><coordinates>-48.221140,-15.789030,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.001709,-15.789001,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.940308,-15.789001,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.939209,-15.789001,0</coordinates></Point></Placemark>
@@ -2043,7 +2043,7 @@
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-47.999789,-15.786086,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.000427,-15.786011,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.994080,-15.786011,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.135473,-15.785977,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 73° (leste)</description><Point><coordinates>-48.135473,-15.785977,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.135620,-15.785889,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.935913,-15.785889,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.935486,-15.785889,0</coordinates></Point></Placemark>
@@ -2062,7 +2062,7 @@
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.913879,-15.785217,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.930786,-15.785095,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-47.912229,-15.785047,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.120975,-15.785009,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 292° (oeste)</description><Point><coordinates>-48.120975,-15.785009,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.914051,-15.784934,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.121094,-15.784912,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.934387,-15.784912,0</coordinates></Point></Placemark>
@@ -2400,11 +2400,11 @@
 <Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.181392,-15.730840,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.117981,-15.729919,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.910095,-15.729492,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.123057,-15.729319,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 276° (oeste)</description><Point><coordinates>-48.123057,-15.729319,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.123230,-15.729309,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.842102,-15.729309,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.841980,-15.729309,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.125013,-15.729242,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 96° (leste)</description><Point><coordinates>-48.125013,-15.729242,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 70 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.869812,-15.729187,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.128601,-15.728821,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.658691,-15.727905,0</coordinates></Point></Placemark>
@@ -2448,10 +2448,10 @@
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.900879,-15.714478,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.883911,-15.714294,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.891296,-15.713684,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.198399,-15.713418,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 343° (norte)</description><Point><coordinates>-48.198399,-15.713418,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.198608,-15.712708,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.888306,-15.711975,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.199240,-15.711105,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 163° (sul)</description><Point><coordinates>-48.199240,-15.711105,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.895743,-15.710386,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 70 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.896072,-15.709685,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.892352,-15.707439,0</coordinates></Point></Placemark>
@@ -2478,7 +2478,7 @@
 <Placemark><name>Radar 70 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.865784,-15.691406,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.855103,-15.690796,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 70 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.865319,-15.690768,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.205719,-15.690677,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 164° (sul)</description><Point><coordinates>-48.205719,-15.690677,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-48.205760,-15.690544,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.862183,-15.690491,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.860413,-15.689209,0</coordinates></Point></Placemark>
@@ -2552,8 +2552,8 @@
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.785889,-15.648376,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.785400,-15.648376,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.768616,-15.647522,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.201565,-15.646572,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-48.201540,-15.645338,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 6° (norte)</description><Point><coordinates>-48.201565,-15.646572,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 186° (sul)</description><Point><coordinates>-48.201540,-15.645338,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.761902,-15.644592,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.797180,-15.644104,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.761108,-15.644104,0</coordinates></Point></Placemark>
@@ -2633,15 +2633,15 @@
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.679810,-15.600403,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.677490,-15.599487,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.673218,-15.596802,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.649651,-15.595438,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 274° (oeste)</description><Point><coordinates>-47.649651,-15.595438,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: OSM</description><Point><coordinates>-47.649789,-15.595370,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.650085,-15.595276,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.351807,-15.585083,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.355179,-15.584536,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 72° (leste)</description><Point><coordinates>-47.355179,-15.584536,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.354980,-15.584412,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.349609,-15.582886,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.508606,-15.581787,0</coordinates></Point></Placemark>
-<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-47.455389,-15.581633,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 110° (leste)</description><Point><coordinates>-47.455389,-15.581633,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.456299,-15.581299,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-47.503418,-15.580811,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 80 km/h</name><description>Fonte: DETRAN-DF</description><Point><coordinates>-48.042603,-15.549805,0</coordinates></Point></Placemark>

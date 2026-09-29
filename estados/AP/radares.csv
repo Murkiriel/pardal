@@ -1,4 +1,4 @@
-lat,lng,kind,limit_kmh,source,active,end_lat,end_lng
-0.077810,-51.068730,FIXED,,DNIT,1,,
-0.081930,-51.076290,FIXED,,DNIT,1,,
-0.082013,-51.076583,FIXED,,DNIT,1,,
+lat,lng,kind,limit_kmh,source,active,end_lat,end_lng,direction_deg
+0.077810,-51.068730,FIXED,,DNIT,1,,,
+0.081930,-51.076290,FIXED,,DNIT,1,,,
+0.082013,-51.076583,FIXED,,DNIT,1,,,

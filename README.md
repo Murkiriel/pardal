@@ -36,6 +36,7 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
 catalog.json            índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
 scripts/para_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
+gerador/                código que baixa as fontes e gera todos os arquivos acima
 ```
 
 Limites e estruturas são publicados só em CSV (os limites do Brasil com os estimados num
@@ -46,7 +47,7 @@ interesse, e o limite é um valor da via, não um lugar.
 
 ## Formato
 
-**Radares (CSV):** `lat,lng,kind,limit_kmh,source,active,end_lat,end_lng`
+**Radares (CSV):** `lat,lng,kind,limit_kmh,source,active,end_lat,end_lng,direction_deg`
 
 | Coluna | Significado |
 |---|---|
@@ -54,20 +55,22 @@ interesse, e o limite é um valor da via, não um lugar.
 | `limit_kmh` | Limite fiscalizado, quando a fonte informa (veículo leve) |
 | `source` | De onde veio o ponto (`OSM`, `DNIT`, `ANTT`, `DER-SP`, `RIO`…) |
 | `active` | `0` quando o radar está desativado ou com a aferição do Inmetro vencida |
+| `direction_deg` | Sentido fiscalizado: rumo do trânsito que o radar fiscaliza, em graus a partir do norte (0 = norte, 90 = leste, 180 = sul, 270 = oeste). Vazio quando o radar fiscaliza os dois sentidos ou a fonte não informa |
 
-No GPX e no KML entram só os radares ativos, com o nome no formato "Radar 60 km/h". O
-GeoJSON tem todos, com as mesmas informações nas propriedades.
+No GPX e no KML entram só os radares ativos, com o nome no formato "Radar 60 km/h" e o
+sentido na descrição. O GeoJSON tem todos, com as mesmas informações nas propriedades.
 
-**Limites (CSV):** `lat,lng,limit_kmh,source,estimated,limit_low_kmh`. Cada ponto marca o
-limite naquele lugar da via; o valor vale até o próximo ponto. Onde há dado oficial (placas
-das concessões federais, velocidade regulamentada das ruas do Rio de Janeiro e de São Paulo),
-ele substitui o do OpenStreetMap naquele trecho.
+**Limites (CSV):** `lat,lng,limit_kmh,source,estimated,limit_low_kmh,direction_deg`. Cada ponto
+marca o limite naquele lugar da via; o valor vale até o próximo ponto. Onde há dado oficial
+(placas das concessões federais, velocidade regulamentada das ruas do Rio de Janeiro e de São
+Paulo), ele substitui o do OpenStreetMap naquele trecho.
 
 | Coluna | Significado |
 |---|---|
 | `source` | `ANTT`, `RIO`, `CET-SP`, `OSM` (valor sinalizado no mapa), `OSM:zone` ou `OSM:classe` (estimados) |
 | `estimated` | `1` quando o valor **não é sinalizado**: foi estimado pela regra do Código de Trânsito para aquele tipo de via (rodovia, avenida, via local), porque a via não tem limite cadastrado. `0` para valor sinalizado ou oficial |
 | `limit_low_kmh` | Só nos estimados: a mesma estimativa pelo lado baixo da faixa legal, para quem prefere errar para o lado cauteloso (ex.: 80 onde o típico é 100) |
+| `direction_deg` | Preenchido quando a placa vale só para um sentido (rumo do trânsito em graus, como nos radares). Nas rodovias concedidas em que cada sentido tem um limite diferente, há um ponto para cada sentido no mesmo lugar. Vazio = vale para os dois sentidos |
 
 Os estimados cobrem só a rede principal (autoestradas, troncos, primárias, secundárias e
 terciárias). Estradas rurais sem classificação e ruas de bairro ficam sem estimativa.
@@ -117,6 +120,16 @@ Pardal estima pela regra geral do Código de Trânsito para aquele tipo de via e
 com `estimated=1`. Pode estar errado. Para usar só limites sinalizados, descarte as linhas com
 `estimated=1` (no consolidado do Brasil eles já vêm num arquivo separado).
 
+**O radar vale para qual sentido?** Veja a coluna `direction_deg`: é o rumo do trânsito
+fiscalizado, em graus (0 = norte, 90 = leste, 180 = sul, 270 = oeste). Para saber se um radar
+vale para quem passa, compare com o rumo do veículo: se a diferença for de até 90°, vale. O
+sentido vem das fontes oficiais que o informam ("crescente/decrescente" do km na ANTT e no
+DER-GO, Norte/Sul/Leste/Oeste na Artesp, faixas por sentido no DER-SP), convertido em rumo
+pela geometria da rodovia (SNV do DNIT, malha estadual da Goinfra e OpenStreetMap). A tag
+`direction` dos radares do OpenStreetMap não é usada: medida contra as fontes oficiais, ela
+aponta o sentido contrário na maioria das rodovias (muitos mapeadores marcam para onde a câmera
+olha). Vazio quer dizer os dois sentidos ou sentido não informado.
+
 **Como sei se um radar ainda funciona?** A coluna `active` usa a situação informada pela
 ANTT e pelos DERs e, nas rodovias federais, a validade da aferição no Inmetro.
 
@@ -128,25 +141,35 @@ fontes e manter a mesma licença em bases derivadas.
 | Fonte | O que entra | Licença |
 |---|---|---|
 | OpenStreetMap (extratos da Geofabrik) | Radares, limites (`maxspeed`), pontes e túneis | ODbL 1.0 — © colaboradores do OpenStreetMap |
-| DNIT — Controle de Velocidade (PNCV) | Radares das rodovias federais | Dado aberto governamental |
-| DNIT — Sistema Nacional de Viação | Quilometragem das BRs, usada para casar com o Inmetro | Dado aberto governamental |
-| ANTT — Radar | Radares das concessões federais, com situação | CC-BY |
-| ANTT — Sinalização | Placas de velocidade máxima das concessões federais | CC-BY |
+| DNIT — Controle de Velocidade (PNCV) | Radares das rodovias federais, com o sentido fiscalizado | Dado aberto governamental |
+| DNIT — Sistema Nacional de Viação | Quilometragem das BRs, usada para casar com o Inmetro e para converter o sentido (crescente/decrescente) em rumo | Dado aberto governamental |
+| ANTT — Radar | Radares das concessões federais, com situação e sentido | CC-BY |
+| ANTT — Sinalização | Placas de velocidade máxima das concessões federais, por sentido | CC-BY |
 | Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo) | Creative Commons |
-| DER-SP / Artesp, DER-GO (Goinfra), DER-PE | Radares das rodovias estaduais | Dado aberto governamental |
+| DER-SP / Artesp, DER-GO (Goinfra), DER-PE | Radares das rodovias estaduais, com o sentido fiscalizado (SP e GO) | Dado aberto governamental |
+| Goinfra — malha rodoviária estadual | Quilometragem das rodovias de Goiás, para converter o sentido em rumo | Dado aberto governamental |
 | Prefeitura do Rio de Janeiro (IPP, SMTR/CET-Rio) | Limite por trecho de rua e radares da cidade | CC-BY 4.0 |
 | Prefeitura de São Paulo (GeoSampa, CET) | Limite pela classificação viária (vias de trânsito rápido e arteriais) | Dado aberto municipal |
 | BHTrans (Belo Horizonte) | Radares e detectores de avanço de sinal | CC-BY |
 | Detran-DF | Radares e lombadas eletrônicas | Dado aberto governamental |
 | Prefeituras de Fortaleza, Recife e João Pessoa | Radares urbanos | Dado aberto governamental |
 
+## Como os arquivos são gerados
+
+O código que baixa as fontes, junta, calcula o sentido e gera todos os arquivos está em
+[`gerador/`](gerador) (Python). Lá estão como rodar, como funciona cada parte, a
+investigação das fontes com as medições ([`FONTES.md`](gerador/FONTES.md)) e o que ainda
+falta ([`PENDENCIAS.md`](gerador/PENDENCIAS.md)).
+
 ## Licença
 
-O Pardal é uma base de dados derivada do OpenStreetMap e é distribuído sob a
+Os **dados** são uma base derivada do OpenStreetMap, distribuída sob a
 **Open Database License (ODbL) 1.0** (texto em [`LICENSE`](LICENSE)).
 
 - Cite "© colaboradores do OpenStreetMap" e as fontes da tabela acima.
 - Se você publicar uma base derivada deste conjunto, ela precisa manter a ODbL.
+
+O **código** (pasta `gerador/` e `scripts/`) é MIT ([`gerador/LICENSE`](gerador/LICENSE)).
 
 ## Atualização
 
@@ -156,15 +179,15 @@ A data de cada pacote está no campo `built_at` do `catalog.json`.
 ## English
 
 **Pardal** is an open dataset of **speed cameras in Brazil** (fixed cameras, average-speed
-sections, red-light cameras) and **road speed limits**, with coordinates, as CSV, GeoJSON,
+sections, red-light cameras, with the enforced direction as a compass bearing) and **road speed limits**, with coordinates, as CSV, GeoJSON,
 KML and GPX, for the whole country (`brasil/`) and per state (`estados/<UF>/`). It merges
 official Brazilian open data (DNIT, ANTT, Inmetro, state road agencies, city halls) with
-OpenStreetMap. Licensed under the ODbL 1.0. Not an official source; road signs always
-prevail.
+OpenStreetMap. Data licensed under the ODbL 1.0; the generator code (`gerador/`, Python) under
+MIT. Not an official source; road signs always prevail.
 
 <sub>Palavras-chave: radares Brasil, lista de radares, localização de radares, base de
 radares, radares fixos, pardais, lombada eletrônica, radar de trecho, avanço de sinal,
 fiscalização eletrônica, limite de velocidade, velocidade máxima das vias, rodovias
 federais, rodovias estaduais, DNIT, ANTT, Inmetro, DER, arquivo de radares para GPS, POI de
-radar, GPX, KML, CSV, GeoJSON, OpenStreetMap, dados abertos, Brazil speed cameras, speed
+radar, sentido do radar, GPX, KML, CSV, GeoJSON, OpenStreetMap, dados abertos, Brazil speed cameras, speed
 limits Brazil, open data.</sub>

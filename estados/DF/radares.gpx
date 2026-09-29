@@ -102,7 +102,7 @@
 <wpt lat="-16.027588" lon="-48.060730"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.027405" lon="-48.069702"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.027405" lon="-48.061096"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-16.027217" lon="-47.979094"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-16.027217" lon="-47.979094"><name>Radar</name><desc>Fonte: DNIT · sentido 349° (norte)</desc><type>FIXED</type></wpt>
 <wpt lat="-16.027100" lon="-48.073608"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.026978" lon="-47.979004"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.026794" lon="-48.069275"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -119,7 +119,7 @@
 <wpt lat="-16.026001" lon="-48.065979"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.025879" lon="-47.979492"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.025818" lon="-48.063904"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-16.025611" lon="-47.979528"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-16.025611" lon="-47.979528"><name>Radar</name><desc>Fonte: DNIT · sentido 169° (sul)</desc><type>FIXED</type></wpt>
 <wpt lat="-16.025594" lon="-47.979341"><name>Radar 60 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-16.025513" lon="-48.068909"><name>Radar 50 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.025451" lon="-47.979649"><name>Radar 60 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
@@ -154,7 +154,7 @@
 <wpt lat="-16.018982" lon="-47.801086"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.018799" lon="-48.061890"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.018494" lon="-48.083984"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-16.018444" lon="-47.980917"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-16.018444" lon="-47.980917"><name>Radar</name><desc>Fonte: DNIT · sentido 348° (norte)</desc><type>FIXED</type></wpt>
 <wpt lat="-16.018311" lon="-48.061890"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.018311" lon="-47.980713"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-16.017883" lon="-48.061707"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -226,7 +226,7 @@
 <wpt lat="-15.999084" lon="-48.115784"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.997986" lon="-48.077515"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.997986" lon="-48.077393"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.994278" lon="-47.986028"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.994278" lon="-47.986028"><name>Radar</name><desc>Fonte: DNIT · sentido 169° (sul)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.993286" lon="-48.077087"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.991882" lon="-48.076294"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.991882" lon="-48.076111"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -285,8 +285,8 @@
 <wpt lat="-15.948120" lon="-47.823181"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.947998" lon="-47.823181"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.947876" lon="-48.000610"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.945574" lon="-47.793160"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
-<wpt lat="-15.945438" lon="-47.789458"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.945574" lon="-47.793160"><name>Radar</name><desc>Fonte: DNIT · sentido 110° (leste)</desc><type>FIXED</type></wpt>
+<wpt lat="-15.945438" lon="-47.789458"><name>Radar</name><desc>Fonte: DNIT · sentido 256° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.945312" lon="-47.824402"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.945129" lon="-47.602600"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.943604" lon="-47.727783"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -302,7 +302,7 @@
 <wpt lat="-15.937622" lon="-47.756897"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.937500" lon="-48.228394"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.937500" lon="-47.750488"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.937443" lon="-47.755913"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.937443" lon="-47.755913"><name>Radar</name><desc>Fonte: DNIT · sentido 76° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.937378" lon="-48.227417"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.937012" lon="-47.750000"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.936707" lon="-48.223511"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -344,7 +344,7 @@
 <wpt lat="-15.906189" lon="-47.771729"><name>Radar 30 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.905884" lon="-47.951782"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.905396" lon="-48.051086"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.905098" lon="-48.137158"><name>Radar 80 km/h</name><desc>Fonte: ANTT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.905098" lon="-48.137158"><name>Radar 80 km/h</name><desc>Fonte: ANTT · sentido 252° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.905047" lon="-48.136780"><name>Radar</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.904907" lon="-48.136292"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.904907" lon="-48.051514"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -388,7 +388,7 @@
 <wpt lat="-15.892029" lon="-47.950989"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.891907" lon="-47.950989"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.890686" lon="-47.797913"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.890481" lon="-48.086677"><name>Radar 60 km/h</name><desc>Fonte: ANTT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.890481" lon="-48.086677"><name>Radar 60 km/h</name><desc>Fonte: ANTT · sentido 73° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.890076" lon="-47.799927"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.889282" lon="-47.780823"><name>Radar 50 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.888611" lon="-47.805481"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1582,7 +1582,7 @@
 <wpt lat="-15.800781" lon="-47.789612"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.800720" lon="-48.130798"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.800720" lon="-47.922180"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.800628" lon="-48.076976"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.800628" lon="-48.076976"><name>Radar</name><desc>Fonte: DNIT · sentido 53° (nordeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.800598" lon="-48.122986"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.800598" lon="-47.965698"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.800598" lon="-47.946106"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1622,7 +1622,7 @@
 <wpt lat="-15.799194" lon="-48.087891"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.799194" lon="-47.943481"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.799194" lon="-47.868896"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.799192" lon="-48.087775"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.799192" lon="-48.087775"><name>Radar</name><desc>Fonte: DNIT · sentido 308° (noroeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.799166" lon="-48.056415"><name>Radar</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.799032" lon="-47.914308"><name>Radar 60 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.799011" lon="-48.139709"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1684,10 +1684,10 @@
 <wpt lat="-15.797119" lon="-47.943481"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.796997" lon="-47.938599"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.796997" lon="-47.849426"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.796992" lon="-48.191315"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.796992" lon="-48.191315"><name>Radar</name><desc>Fonte: DNIT · sentido 287° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.796916" lon="-48.191641"><name>Radar 60 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
-<wpt lat="-15.796900" lon="-48.173600"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
-<wpt lat="-15.796892" lon="-48.091763"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.796900" lon="-48.173600"><name>Radar</name><desc>Fonte: DNIT · sentido 71° (leste)</desc><type>FIXED</type></wpt>
+<wpt lat="-15.796892" lon="-48.091763"><name>Radar</name><desc>Fonte: DNIT · sentido 123° (sudeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.796875" lon="-48.120483"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.796875" lon="-47.859009"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.796814" lon="-48.091797"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1730,7 +1730,7 @@
 <wpt lat="-15.795593" lon="-47.914795"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795593" lon="-47.852112"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795593" lon="-47.845886"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.795500" lon="-48.169900"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.795500" lon="-48.169900"><name>Radar</name><desc>Fonte: DNIT · sentido 253° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795410" lon="-48.109192"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795410" lon="-47.969727"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795410" lon="-47.914429"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1738,7 +1738,7 @@
 <wpt lat="-15.795410" lon="-47.849976"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795410" lon="-47.849609"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795410" lon="-47.846802"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.795336" lon="-48.064663"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.795336" lon="-48.064663"><name>Radar</name><desc>Fonte: DNIT · sentido 252° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795288" lon="-48.064392"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795288" lon="-47.942993"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.795288" lon="-47.890808"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1827,7 +1827,7 @@
 <wpt lat="-15.792908" lon="-48.015808"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.792908" lon="-47.934509"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.792786" lon="-48.125793"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.792690" lon="-48.102011"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.792690" lon="-48.102011"><name>Radar</name><desc>Fonte: DNIT · sentido 112° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.792618" lon="-48.101961"><name>Radar 80 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.792603" lon="-47.895996"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.792603" lon="-47.882385"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1865,7 +1865,7 @@
 <wpt lat="-15.791809" lon="-47.849609"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791809" lon="-47.847412"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791809" lon="-47.847107"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.791690" lon="-48.155530"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.791690" lon="-48.155530"><name>Radar</name><desc>Fonte: DNIT · sentido 73° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791687" lon="-47.848389"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791687" lon="-47.846619"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791687" lon="-47.845703"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1885,7 +1885,7 @@
 <wpt lat="-15.791321" lon="-47.940430"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791321" lon="-47.937988"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791321" lon="-47.850891"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.791312" lon="-48.104685"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.791312" lon="-48.104685"><name>Radar</name><desc>Fonte: DNIT · sentido 292° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791199" lon="-47.898376"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791199" lon="-47.870483"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.791077" lon="-48.001709"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -1950,8 +1950,8 @@
 <wpt lat="-15.789185" lon="-47.937683"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.789185" lon="-47.936829"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.789185" lon="-47.934387"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.789087" lon="-48.111460"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
-<wpt lat="-15.789030" lon="-48.221140"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.789087" lon="-48.111460"><name>Radar</name><desc>Fonte: DNIT · sentido 112° (leste)</desc><type>FIXED</type></wpt>
+<wpt lat="-15.789030" lon="-48.221140"><name>Radar</name><desc>Fonte: DNIT · sentido 262° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.789001" lon="-48.001709"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.789001" lon="-47.940308"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.789001" lon="-47.939209"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -2041,7 +2041,7 @@
 <wpt lat="-15.786086" lon="-47.999789"><name>Radar</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.786011" lon="-48.000427"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.786011" lon="-47.994080"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.785977" lon="-48.135473"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.785977" lon="-48.135473"><name>Radar</name><desc>Fonte: DNIT · sentido 73° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.785889" lon="-48.135620"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.785889" lon="-47.935913"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.785889" lon="-47.935486"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -2060,7 +2060,7 @@
 <wpt lat="-15.785217" lon="-47.913879"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.785095" lon="-47.930786"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.785047" lon="-47.912229"><name>Radar</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
-<wpt lat="-15.785009" lon="-48.120975"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.785009" lon="-48.120975"><name>Radar</name><desc>Fonte: DNIT · sentido 292° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.784934" lon="-47.914051"><name>Radar 60 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.784912" lon="-48.121094"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.784912" lon="-47.934387"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -2398,11 +2398,11 @@
 <wpt lat="-15.730840" lon="-48.181392"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
 <wpt lat="-15.729919" lon="-48.117981"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.729492" lon="-47.910095"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.729319" lon="-48.123057"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.729319" lon="-48.123057"><name>Radar</name><desc>Fonte: DNIT · sentido 276° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.729309" lon="-48.123230"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.729309" lon="-47.842102"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.729309" lon="-47.841980"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.729242" lon="-48.125013"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.729242" lon="-48.125013"><name>Radar</name><desc>Fonte: DNIT · sentido 96° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.729187" lon="-47.869812"><name>Radar 70 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.728821" lon="-48.128601"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.727905" lon="-47.658691"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -2446,10 +2446,10 @@
 <wpt lat="-15.714478" lon="-47.900879"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.714294" lon="-47.883911"><name>Radar 50 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.713684" lon="-47.891296"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.713418" lon="-48.198399"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.713418" lon="-48.198399"><name>Radar</name><desc>Fonte: DNIT · sentido 343° (norte)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.712708" lon="-48.198608"><name>Radar 50 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.711975" lon="-47.888306"><name>Radar 50 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.711105" lon="-48.199240"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.711105" lon="-48.199240"><name>Radar</name><desc>Fonte: DNIT · sentido 163° (sul)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.710386" lon="-47.895743"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.709685" lon="-47.896072"><name>Radar 70 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.707439" lon="-47.892352"><name>Radar 80 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
@@ -2476,7 +2476,7 @@
 <wpt lat="-15.691406" lon="-47.865784"><name>Radar 70 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.690796" lon="-47.855103"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.690768" lon="-47.865319"><name>Radar 70 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
-<wpt lat="-15.690677" lon="-48.205719"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.690677" lon="-48.205719"><name>Radar</name><desc>Fonte: DNIT · sentido 164° (sul)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.690544" lon="-48.205760"><name>Radar 60 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.690491" lon="-47.862183"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.689209" lon="-47.860413"><name>Radar 50 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -2550,8 +2550,8 @@
 <wpt lat="-15.648376" lon="-47.785889"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.648376" lon="-47.785400"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.647522" lon="-47.768616"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.646572" lon="-48.201565"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
-<wpt lat="-15.645338" lon="-48.201540"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.646572" lon="-48.201565"><name>Radar</name><desc>Fonte: DNIT · sentido 6° (norte)</desc><type>FIXED</type></wpt>
+<wpt lat="-15.645338" lon="-48.201540"><name>Radar</name><desc>Fonte: DNIT · sentido 186° (sul)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.644592" lon="-47.761902"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.644104" lon="-47.797180"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.644104" lon="-47.761108"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
@@ -2631,15 +2631,15 @@
 <wpt lat="-15.600403" lon="-47.679810"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.599487" lon="-47.677490"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.596802" lon="-47.673218"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.595438" lon="-47.649651"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.595438" lon="-47.649651"><name>Radar</name><desc>Fonte: DNIT · sentido 274° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.595370" lon="-47.649789"><name>Radar 80 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-15.595276" lon="-47.650085"><name>Radar 60 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.585083" lon="-47.351807"><name>Radar</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.584536" lon="-47.355179"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.584536" lon="-47.355179"><name>Radar</name><desc>Fonte: DNIT · sentido 72° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.584412" lon="-47.354980"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.582886" lon="-47.349609"><name>Radar 40 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.581787" lon="-47.508606"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
-<wpt lat="-15.581633" lon="-47.455389"><name>Radar</name><desc>Fonte: DNIT</desc><type>FIXED</type></wpt>
+<wpt lat="-15.581633" lon="-47.455389"><name>Radar</name><desc>Fonte: DNIT · sentido 110° (leste)</desc><type>FIXED</type></wpt>
 <wpt lat="-15.581299" lon="-47.456299"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.580811" lon="-47.503418"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>
 <wpt lat="-15.549805" lon="-48.042603"><name>Radar 80 km/h</name><desc>Fonte: DETRAN-DF</desc><type>FIXED</type></wpt>

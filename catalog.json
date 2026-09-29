@@ -1,6 +1,6 @@
 {
  "schema": 1,
- "built_at": "2026-09-29T20:58:37Z",
+ "built_at": "2026-09-29T23:45:37Z",
  "base_url": "",
  "ufs": {
   "AC": {
@@ -11,8 +11,8 @@
     -7.11,
     -66.62
    ],
-   "built_at": "2026-09-29T20:49:39Z",
-   "artifact_built_at": "2026-09-29T20:49:39Z",
+   "built_at": "2026-09-29T23:37:10Z",
+   "artifact_built_at": "2026-09-29T23:37:10Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -21,14 +21,14 @@
    },
    "radares": {
     "file": "estados/AC/radares.csv",
-    "bytes": 241,
-    "sha256": "57e79ff7fc76f65b3d4fe953300998d4eb77481e44f86decaebbfea3888435c8",
+    "bytes": 260,
+    "sha256": "729422d89acbe7570d93096cd820774bde41cc041c9e807df746117aed7fa960",
     "count": 5
    },
    "limites": {
     "file": "estados/AC/limites.csv",
-    "bytes": 232133,
-    "sha256": "72461f2e47d5133ba2ac971268dbcb152b9fb3dee807a411c1c516b70bcbf7c1",
+    "bytes": 238448,
+    "sha256": "180cda910ef1232cb128775c90827483c541b3c6a44d7381e58eb57f08fcbd76",
     "count": 6301
    },
    "counts": {
@@ -55,8 +55,8 @@
     -8.81,
     -35.15
    ],
-   "built_at": "2026-09-29T20:48:10Z",
-   "artifact_built_at": "2026-09-29T20:48:10Z",
+   "built_at": "2026-09-29T23:35:27Z",
+   "artifact_built_at": "2026-09-29T23:35:26Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -66,14 +66,14 @@
    },
    "radares": {
     "file": "estados/AL/radares.csv",
-    "bytes": 4082,
-    "sha256": "caa5b5397283080cd710771664189e7be0917f75d39c962fec0afb997e7e8652",
+    "bytes": 4234,
+    "sha256": "9135ce3b92c5827a0bfb325b935b0b5087701369b1def24adf771602ec6fe105",
     "count": 108
    },
    "limites": {
     "file": "estados/AL/limites.csv",
-    "bytes": 973152,
-    "sha256": "7c55d907c8cea8a812f66487020bdb2720036b2817ee004625e9c0f7c7997883",
+    "bytes": 998609,
+    "sha256": "acadb19758d1084411ee34387316a50fe2106cbe0afbfd7ce4ca636a59b39f0e",
     "count": 25443
    },
    "counts": {
@@ -100,8 +100,8 @@
     2.25,
     -56.1
    ],
-   "built_at": "2026-09-29T20:49:42Z",
-   "artifact_built_at": "2026-09-29T20:49:42Z",
+   "built_at": "2026-09-29T23:37:14Z",
+   "artifact_built_at": "2026-09-29T23:37:13Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -111,14 +111,14 @@
    },
    "radares": {
     "file": "estados/AM/radares.csv",
-    "bytes": 693,
-    "sha256": "c96147d5939de3e60c1060ff55c8a2ff567e3deee44a1e24e4606a4ff2e3a024",
+    "bytes": 724,
+    "sha256": "94834326005165ca5d60dbf6455b110fc9e4ee9e3deb5a6600a4a8057c4203be",
     "count": 17
    },
    "limites": {
     "file": "estados/AM/limites.csv",
-    "bytes": 743643,
-    "sha256": "1191cd3bb7b38e314b128835242c29a08b37bd44501158062c9b0637aa60c276",
+    "bytes": 764038,
+    "sha256": "d49e3392902e54b6618f79c36d2c577e32d4f902686041e01a75e36236f52e9c",
     "count": 20381
    },
    "counts": {
@@ -145,8 +145,8 @@
     4.44,
     -49.87
    ],
-   "built_at": "2026-09-29T20:49:43Z",
-   "artifact_built_at": "2026-09-29T20:49:43Z",
+   "built_at": "2026-09-29T23:37:15Z",
+   "artifact_built_at": "2026-09-29T23:37:15Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -155,14 +155,14 @@
    },
    "radares": {
     "file": "estados/AP/radares.csv",
-    "bytes": 161,
-    "sha256": "74f45f69fcf0e2278316a6ce5dd5fc646701c4a069ff177e0ece4b0f12169138",
+    "bytes": 178,
+    "sha256": "59b231025b3035f78bc354dd2d3dcca188ba45ee6d3e5f9666e1d9834bf71d82",
     "count": 3
    },
    "limites": {
     "file": "estados/AP/limites.csv",
-    "bytes": 189320,
-    "sha256": "ffe5eb2bb02a8e14f90c191090c9a883995c154ec7057cd2d070cabdae37a93e",
+    "bytes": 194199,
+    "sha256": "6769dc0be5aa6cc0647cf1d4744b6da0717e47dbed9c54ae1f8173f981f405a3",
     "count": 4865
    },
    "counts": {
@@ -189,8 +189,8 @@
     -8.53,
     -37.34
    ],
-   "built_at": "2026-09-29T20:48:34Z",
-   "artifact_built_at": "2026-09-29T20:48:31Z",
+   "built_at": "2026-09-29T23:35:53Z",
+   "artifact_built_at": "2026-09-29T23:35:49Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -201,15 +201,15 @@
    },
    "radares": {
     "file": "estados/BA/radares.csv",
-    "bytes": 19130,
-    "sha256": "9ca04f3b52a9fcaa04949cdb8e534743d02fde6b6e356591b237ab7eea01426a",
+    "bytes": 19755,
+    "sha256": "1a07b26a02893d2298dffd3004873ec24e8bd528e0c54879429486cdd10c7e69",
     "count": 499
    },
    "limites": {
     "file": "estados/BA/limites.csv",
-    "bytes": 7752125,
-    "sha256": "fd6bcb5393219979e6f0a404215caa2f3926552b8589e65bf7a990c6f6a1eb90",
-    "count": 199931
+    "bytes": 8042717,
+    "sha256": "c7f90efb7c4e859b6475e4ecaad65da5bfb375bcc8b06658120cadcf4728590f",
+    "count": 202371
    },
    "counts": {
     "cameras": 499,
@@ -217,7 +217,7 @@
     "cameras_inactive": 21,
     "sections": 0,
     "red_lights": 6,
-    "limits": 199931,
+    "limits": 202371,
     "structs": 6217
    },
    "estruturas": {
@@ -235,8 +235,8 @@
     -2.78,
     -37.25
    ],
-   "built_at": "2026-09-29T20:48:42Z",
-   "artifact_built_at": "2026-09-29T20:48:41Z",
+   "built_at": "2026-09-29T23:36:01Z",
+   "artifact_built_at": "2026-09-29T23:35:59Z",
    "cobertura": {
     "nivel": "federal+municipal",
     "fontes": [
@@ -247,14 +247,14 @@
    },
    "radares": {
     "file": "estados/CE/radares.csv",
-    "bytes": 32443,
-    "sha256": "3ce66d646d07fb06b52f967e3a4653a887e30497d89c9c2e61660cdf4c858bf2",
+    "bytes": 33351,
+    "sha256": "29779c28fb3902f0e826f588554b6d21a9a749c2109c16cb789a00836b7872a9",
     "count": 861
    },
    "limites": {
     "file": "estados/CE/limites.csv",
-    "bytes": 2551022,
-    "sha256": "eb1d25b3e33cb7de55c1fe391f696f20b3fbb4da44fb049f5f6d23282b031869",
+    "bytes": 2619729,
+    "sha256": "65c7c95ad54c1034205b814261afb31b59a17fbc7738c613c3c28e967077c014",
     "count": 68693
    },
    "counts": {
@@ -281,8 +281,8 @@
     -15.5,
     -47.31
    ],
-   "built_at": "2026-09-29T20:45:30Z",
-   "artifact_built_at": "2026-09-29T20:45:30Z",
+   "built_at": "2026-09-29T23:32:26Z",
+   "artifact_built_at": "2026-09-29T23:32:26Z",
    "cobertura": {
     "nivel": "federal+estadual",
     "fontes": [
@@ -295,15 +295,15 @@
    },
    "radares": {
     "file": "estados/DF/radares.csv",
-    "bytes": 114365,
-    "sha256": "567a18915bb11e933f7c0b8a219447e3f6a91fd644b7ce5fa7eefc84123175ab",
+    "bytes": 117112,
+    "sha256": "bcdf2c12138272407be8e6710edcc871c3dac426ac1f3360d3508fa1d16201b9",
     "count": 2644
    },
    "limites": {
     "file": "estados/DF/limites.csv",
-    "bytes": 956866,
-    "sha256": "74299c20d039e21d4a226c9807c129506d7ee2ca3524010f4d496bd0c21e6e48",
-    "count": 26986
+    "bytes": 986758,
+    "sha256": "b3c56ed3c2012e9a0fb28adcb7f0d42c5ce023ceaff1ead7816269e88b74f8a2",
+    "count": 27060
    },
    "counts": {
     "cameras": 2644,
@@ -311,7 +311,7 @@
     "cameras_inactive": 0,
     "sections": 0,
     "red_lights": 0,
-    "limits": 26986,
+    "limits": 27060,
     "structs": 730
    },
    "estruturas": {
@@ -329,8 +329,8 @@
     -17.89,
     -39.66
    ],
-   "built_at": "2026-09-29T20:52:53Z",
-   "artifact_built_at": "2026-09-29T20:52:51Z",
+   "built_at": "2026-09-29T23:40:27Z",
+   "artifact_built_at": "2026-09-29T23:40:25Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -341,15 +341,15 @@
    },
    "radares": {
     "file": "estados/ES/radares.csv",
-    "bytes": 13138,
-    "sha256": "57c64300d28d65c7bf9bfc0f6930dd2d716187059b2e8f2ae4a2a6e423f2354b",
+    "bytes": 13883,
+    "sha256": "3b2d5e2ddd56bf258c77e8dc59443a420efc0e72b6d1418358295cf86e44314e",
     "count": 333
    },
    "limites": {
     "file": "estados/ES/limites.csv",
-    "bytes": 3965110,
-    "sha256": "9f93de7105c2ce85c901d6b4ee4959cec5560817bebe4774443bcc6523705418",
-    "count": 113228
+    "bytes": 4114292,
+    "sha256": "3bce841643f7160d83728877dd7a9f2e4bce207f802f4fae1c3f3808b14bf0b1",
+    "count": 114181
    },
    "counts": {
     "cameras": 333,
@@ -357,7 +357,7 @@
     "cameras_inactive": 31,
     "sections": 5,
     "red_lights": 4,
-    "limits": 113228,
+    "limits": 114181,
     "structs": 7320
    },
    "estruturas": {
@@ -375,8 +375,8 @@
     -12.4,
     -45.9
    ],
-   "built_at": "2026-09-29T20:45:53Z",
-   "artifact_built_at": "2026-09-29T20:45:51Z",
+   "built_at": "2026-09-29T23:32:49Z",
+   "artifact_built_at": "2026-09-29T23:32:46Z",
    "cobertura": {
     "nivel": "federal+estadual",
     "fontes": [
@@ -389,15 +389,15 @@
    },
    "radares": {
     "file": "estados/GO/radares.csv",
-    "bytes": 62166,
-    "sha256": "6123bf517f7fefe4ecd38b69ef37eb76203094af9c610c34c49b50f0707b73a4",
+    "bytes": 66046,
+    "sha256": "f1f6482fe2063f91a6bc710af21e64c90838d52f62be9d3253c198cafc298bef",
     "count": 1515
    },
    "limites": {
     "file": "estados/GO/limites.csv",
-    "bytes": 4570531,
-    "sha256": "7b233a81b263aba4cf9d5f070c4a90d158c24b7a3f23b1a2b512b9ca6057ceb2",
-    "count": 120941
+    "bytes": 4855890,
+    "sha256": "539bd442e8e508afae66ceb8725177c5a877e956e44e41ef011ec4ebc3725d2a",
+    "count": 125310
    },
    "counts": {
     "cameras": 1515,
@@ -405,7 +405,7 @@
     "cameras_inactive": 3,
     "sections": 0,
     "red_lights": 0,
-    "limits": 120941,
+    "limits": 125310,
     "structs": 4915
    },
    "estruturas": {
@@ -423,8 +423,8 @@
     -1.04,
     -41.8
    ],
-   "built_at": "2026-09-29T20:48:49Z",
-   "artifact_built_at": "2026-09-29T20:48:48Z",
+   "built_at": "2026-09-29T23:36:09Z",
+   "artifact_built_at": "2026-09-29T23:36:07Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -434,14 +434,14 @@
    },
    "radares": {
     "file": "estados/MA/radares.csv",
-    "bytes": 5627,
-    "sha256": "208fadb8778628fc189c4df443bad901470112127e6bfdda475be935c66e0a2b",
+    "bytes": 5828,
+    "sha256": "a4ccf17195bf692358531f45f3053187985b138be6c7724ca193250ba37165f9",
     "count": 148
    },
    "limites": {
     "file": "estados/MA/limites.csv",
-    "bytes": 2107982,
-    "sha256": "62cf3e778a1cc3dd504c860c90d5b9708bb71b90cf84283297f635c8bb382829",
+    "bytes": 2164140,
+    "sha256": "343f70182561aee95b5cd1f48cb46a20d16f7ac25b55ebed1f37bd7daf6848c0",
     "count": 56144
    },
    "counts": {
@@ -468,8 +468,8 @@
     -14.23,
     -39.86
    ],
-   "built_at": "2026-09-29T20:54:11Z",
-   "artifact_built_at": "2026-09-29T20:54:00Z",
+   "built_at": "2026-09-29T23:41:40Z",
+   "artifact_built_at": "2026-09-29T23:41:21Z",
    "cobertura": {
     "nivel": "federal+estadual",
     "fontes": [
@@ -482,15 +482,15 @@
    },
    "radares": {
     "file": "estados/MG/radares.csv",
-    "bytes": 77152,
-    "sha256": "35d7324aafb7d14fc7650679dc0a60a5edef388835ace2047c12c0fbf5938035",
+    "bytes": 79559,
+    "sha256": "db65b3c299581338beef7e46e4f173018f6a16f344b302f7e436ea52f879b57f",
     "count": 1936
    },
    "limites": {
     "file": "estados/MG/limites.csv",
-    "bytes": 15004276,
-    "sha256": "a91725ebc1186f11990bae4f2112bfe4825790f58d05d674dd120d592a942fcd",
-    "count": 408664
+    "bytes": 15686993,
+    "sha256": "6f0c8ebfc828c420b5223914bea835a831c8ae48b6c095d46de0f91687598f98",
+    "count": 415873
    },
    "counts": {
     "cameras": 1936,
@@ -498,7 +498,7 @@
     "cameras_inactive": 22,
     "sections": 2,
     "red_lights": 233,
-    "limits": 408664,
+    "limits": 415873,
     "structs": 19722
    },
    "estruturas": {
@@ -516,8 +516,8 @@
     -17.16,
     -50.92
    ],
-   "built_at": "2026-09-29T20:46:03Z",
-   "artifact_built_at": "2026-09-29T20:46:02Z",
+   "built_at": "2026-09-29T23:33:02Z",
+   "artifact_built_at": "2026-09-29T23:32:59Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -528,15 +528,15 @@
    },
    "radares": {
     "file": "estados/MS/radares.csv",
-    "bytes": 7803,
-    "sha256": "505866b7aea330b975b2cda9bda58eb43085f057e289f5159ac5a6b594d0ed0a",
+    "bytes": 8090,
+    "sha256": "211c5a3f23441b347b4b4f38c9e5a12cdeea49a71a7a24a78a5de5875be3861f",
     "count": 199
    },
    "limites": {
     "file": "estados/MS/limites.csv",
-    "bytes": 2376069,
-    "sha256": "9020310fa7c869eaa65a9567c9be43ecc7c4d5b93355bc39d5372454132fae99",
-    "count": 62016
+    "bytes": 2448792,
+    "sha256": "69c1bfe1b0b0f66be98c3efc5548bb21a6d25336dab36fb215de42493983664d",
+    "count": 62288
    },
    "counts": {
     "cameras": 199,
@@ -544,7 +544,7 @@
     "cameras_inactive": 10,
     "sections": 0,
     "red_lights": 0,
-    "limits": 62016,
+    "limits": 62288,
     "structs": 2199
    },
    "estruturas": {
@@ -562,8 +562,8 @@
     -7.35,
     -50.22
    ],
-   "built_at": "2026-09-29T20:46:23Z",
-   "artifact_built_at": "2026-09-29T20:46:20Z",
+   "built_at": "2026-09-29T23:33:22Z",
+   "artifact_built_at": "2026-09-29T23:33:18Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -574,15 +574,15 @@
    },
    "radares": {
     "file": "estados/MT/radares.csv",
-    "bytes": 9836,
-    "sha256": "f667d02ef2523d996671d82b91bcafb6f9c49d43d146081f4d88707e432a9ea5",
+    "bytes": 10329,
+    "sha256": "14098c5f86d935e2a88bf2609bcb43b9e9d2303b19afa964278ea7cd383b5d09",
     "count": 251
    },
    "limites": {
     "file": "estados/MT/limites.csv",
-    "bytes": 4889733,
-    "sha256": "cf518befd4656543e62683187e5b4f523175369af9f84919cda51f6906d32df5",
-    "count": 129679
+    "bytes": 5125286,
+    "sha256": "981be5549f85c4655c6d66f159a207cf4fc9aedb30fc7ef4fb93b86b9ff83fe2",
+    "count": 132481
    },
    "counts": {
     "cameras": 251,
@@ -590,7 +590,7 @@
     "cameras_inactive": 0,
     "sections": 0,
     "red_lights": 4,
-    "limits": 129679,
+    "limits": 132481,
     "structs": 5426
    },
    "estruturas": {
@@ -608,8 +608,8 @@
     2.59,
     -46.06
    ],
-   "built_at": "2026-09-29T20:49:55Z",
-   "artifact_built_at": "2026-09-29T20:49:54Z",
+   "built_at": "2026-09-29T23:37:28Z",
+   "artifact_built_at": "2026-09-29T23:37:26Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -620,15 +620,15 @@
    },
    "radares": {
     "file": "estados/PA/radares.csv",
-    "bytes": 5760,
-    "sha256": "d8d8bda9f4e5406395dfaaa5f348add0965db7bc6a599ce0d7d6a43483105ca0",
+    "bytes": 6071,
+    "sha256": "c3e41461956fbfbae31b161cfe229d50a421a2b0321d0eb8d96ad543444ac1cb",
     "count": 150
    },
    "limites": {
     "file": "estados/PA/limites.csv",
-    "bytes": 3004796,
-    "sha256": "55e78d2ed94d16a43b4730fba5d112e911574ebfccb2ffb6050db16cad44fbf8",
-    "count": 80309
+    "bytes": 3107199,
+    "sha256": "adae2c3bede7b026c24e28aaccc46f57b6dcb6be67973e7120a6e2e29faf5aaa",
+    "count": 80887
    },
    "counts": {
     "cameras": 150,
@@ -636,7 +636,7 @@
     "cameras_inactive": 0,
     "sections": 2,
     "red_lights": 0,
-    "limits": 80309,
+    "limits": 80887,
     "structs": 3780
    },
    "estruturas": {
@@ -654,8 +654,8 @@
     -6.02,
     -34.79
    ],
-   "built_at": "2026-09-29T20:48:53Z",
-   "artifact_built_at": "2026-09-29T20:48:52Z",
+   "built_at": "2026-09-29T23:36:13Z",
+   "artifact_built_at": "2026-09-29T23:36:12Z",
    "cobertura": {
     "nivel": "federal+municipal",
     "fontes": [
@@ -666,14 +666,14 @@
    },
    "radares": {
     "file": "estados/PB/radares.csv",
-    "bytes": 10835,
-    "sha256": "f4d0ef6069cf8fad5079a7c764c2f853ef602b1f440951b59e1f6171003c8952",
+    "bytes": 11279,
+    "sha256": "6c5f761901b58c8ca3624c61589c1ec29d302906ec230127e3e7fa2efcc2d278",
     "count": 284
    },
    "limites": {
     "file": "estados/PB/limites.csv",
-    "bytes": 1618170,
-    "sha256": "b5cc693eff6b585fda4cd941a6387a8bed6102680d003b70469f30cd31ecaa2c",
+    "bytes": 1664618,
+    "sha256": "04c3841dc08f17cde11d2423ebc38f06677a248b3d8b20d37bd6783224f96bf8",
     "count": 46434
    },
    "counts": {
@@ -700,8 +700,8 @@
     -7.27,
     -34.81
    ],
-   "built_at": "2026-09-29T20:48:59Z",
-   "artifact_built_at": "2026-09-29T20:48:58Z",
+   "built_at": "2026-09-29T23:36:19Z",
+   "artifact_built_at": "2026-09-29T23:36:18Z",
    "cobertura": {
     "nivel": "federal+estadual+municipal",
     "fontes": [
@@ -713,14 +713,14 @@
    },
    "radares": {
     "file": "estados/PE/radares.csv",
-    "bytes": 16556,
-    "sha256": "4ef5d645fc19a6deacc381fca586406a4c2efe322a7a6611f987fda2adfe08ba",
+    "bytes": 17058,
+    "sha256": "dccbfbad26b97cd8d4917d784cade4d111a921b94ded3d2175d07b702ee06881",
     "count": 438
    },
    "limites": {
     "file": "estados/PE/limites.csv",
-    "bytes": 2346728,
-    "sha256": "e50b69606d8f5a8b3c700e5362c7ec5f459cc9dfd9a7d2076741122180342ac6",
+    "bytes": 2409617,
+    "sha256": "62ed6f53decaee382b9187c56bb5573c5fad5efe94e8f328d29abb1f15e83cdb",
     "count": 62875
    },
    "counts": {
@@ -747,8 +747,8 @@
     -2.74,
     -40.37
    ],
-   "built_at": "2026-09-29T20:49:06Z",
-   "artifact_built_at": "2026-09-29T20:49:04Z",
+   "built_at": "2026-09-29T23:36:27Z",
+   "artifact_built_at": "2026-09-29T23:36:25Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -758,14 +758,14 @@
    },
    "radares": {
     "file": "estados/PI/radares.csv",
-    "bytes": 2569,
-    "sha256": "63270f59850ed2d3eebf4ef27734a60beee3d646710644f9d4f4bb6ddca1c4fa",
+    "bytes": 2668,
+    "sha256": "ac1541365841fa15f1d6c4ea155d1fb4c3d45fb1d29ae93eb7e59550abc9caae",
     "count": 67
    },
    "limites": {
     "file": "estados/PI/limites.csv",
-    "bytes": 2316107,
-    "sha256": "898bf18dbacc1c02afde597943241a748c91c577c57f975178bd6655498e4f3c",
+    "bytes": 2378472,
+    "sha256": "1f9f8e367afe939dde83fac129f6a774c3d7ae2b658702bf1bfa5b134f03a261",
     "count": 62351
    },
    "counts": {
@@ -792,8 +792,8 @@
     -22.52,
     -48.02
    ],
-   "built_at": "2026-09-29T20:57:49Z",
-   "artifact_built_at": "2026-09-29T20:57:45Z",
+   "built_at": "2026-09-29T23:44:51Z",
+   "artifact_built_at": "2026-09-29T23:44:46Z",
    "cobertura": {
     "nivel": "federal+estadual",
     "fontes": [
@@ -805,15 +805,15 @@
    },
    "radares": {
     "file": "estados/PR/radares.csv",
-    "bytes": 51823,
-    "sha256": "4309998282eba958396538a67b46bc6b3f23a5638b24db95c823d54331f2860d",
+    "bytes": 53588,
+    "sha256": "41f340f413f4d57cac029a519bde8c6cfabc1a5f1ca698ab8b4fdddddfe4af1f",
     "count": 1313
    },
    "limites": {
     "file": "estados/PR/limites.csv",
-    "bytes": 6765304,
-    "sha256": "ac42f482a0b259421eb8300bc0e37f92d739d9319a8a3a4b45da3bc35f940550",
-    "count": 190115
+    "bytes": 6985141,
+    "sha256": "fe4eb239f6b7079288a4d5cfd59b7c787af6454ab58f368ecd9cbb53d63560b7",
+    "count": 190883
    },
    "counts": {
     "cameras": 1313,
@@ -821,7 +821,7 @@
     "cameras_inactive": 7,
     "sections": 30,
     "red_lights": 9,
-    "limits": 190115,
+    "limits": 190883,
     "structs": 8890
    },
    "estruturas": {
@@ -839,8 +839,8 @@
     -20.76,
     -40.96
    ],
-   "built_at": "2026-09-29T20:54:31Z",
-   "artifact_built_at": "2026-09-29T20:54:28Z",
+   "built_at": "2026-09-29T23:41:59Z",
+   "artifact_built_at": "2026-09-29T23:41:55Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -852,15 +852,15 @@
    },
    "radares": {
     "file": "estados/RJ/radares.csv",
-    "bytes": 50396,
-    "sha256": "7748e6a48696b792767b521db2a31a66e3800c507b96c680ecf95f09d4c5b552",
+    "bytes": 51906,
+    "sha256": "b8175094c9f5cddc7992f8547929116f91d0ae6ce061a3c4c2b8455d98945bfc",
     "count": 1276
    },
    "limites": {
     "file": "estados/RJ/limites.csv",
-    "bytes": 6168680,
-    "sha256": "16478e1234472cc8ff3c4badb84b9c7cbee3657357b1ec97ea7084416a04c6ef",
-    "count": 184019
+    "bytes": 6432124,
+    "sha256": "61dd46ab4d0b658cbfa2bc6a9c70626cca5acf970999bd2115f1f27b7ad6a57a",
+    "count": 186113
    },
    "counts": {
     "cameras": 1276,
@@ -868,7 +868,7 @@
     "cameras_inactive": 2,
     "sections": 1,
     "red_lights": 201,
-    "limits": 184019,
+    "limits": 186113,
     "structs": 7848
    },
    "estruturas": {
@@ -886,8 +886,8 @@
     -4.83,
     -34.96
    ],
-   "built_at": "2026-09-29T20:49:09Z",
-   "artifact_built_at": "2026-09-29T20:49:08Z",
+   "built_at": "2026-09-29T23:36:31Z",
+   "artifact_built_at": "2026-09-29T23:36:30Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -897,14 +897,14 @@
    },
    "radares": {
     "file": "estados/RN/radares.csv",
-    "bytes": 6318,
-    "sha256": "8cc3153b42f553f19a72f2f33c6bd1b85ac721d4c63b16e622e43783841b3efd",
+    "bytes": 6648,
+    "sha256": "7fcb839e2ea57490d88e1abd8b473849f566c9ea1ee4872f86b3b803a62528d3",
     "count": 168
    },
    "limites": {
     "file": "estados/RN/limites.csv",
-    "bytes": 1135665,
-    "sha256": "b5f31e607f1a960c739a7347e5dac6e5cd926254c611cca4c9db61cf14b13f91",
+    "bytes": 1165786,
+    "sha256": "ed8c2ff2b72f645af843f1003c228a833df1a2276b389321d19b7df23ca1e6ca",
     "count": 30107
    },
    "counts": {
@@ -931,8 +931,8 @@
     -7.97,
     -59.77
    ],
-   "built_at": "2026-09-29T20:49:59Z",
-   "artifact_built_at": "2026-09-29T20:49:58Z",
+   "built_at": "2026-09-29T23:37:33Z",
+   "artifact_built_at": "2026-09-29T23:37:32Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -942,14 +942,14 @@
    },
    "radares": {
     "file": "estados/RO/radares.csv",
-    "bytes": 1012,
-    "sha256": "e274315cd97ea84848819be359b6ca634e664cec7dbff38a00cb2352c14dc0e0",
+    "bytes": 1072,
+    "sha256": "2d5b914f2edf9700d8338c409c851b36d6983cb9efa2e70e8ef106f77adaa88c",
     "count": 25
    },
    "limites": {
     "file": "estados/RO/limites.csv",
-    "bytes": 1193341,
-    "sha256": "dcf472f12a451209d89762d98be10a48865c2c5888926a4c62b168377f2b61d6",
+    "bytes": 1225200,
+    "sha256": "0c386b4a31af9c8ae906844ade0d75529bda1975d492eecec444fa1e3a113cf8",
     "count": 31845
    },
    "counts": {
@@ -976,8 +976,8 @@
     5.27,
     -58.89
    ],
-   "built_at": "2026-09-29T20:50:01Z",
-   "artifact_built_at": "2026-09-29T20:50:01Z",
+   "built_at": "2026-09-29T23:37:35Z",
+   "artifact_built_at": "2026-09-29T23:37:35Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -987,14 +987,14 @@
    },
    "radares": {
     "file": "estados/RR/radares.csv",
-    "bytes": 1050,
-    "sha256": "d8516127d300cf270b7b8007b90cfd0f193ed44bdbdc41733c959889680326fd",
+    "bytes": 1091,
+    "sha256": "e31c01feabfe56f0b3718cea9dbe5416f42bf288141d810ada6d2a35fcab6f29",
     "count": 27
    },
    "limites": {
     "file": "estados/RR/limites.csv",
-    "bytes": 345771,
-    "sha256": "9087937e4a3dc42007ad7598fa74dc73a1a389d974fd664b8bec705b47020f70",
+    "bytes": 355344,
+    "sha256": "f87fd10e40945469d2b8c63a5f8ec1fede4b58ae7235dd4ab2842aab66343502",
     "count": 9559
    },
    "counts": {
@@ -1021,8 +1021,8 @@
     -27.08,
     -49.69
    ],
-   "built_at": "2026-09-29T20:58:20Z",
-   "artifact_built_at": "2026-09-29T20:58:16Z",
+   "built_at": "2026-09-29T23:45:22Z",
+   "artifact_built_at": "2026-09-29T23:45:19Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -1033,15 +1033,15 @@
    },
    "radares": {
     "file": "estados/RS/radares.csv",
-    "bytes": 39128,
-    "sha256": "34acfe4e5d17fa8fcb9e87e2e3b213a0891eed6454a1c4e636cd282b4dfbbde7",
+    "bytes": 40783,
+    "sha256": "04b8b53929545ae512daef0b207a06d83f2601ba14ad2f56b1a778a13602c792",
     "count": 964
    },
    "limites": {
     "file": "estados/RS/limites.csv",
-    "bytes": 7949324,
-    "sha256": "239d89ea0d5b4ade0cfbe9e3288af956a08c2d40b5caa2d2574e5a30c044b82b",
-    "count": 219958
+    "bytes": 8295772,
+    "sha256": "b31323a464ab646cd980dea42673b0913392314c481a69b9823da476b98f33c8",
+    "count": 223329
    },
    "counts": {
     "cameras": 964,
@@ -1049,7 +1049,7 @@
     "cameras_inactive": 262,
     "sections": 84,
     "red_lights": 4,
-    "limits": 219958,
+    "limits": 223329,
     "structs": 10306
    },
    "estruturas": {
@@ -1067,8 +1067,8 @@
     -25.95,
     -48.35
    ],
-   "built_at": "2026-09-29T20:58:36Z",
-   "artifact_built_at": "2026-09-29T20:58:33Z",
+   "built_at": "2026-09-29T23:45:36Z",
+   "artifact_built_at": "2026-09-29T23:45:33Z",
    "cobertura": {
     "nivel": "federal+estadual",
     "fontes": [
@@ -1080,15 +1080,15 @@
    },
    "radares": {
     "file": "estados/SC/radares.csv",
-    "bytes": 47028,
-    "sha256": "302f5a8ab2a439e3e883292d8f28212404c79c1a287470bfbdecf6c6e7c6d7fe",
+    "bytes": 48668,
+    "sha256": "d67f280d86a67df03dca1970bdcf363e6b05df29658d9a53c34ef0b401c4efd0",
     "count": 1091
    },
    "limites": {
     "file": "estados/SC/limites.csv",
-    "bytes": 4744343,
-    "sha256": "0d40be481ba299c7f4cec4e18a1b8144e2fd10c5a2563c164c51810644d35f87",
-    "count": 132594
+    "bytes": 4932508,
+    "sha256": "eff673db9926a72e88094582c71998894b976500aaa854c4f7488a8c04333e65",
+    "count": 134011
    },
    "counts": {
     "cameras": 1091,
@@ -1096,7 +1096,7 @@
     "cameras_inactive": 110,
     "sections": 189,
     "red_lights": 68,
-    "limits": 132594,
+    "limits": 134011,
     "structs": 11133
    },
    "estruturas": {
@@ -1114,8 +1114,8 @@
     -9.51,
     -36.39
    ],
-   "built_at": "2026-09-29T20:49:11Z",
-   "artifact_built_at": "2026-09-29T20:49:11Z",
+   "built_at": "2026-09-29T23:36:33Z",
+   "artifact_built_at": "2026-09-29T23:36:33Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -1125,14 +1125,14 @@
    },
    "radares": {
     "file": "estados/SE/radares.csv",
-    "bytes": 5742,
-    "sha256": "ee6c3c2955a0ff483b8955d77572553cdc436f86bd51506940e882be88a9b05e",
+    "bytes": 5923,
+    "sha256": "2777de7aa553d096d9f4b9a8f35f8d00a167c8556150d1078c4127b35c228e00",
     "count": 147
    },
    "limites": {
     "file": "estados/SE/limites.csv",
-    "bytes": 617752,
-    "sha256": "4c5c60762aadf23acbdf1822bcb6bd66daedcdc326fbd47dff56b43280641eb6",
+    "bytes": 633692,
+    "sha256": "1f48ec87047cf7aad825362dbe468dc2ea4c10800a27502eac38ad5ff29edb14",
     "count": 15926
    },
    "counts": {
@@ -1159,8 +1159,8 @@
     -19.78,
     -44.16
    ],
-   "built_at": "2026-09-29T20:55:32Z",
-   "artifact_built_at": "2026-09-29T20:55:14Z",
+   "built_at": "2026-09-29T23:42:49Z",
+   "artifact_built_at": "2026-09-29T23:42:38Z",
    "cobertura": {
     "nivel": "federal+estadual",
     "fontes": [
@@ -1172,15 +1172,15 @@
    },
    "radares": {
     "file": "estados/SP/radares.csv",
-    "bytes": 187958,
-    "sha256": "62bcd99946b7725b57373efc447e0524e888f04e8a64579a826486ee02b58a6b",
+    "bytes": 195450,
+    "sha256": "0e23267afd2b20541a1d0885fb6af578f7b1de66573e59580045334324600ccd",
     "count": 4772
    },
    "limites": {
     "file": "estados/SP/limites.csv",
-    "bytes": 16344421,
-    "sha256": "a5501f430f490b39121c47348a617e8d1fdb073217649c4880aeca9e657b8839",
-    "count": 456466
+    "bytes": 16931941,
+    "sha256": "7a738736796fca66962b33192f0f3dfc11731f7a340bfc7e4aa5889309dba4d6",
+    "count": 459962
    },
    "counts": {
     "cameras": 4772,
@@ -1188,7 +1188,7 @@
     "cameras_inactive": 52,
     "sections": 31,
     "red_lights": 46,
-    "limits": 456466,
+    "limits": 459962,
     "structs": 20092
    },
    "estruturas": {
@@ -1206,8 +1206,8 @@
     -5.17,
     -45.7
    ],
-   "built_at": "2026-09-29T20:50:07Z",
-   "artifact_built_at": "2026-09-29T20:50:06Z",
+   "built_at": "2026-09-29T23:37:43Z",
+   "artifact_built_at": "2026-09-29T23:37:42Z",
    "cobertura": {
     "nivel": "federal",
     "fontes": [
@@ -1218,15 +1218,15 @@
    },
    "radares": {
     "file": "estados/TO/radares.csv",
-    "bytes": 2885,
-    "sha256": "c75c4583c6f5236723c8a5b7ee066119b5a2efc764a9be8ee91793984a1b12dd",
+    "bytes": 3014,
+    "sha256": "4eff621ff53a69779a9216e127b45e140194b7a41a35eebce175f1f5ecfebb24",
     "count": 74
    },
    "limites": {
     "file": "estados/TO/limites.csv",
-    "bytes": 1807424,
-    "sha256": "444602cd5138e95f419be942baf40a7dcad7031d486035016e343dfa455b87fa",
-    "count": 47954
+    "bytes": 1876536,
+    "sha256": "bc890d77e17d948c8d17c1c37080325f1f826d4effd728c0c15fb6312b024a5d",
+    "count": 48508
    },
    "counts": {
     "cameras": 74,
@@ -1234,7 +1234,7 @@
     "cameras_inactive": 4,
     "sections": 0,
     "red_lights": 0,
-    "limits": 47954,
+    "limits": 48508,
     "structs": 1019
    },
    "estruturas": {
@@ -1252,7 +1252,7 @@
     6.0,
     -32.0
    ],
-   "built_at": "2026-09-29T20:58:48Z",
+   "built_at": "2026-09-29T23:45:47Z",
    "cobertura": {
     "nivel": "bundle",
     "fontes": [
@@ -1261,21 +1261,21 @@
    },
    "radares": {
     "file": "brasil/radares.csv",
-    "bytes": 774519,
-    "sha256": "53e5028e691f20f39e4aae8dd80a2d7e208e08d2d75e63e337d814fe67918fe5",
+    "bytes": 802826,
+    "sha256": "03a06c6f31709e16d925f0349d2db7b19fccdda258dcc9f6e3d3e24fba8d0325",
     "count": 19315
    },
    "limites": {
     "file": "brasil/limites.csv",
-    "bytes": 44118368,
-    "sha256": "cb37eca291b76ee1b740a43dcabffc19d6e80dfe3283d73e8a51818e77530d63",
-    "count": 1378546
+    "bytes": 46712327,
+    "sha256": "99d6bdb5a57f2e74841f73f4a726d99748752a38047d0c641b5dd5e11a64c7d4",
+    "count": 1410490
    },
    "limites_estimados": {
     "file": "brasil/limites_estimados.csv",
-    "bytes": 58549424,
-    "sha256": "da36f33ef470d7e4b75638180e3c6d8008173d195d215298752a815848db4040",
-    "count": 1435214
+    "bytes": 59919144,
+    "sha256": "54ac20508356a01eaf69012fb1ccdc07094e31cc538bb0127309a104d8bd2391",
+    "count": 1433667
    },
    "estruturas": {
     "file": "brasil/estruturas.csv",
@@ -1285,8 +1285,8 @@
    },
    "counts": {
     "cameras": 19315,
-    "limits": 1378546,
-    "limits_estimated": 1435214,
+    "limits": 1410490,
+    "limits_estimated": 1433667,
     "structs": 126948
    },
    "ufs_incluidas": [
