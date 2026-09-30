@@ -226,7 +226,8 @@ class CommitDataOnly(unittest.TestCase):
             with open(os.path.join(repo, "LEIAME.md"), "w", encoding="utf-8") as f:
                 f.write("editado\n")
             # um build mínimo em dist
-            with open(os.path.join(dist, "radares_GO.csv"), "w", encoding="utf-8") as f:
+            os.makedirs(os.path.join(dist, "estados", "GO"))
+            with open(os.path.join(dist, "estados", "GO", "radares.csv"), "w", encoding="utf-8") as f:
                 f.write("lat,lng\n-16,-49\n")
             with open(os.path.join(dist, "catalog.json"), "w", encoding="utf-8") as f:
                 json.dump({"built_at": "2026-09-30T00:00:00Z", "ufs": {"GO": {"counts": {"cameras": 1}}}}, f)

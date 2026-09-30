@@ -1,7 +1,8 @@
 """Listas da UF -> pacote por UF (a unidade que se baixa por estado).
 
 Recebe os radares, limites e estruturas já atribuídos à UF (build.py, common/ufassign.py),
-deduplica de novo por segurança e escreve data/packs/<UF>/ com manifest.json. Antes passava por
+deduplica de novo por segurança e escreve data/packs/<UF>/ (radares.csv, limites.csv,
+estruturas.csv, com os mesmos nomes do que é publicado, e manifesto.json). Antes passava por
 tiles gravados em data/tiles e relidos; os tiles de um build antigo que o novo não reescrevia
 ficavam lá e voltavam para o pacote.
 """
@@ -18,7 +19,12 @@ from typing import Iterable, List, Optional, Tuple
 from datakit.common import Camera, CameraKind, Limit, Struct, merge_cameras, merge_limits
 from datakit.common.ufs import uf_bbox
 
-SCHEMA = 2  # 1 = base (cameras+limits); 2 = + structs.csv (ponte/túnel). Leitor tolera ausência.
+SCHEMA = 2  # 1 = base (radares+limites); 2 = + estruturas.csv (ponte/túnel). Leitor tolera ausência.
+# Nomes dos arquivos: os mesmos do pacote ao repositório publicado (estados/<UF>/radares.csv...).
+CAMERAS_FILE = "radares.csv"
+LIMITS_FILE = "limites.csv"
+STRUCTS_FILE = "estruturas.csv"
+MANIFEST_FILE = "manifesto.json"
 TILE_DEG = 0.25  # só para o campo "tiles" do manifest (quadrículas de 0,25° com dados)
 
 
@@ -45,9 +51,9 @@ def build(uf: str, packs_dir: str, cams: Iterable[Camera], lims: Iterable[Limit]
 
     out = os.path.join(packs_dir, uf)
     os.makedirs(out, exist_ok=True)
-    cfile = os.path.join(out, "cameras.csv")
-    lfile = os.path.join(out, "limits.csv")
-    sfile = os.path.join(out, "structs.csv")
+    cfile = os.path.join(out, CAMERAS_FILE)
+    lfile = os.path.join(out, LIMITS_FILE)
+    sfile = os.path.join(out, STRUCTS_FILE)
     _write_csv(cfile, Camera.HEADER, (c.row() for c in cams))
     _write_csv(lfile, Limit.HEADER, (x.row() for x in lims))
     _write_csv(sfile, Struct.HEADER, (x.row() for x in structs))
@@ -69,13 +75,13 @@ def build(uf: str, packs_dir: str, cams: Iterable[Camera], lims: Iterable[Limit]
             "limits": len(lims),
         },
         "files": {
-            "cameras.csv": {"sha256": _sha256(cfile), "bytes": os.path.getsize(cfile)},
-            "limits.csv": {"sha256": _sha256(lfile), "bytes": os.path.getsize(lfile)},
-            "structs.csv": {"sha256": _sha256(sfile), "bytes": os.path.getsize(sfile)},
+            CAMERAS_FILE: {"sha256": _sha256(cfile), "bytes": os.path.getsize(cfile)},
+            LIMITS_FILE: {"sha256": _sha256(lfile), "bytes": os.path.getsize(lfile)},
+            STRUCTS_FILE: {"sha256": _sha256(sfile), "bytes": os.path.getsize(sfile)},
         },
     }
     manifest["counts"]["structs"] = len(structs)
-    with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(out, MANIFEST_FILE), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     return manifest
 

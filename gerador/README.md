@@ -51,7 +51,7 @@ para repetir um build com os mesmos dados).
 | `datakit/common/direction.py` | Sentido dos radares e das placas: "crescente/decrescente" (ANTT, DNIT, DER-GO) vira rumo pela geometria com km; o sentido nominal de SP (Norte/Sul/Leste/Oeste) vira rumo pela via do OSM mais próxima |
 | `datakit/inmetro_status.py` | Radar ativo/inativo pela validade da aferição no Inmetro, nas BRs fora de concessão |
 | `datakit/build_formats.py` | Radares em GeoJSON, KML e GPX a partir dos CSVs |
-| `scripts/publish.py` | Confere falhas e quedas, organiza `data/dist/` nas pastas do repositório e reescreve o `catalog.json` |
+| `scripts/publish.py` | Confere falhas, quedas e tamanhos e copia `data/dist/` (que já tem a estrutura `brasil/`, `estados/`, `catalog.json`) para a raiz do repositório |
 | `datakit/failures.py` | Registro das fontes que falharam na execução |
 
 Cada download tenta 3 vezes quando a falha é passageira (conexão caiu, 5xx), com no máximo 20 s
@@ -122,7 +122,7 @@ local.
 
 **Versão do formato (`schema`)**
 
-O `catalog.json` e o `manifest.json` de cada pacote têm o campo `schema`, a versão do formato.
+O `catalog.json` e o `manifesto.json` de cada pacote têm o campo `schema`, a versão do formato.
 Ela sobe quando muda algo que um leitor feito para a versão anterior não entenderia: uma chave
 ou coluna renomeada ou removida, um nome ou caminho de arquivo que muda, um valor que muda de
 significado. Não sobe quando só entram dados novos, ou chaves e colunas novas que um leitor

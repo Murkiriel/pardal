@@ -581,13 +581,21 @@ class Estimated(unittest.TestCase):
         self.assertNotIn("unclassified", _INFER_CLASSES)
         self.assertIn("tertiary", _INFER_CLASSES)
 
-    def test_publish_paths_for_estimated_file(self):
+    def test_published_files_mirror_the_repository(self):
+        """data/dist já tem a estrutura do repositório: o publish só copia o que é dado."""
+        import os
         import sys
+        import tempfile
         sys.path.insert(0, "scripts")
-        from publish import dest_for
-        self.assertEqual(dest_for("limites_estimados_BR.csv"), "brasil/limites_estimados.csv")
-        self.assertEqual(dest_for("limites_estimados_BR.csv.gz"), "brasil/limites_estimados.csv.gz")
-        self.assertEqual(dest_for("limites_GO.csv"), "estados/GO/limites.csv")
+        from publish import published_files
+        with tempfile.TemporaryDirectory() as d:
+            for rel in ("brasil/limites_estimados.csv.gz", "brasil/radares.kml", "estados/GO/limites.csv",
+                        "estados/GO/rascunho.txt", "catalog.json", "BUILD_EM_ANDAMENTO"):
+                os.makedirs(os.path.dirname(os.path.join(d, rel)) or d, exist_ok=True)
+                with open(os.path.join(d, rel), "w") as f:
+                    f.write("x")
+            self.assertEqual(published_files(d), ["brasil/limites_estimados.csv.gz", "brasil/radares.kml",
+                                                  "estados/GO/limites.csv"])
 
     def test_limit_row_roundtrip(self):
         est = Limit(-16.0, -49.0, 100, "OSM:class", True, 80)

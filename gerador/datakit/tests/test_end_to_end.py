@@ -93,13 +93,13 @@ class EndToEnd(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertEqual(new_failures, [])
             pack = os.path.join(tmp, "packs", "RJ")
-            with open(os.path.join(pack, "cameras.csv"), encoding="utf-8") as f:
+            with open(os.path.join(pack, "radares.csv"), encoding="utf-8") as f:
                 cams = list(csv.DictReader(f))
-            with open(os.path.join(pack, "limits.csv"), encoding="utf-8") as f:
+            with open(os.path.join(pack, "limites.csv"), encoding="utf-8") as f:
                 lims = list(csv.DictReader(f))
-            with open(os.path.join(pack, "structs.csv"), encoding="utf-8") as f:
+            with open(os.path.join(pack, "estruturas.csv"), encoding="utf-8") as f:
                 structs = list(csv.DictReader(f))
-            with open(os.path.join(pack, "manifest.json"), encoding="utf-8") as f:
+            with open(os.path.join(pack, "manifesto.json"), encoding="utf-8") as f:
                 manifest = json.load(f)
             with open(os.path.join(tmp, "dist", "catalog.json"), encoding="utf-8") as f:
                 catalog = json.load(f)

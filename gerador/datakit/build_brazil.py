@@ -2,10 +2,10 @@
 
     python -m datakit.build_brazil            # depois de datakit.build --all
 
-Gera data/dist/radares_BR.csv, limites_BR.csv, estruturas_BR.csv e acrescenta a
+Gera data/dist/brasil/radares.csv, limites.csv, estruturas.csv e acrescenta a
 entrada "BR" ao catalog.json ("Brasil (tudo)"). Dedupe nas divisas (coordenada a ~1 m).
 
-Os limites estimados (estimated=1) saem em limites_estimados_BR.csv, separados dos
+Os limites estimados (estimated=1) saem em brasil/limites_estimados.csv, separados dos
 sinalizados: juntos passariam dos 100 MB por arquivo que o GitHub aceita. Se o arquivo dos
 estimados passar de MAX_FILE_BYTES sozinho, sai compactado (.csv.gz). Nos pacotes por estado
 os dois continuam no mesmo arquivo, com a coluna `estimated`.
@@ -31,16 +31,28 @@ from typing import Dict, Iterator, List, Sequence, Tuple
 
 # Teto por arquivo publicado: o GitHub recusa arquivos acima de 100 MB.
 MAX_FILE_BYTES = 95_000_000
-_PUBLISHED = re.compile(r"^(radares|limites_estimados|limites|estruturas)_([A-Z]{2})\.(csv\.gz|csv|geojson|kml|gpx)$")
+# Arquivos publicados, dentro de data/dist/brasil/ e data/dist/estados/<UF>/.
+PUBLISHED_NAME = re.compile(r"^(radares|limites_estimados|limites|estruturas)\.(csv\.gz|csv|geojson|kml|gpx)$")
+MANAGED_DIRS = ("brasil", "estados")
+
+
+def published_files(dist_dir: str) -> List[str]:
+    """Caminhos (relativos a dist_dir, com /) de tudo o que vai para o repositório."""
+    out = []
+    for top in MANAGED_DIRS:
+        for d, _, fs in os.walk(os.path.join(dist_dir, top)):
+            out += [os.path.relpath(os.path.join(d, f), dist_dir).replace(os.sep, "/")
+                    for f in fs if PUBLISHED_NAME.match(f)]
+    return sorted(out)
 
 
 def oversized(dist_dir: str, limit: int = MAX_FILE_BYTES) -> List[Tuple[str, int]]:
-    """(nome, bytes) de cada arquivo que vai ser publicado e passa do teto."""
+    """(caminho, bytes) de cada arquivo que vai ser publicado e passa do teto."""
     out = []
-    for name in sorted(os.listdir(dist_dir)):
-        path = os.path.join(dist_dir, name)
-        if _PUBLISHED.match(name) and os.path.getsize(path) > limit:
-            out.append((name, os.path.getsize(path)))
+    for rel in published_files(dist_dir):
+        size = os.path.getsize(os.path.join(dist_dir, rel))
+        if size > limit:
+            out.append((rel, size))
     return out
 
 
@@ -142,16 +154,18 @@ def _sha256(path):
 
 
 def build(packs_dir: str, dist_dir: str) -> dict:
-    os.makedirs(dist_dir, exist_ok=True)
+    from datakit.build_pack import CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE
+    br_dir = os.path.join(dist_dir, "brasil")
+    os.makedirs(br_dir, exist_ok=True)
     ufs = sorted(d for d in os.listdir(packs_dir)
-                 if os.path.isfile(os.path.join(packs_dir, d, "manifest.json")))
+                 if os.path.isfile(os.path.join(packs_dir, d, MANIFEST_FILE)))
     if not ufs:
         raise RuntimeError(f"nenhum pacote em {packs_dir} — rode `datakit.build --all` antes")
 
     out = {
-        "cameras.csv": ("radares_BR.csv", ("lat", "lng", "kind", "source", "direction_deg"), "cameras"),
-        "limits.csv": ("limites_BR.csv", ("lat", "lng", "limit_kmh", "source", "direction_deg"), "limits"),
-        "structs.csv": ("estruturas_BR.csv", ("lat1", "lng1", "lat2", "lng2", "kind"), "structs"),
+        CAMERAS_FILE: ("radares.csv", ("lat", "lng", "kind", "source", "direction_deg"), "cameras"),
+        LIMITS_FILE: ("limites.csv", ("lat", "lng", "limit_kmh", "source", "direction_deg"), "limits"),
+        STRUCTS_FILE: ("estruturas.csv", ("lat1", "lng1", "lat2", "lng2", "kind"), "structs"),
     }
     files_meta = {}
     counts = {}
@@ -160,14 +174,14 @@ def build(packs_dir: str, dist_dir: str) -> dict:
         header = _header(paths)
         if not header:
             continue
-        dst = os.path.join(dist_dir, dst_name)
-        name = "limites_estimados_BR.csv"
-        path = os.path.join(dist_dir, name)
-        n, n_est = _write_merged(paths, header, keycols, dst, path if src == "limits.csv" else None)
-        files_meta[dst_name] = {"file": dst_name, "bytes": os.path.getsize(dst),
+        dst = os.path.join(br_dir, dst_name)
+        name = "limites_estimados.csv"
+        path = os.path.join(br_dir, name)
+        n, n_est = _write_merged(paths, header, keycols, dst, path if src == LIMITS_FILE else None)
+        files_meta[dst_name] = {"file": "brasil/" + dst_name, "bytes": os.path.getsize(dst),
                                 "sha256": _sha256(dst), "count": n}
         counts[count_key] = n
-        if src == "limits.csv" and not n_est:
+        if src == LIMITS_FILE and not n_est:
             os.remove(path)
         if n_est:
             stale = path + ".gz"
@@ -178,7 +192,7 @@ def build(packs_dir: str, dist_dir: str) -> dict:
                 name, path = name + ".gz", stale
             elif os.path.exists(stale):
                 os.remove(stale)
-            files_meta[name] = {"file": name, "bytes": os.path.getsize(path),
+            files_meta[name] = {"file": "brasil/" + name, "bytes": os.path.getsize(path),
                                 "sha256": _sha256(path), "count": n_est}
             counts["limits_estimated"] = n_est
 
@@ -193,11 +207,11 @@ def build(packs_dir: str, dist_dir: str) -> dict:
         "bbox": [-34.0, -74.5, 6.0, -32.0],
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "cobertura": {"nivel": "bundle", "fontes": ["+".join(sorted(ufs))]},
-        "radares": files_meta.get("radares_BR.csv"),
-        "limites": files_meta.get("limites_BR.csv"),
-        "limites_estimados": files_meta.get("limites_estimados_BR.csv")
-        or files_meta.get("limites_estimados_BR.csv.gz"),
-        "estruturas": files_meta.get("estruturas_BR.csv"),
+        "radares": files_meta.get("radares.csv"),
+        "limites": files_meta.get("limites.csv"),
+        "limites_estimados": files_meta.get("limites_estimados.csv")
+        or files_meta.get("limites_estimados.csv.gz"),
+        "estruturas": files_meta.get("estruturas.csv"),
         "counts": counts,
         "ufs_incluidas": ufs,
     }

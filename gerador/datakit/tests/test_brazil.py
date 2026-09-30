@@ -15,11 +15,11 @@ STR_H = "lat1,lng1,lat2,lng2,kind"
 def _pack(root, uf, cams, lims, structs):
     d = os.path.join(root, uf)
     os.makedirs(d)
-    for name, header, rows in (("cameras.csv", CAM_H, cams), ("limits.csv", LIM_H, lims),
-                               ("structs.csv", STR_H, structs)):
+    for name, header, rows in (("radares.csv", CAM_H, cams), ("limites.csv", LIM_H, lims),
+                               ("estruturas.csv", STR_H, structs)):
         with open(os.path.join(d, name), "w", encoding="utf-8", newline="\n") as f:
             f.write("\n".join([header, *rows]) + "\n")
-    with open(os.path.join(d, "manifest.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(d, "manifesto.json"), "w", encoding="utf-8") as f:
         f.write("{}")
 
 
@@ -40,16 +40,17 @@ class Brazil(unittest.TestCase):
                   ["-16.0,-49.0,80,OSM,0,,"],
                   ["-15.5,-48.2,-15.5,-48.21,BRIDGE", "-16.1,-49.1,-16.1,-49.11,TUNNEL"])
             br = build_brazil.build(packs, dist)
-            cams = _rows(os.path.join(dist, "radares_BR.csv"))
+            cams = _rows(os.path.join(dist, "brasil", "radares.csv"))
             self.assertEqual(cams, [
                 ("-15.9", "-47.9", "FIXED", "60", "DETRAN-DF", "1", "", "", ""),
                 ("-15.5", "-48.2", "FIXED", "60", "OSM", "1", "", "", "90"),   # 1ª posição, dados do último
                 ("-16.0", "-49.0", "FIXED", "", "OSM", "1", "", "", ""),
             ])
-            self.assertEqual(len(_rows(os.path.join(dist, "limites_BR.csv"))), 2)
-            self.assertEqual(_rows(os.path.join(dist, "limites_estimados_BR.csv")),
+            self.assertEqual(len(_rows(os.path.join(dist, "brasil", "limites.csv"))), 2)
+            self.assertEqual(_rows(os.path.join(dist, "brasil", "limites_estimados.csv")),
                              [("-15.8", "-47.8", "40", "OSM:class", "1", "30", "")])
-            self.assertEqual(len(_rows(os.path.join(dist, "estruturas_BR.csv"))), 2)
+            self.assertEqual(len(_rows(os.path.join(dist, "brasil", "estruturas.csv"))), 2)
+            self.assertEqual(br["radares"]["file"], "brasil/radares.csv")
             self.assertEqual(br["counts"], {"cameras": 3, "limits": 2, "limits_estimated": 1, "structs": 2})
             self.assertEqual(br["radares"]["count"], 3)
 
@@ -59,8 +60,8 @@ class Brazil(unittest.TestCase):
             _pack(packs, "GO", [], [f"-16.{i:04d},-49.0,60,OSM:class,1,40," for i in range(200)], [])
             with mock.patch.object(build_brazil, "MAX_FILE_BYTES", 1000):
                 br = build_brazil.build(packs, dist)
-            self.assertEqual(br["limites_estimados"]["file"], "limites_estimados_BR.csv.gz")
-            self.assertFalse(os.path.exists(os.path.join(dist, "limites_estimados_BR.csv")))
+            self.assertEqual(br["limites_estimados"]["file"], "brasil/limites_estimados.csv.gz")
+            self.assertFalse(os.path.exists(os.path.join(dist, "brasil", "limites_estimados.csv")))
 
 
 class FileSize(unittest.TestCase):
@@ -68,18 +69,20 @@ class FileSize(unittest.TestCase):
 
     def test_oversized_lists_every_big_published_file(self):
         with tempfile.TemporaryDirectory() as d:
-            for name, size in (("radares_GO.csv", 10), ("limites_SP.csv", 2000), ("radares_BR.geojson", 3000),
-                               ("limites_estimados_BR.csv.gz", 500), ("BUILD_EM_ANDAMENTO", 5000)):
+            for name, size in (("estados/GO/radares.csv", 10), ("estados/SP/limites.csv", 2000),
+                               ("brasil/radares.geojson", 3000), ("brasil/limites_estimados.csv.gz", 500),
+                               ("BUILD_EM_ANDAMENTO", 5000), ("estados/SP/rascunho.txt", 5000)):
+                os.makedirs(os.path.dirname(os.path.join(d, name)) or d, exist_ok=True)
                 with open(os.path.join(d, name), "wb") as f:
                     f.write(b"x" * size)
             self.assertEqual(build_brazil.oversized(d, limit=1000),
-                             [("limites_SP.csv", 2000), ("radares_BR.geojson", 3000)])
+                             [("brasil/radares.geojson", 3000), ("estados/SP/limites.csv", 2000)])
 
     def test_publish_refuses_an_oversized_file(self):
         import importlib.util
         import json
         path = os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "publish.py")
-        spec = importlib.util.spec_from_file_location("publicar_tamanho", path)
+        spec = importlib.util.spec_from_file_location("publish_size", path)
         pub = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(pub)
         with tempfile.TemporaryDirectory() as tmp:
@@ -88,11 +91,12 @@ class FileSize(unittest.TestCase):
             os.makedirs(repo)
             with open(os.path.join(dist, "catalog.json"), "w", encoding="utf-8") as f:
                 json.dump({"ufs": {}}, f)
-            with open(os.path.join(dist, "limites_SP.csv"), "wb") as f:
+            os.makedirs(os.path.join(dist, "estados", "SP"))
+            with open(os.path.join(dist, "estados", "SP", "limites.csv"), "wb") as f:
                 f.write(b"x" * 2000)
             with mock.patch.object(pub, "MAX_FILE_BYTES", 1000), self.assertRaises(SystemExit) as cm:
                 pub.main(["--repo", repo, "--dist", dist])
-            self.assertIn("limites_SP.csv", str(cm.exception.code))
+            self.assertIn("estados/SP/limites.csv", str(cm.exception.code))
             self.assertEqual(os.listdir(repo), [])
 
 

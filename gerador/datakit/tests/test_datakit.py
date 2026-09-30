@@ -90,10 +90,10 @@ class Pack(unittest.TestCase):
                            built_at="2026-09-30T00:00:00Z")
             self.assertEqual(os.listdir(d), ["GO"])
             self.assertEqual(sorted(os.listdir(os.path.join(d, "GO"))),
-                             ["cameras.csv", "limits.csv", "manifest.json", "structs.csv"])
-            with open(os.path.join(d, "GO", "cameras.csv"), encoding="utf-8") as f:
+                             ["estruturas.csv", "limites.csv", "manifesto.json", "radares.csv"])
+            with open(os.path.join(d, "GO", "radares.csv"), encoding="utf-8") as f:
                 rows = list(csv.DictReader(f))
-            with open(os.path.join(d, "GO", "manifest.json"), encoding="utf-8") as f:
+            with open(os.path.join(d, "GO", "manifesto.json"), encoding="utf-8") as f:
                 on_disk = json.load(f)
         self.assertEqual(on_disk, m)
         self.assertEqual([(r["source"], r["direction_deg"]) for r in rows], [("OSM", ""), ("DER-GO", "90")])

@@ -1,13 +1,11 @@
 """data/packs/<UF>/  ->  data/dist/  (arquivos publicáveis por estado + catalog.json).
 
-Gera:
-  data/dist/radares_<UF>.csv
-  data/dist/limites_<UF>.csv
-  data/dist/estruturas_<UF>.csv
-  data/dist/catalog.json
+data/dist tem a mesma estrutura do que é publicado na raiz do repositório:
+  data/dist/estados/<UF>/radares.csv, limites.csv, estruturas.csv
+  data/dist/catalog.json            (com os caminhos já como no repositório)
 
 Quem consome os pacotes lê o catalog.json da raiz do repositório e baixa os arquivos que ele
-lista (scripts/publish.py reescreve os caminhos para as pastas estados/ e brasil/).
+lista; scripts/publish.py só copia data/dist para lá.
 """
 from __future__ import annotations
 
@@ -21,6 +19,7 @@ import sys
 from datetime import datetime, timezone
 from typing import Optional
 
+from datakit.build_pack import CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE
 from datakit.common.ufs import uf_name
 
 _FEDERAL = {"DNIT", "ANTT"}
@@ -59,9 +58,9 @@ def _sha256(path: str) -> str:
     return h.hexdigest()
 
 
-def _file_ref(path: str, count: Optional[int]) -> dict:
+def _file_ref(path: str, count: Optional[int], dist_dir: str) -> dict:
     return {
-        "file": os.path.basename(path),
+        "file": os.path.relpath(path, dist_dir).replace(os.sep, "/"),
         "bytes": os.path.getsize(path),
         "sha256": _sha256(path),
         "count": count,
@@ -70,19 +69,23 @@ def _file_ref(path: str, count: Optional[int]) -> dict:
 
 def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
     os.makedirs(dist_dir, exist_ok=True)
+    states_dir = os.path.join(dist_dir, "estados")
+    shutil.rmtree(states_dir, ignore_errors=True)   # refeito inteiro: nada de um build anterior fica
     ufs: dict = {}
     for uf in sorted(os.listdir(packs_dir)):
         pdir = os.path.join(packs_dir, uf)
-        man_path = os.path.join(pdir, "manifest.json")
+        man_path = os.path.join(pdir, MANIFEST_FILE)
         if not os.path.isfile(man_path):
             continue
         with open(man_path, encoding="utf-8") as f:
             man = json.load(f)
 
-        rad_dst = os.path.join(dist_dir, f"radares_{uf}.csv")
-        lim_dst = os.path.join(dist_dir, f"limites_{uf}.csv")
-        shutil.copyfile(os.path.join(pdir, "cameras.csv"), rad_dst)
-        shutil.copyfile(os.path.join(pdir, "limits.csv"), lim_dst)
+        out = os.path.join(states_dir, uf)
+        os.makedirs(out, exist_ok=True)
+        rad_dst = os.path.join(out, CAMERAS_FILE)
+        lim_dst = os.path.join(out, LIMITS_FILE)
+        shutil.copyfile(os.path.join(pdir, CAMERAS_FILE), rad_dst)
+        shutil.copyfile(os.path.join(pdir, LIMITS_FILE), lim_dst)
 
         counts = man.get("counts", {})
         entry = {
@@ -90,16 +93,16 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             "bbox": man.get("bbox", []),
             "built_at": man.get("built_at"),
             "artifact_built_at": man.get("artifact_built_at"),
-            "cobertura": _coverage(os.path.join(pdir, "cameras.csv")),
-            "radares": _file_ref(rad_dst, counts.get("cameras")),
-            "limites": _file_ref(lim_dst, counts.get("limits")),
+            "cobertura": _coverage(os.path.join(pdir, CAMERAS_FILE)),
+            "radares": _file_ref(rad_dst, counts.get("cameras"), dist_dir),
+            "limites": _file_ref(lim_dst, counts.get("limits"), dist_dir),
             "counts": counts,
         }
-        struct_src = os.path.join(pdir, "structs.csv")
+        struct_src = os.path.join(pdir, STRUCTS_FILE)
         if os.path.exists(struct_src) and os.path.getsize(struct_src) > 40:  # > só o cabeçalho
-            struct_dst = os.path.join(dist_dir, f"estruturas_{uf}.csv")
+            struct_dst = os.path.join(out, STRUCTS_FILE)
             shutil.copyfile(struct_src, struct_dst)
-            entry["estruturas"] = _file_ref(struct_dst, counts.get("structs"))
+            entry["estruturas"] = _file_ref(struct_dst, counts.get("structs"), dist_dir)
         ufs[uf] = entry
 
     catalog = {

@@ -2,10 +2,10 @@
 
     python -m datakit.build_formats            # depois de datakit.build --all
 
-Para cada estado e para o Brasil (radares_<X>.csv):
-  radares_<X>.geojson — todos os radares, com todas as colunas (inativos com active=false)
-  radares_<X>.kml     — só os ativos, uma pasta por tipo (Google Earth / My Maps)
-  radares_<X>.gpx     — só os ativos, como waypoints (GPS, OsmAnd, apps de navegação)
+Para cada estado e para o Brasil (estados/<UF>/radares.csv e brasil/radares.csv), ao lado:
+  radares.geojson — todos os radares, com todas as colunas (inativos com active=false)
+  radares.kml     — só os ativos, uma pasta por tipo (Google Earth / My Maps)
+  radares.gpx     — só os ativos, como waypoints (GPS, OsmAnd, apps de navegação)
 
 Limites e estruturas ficam só em CSV: em GeoJSON os limites dos estados somavam 451 MB (70%
 do repositório) para os mesmos pontos do CSV. Quem quiser GeoJSON converte com o
@@ -18,7 +18,6 @@ import argparse
 import csv
 import json
 import os
-import re
 import sys
 from typing import Dict, List
 from xml.sax.saxutils import escape
@@ -127,14 +126,15 @@ def _write_text(path: str, text: str) -> None:
 
 def build(dist_dir: str) -> Dict[str, int]:
     stats = {"radares": 0}
-    for fname in sorted(os.listdir(dist_dir)):
-        m = re.fullmatch(r"radares_([A-Z]{2})\.csv", fname)
-        if not m:
+    states = os.path.join(dist_dir, "estados")
+    areas = [(uf, os.path.join(states, uf)) for uf in sorted(os.listdir(states))] if os.path.isdir(states) else []
+    areas.append(("Brasil", os.path.join(dist_dir, "brasil")))
+    for title, folder in areas:
+        csv_path = os.path.join(folder, "radares.csv")
+        if not os.path.isfile(csv_path):
             continue
-        area = m.group(1)
-        rows = read(os.path.join(dist_dir, fname))
-        base = os.path.join(dist_dir, f"radares_{area}")
-        title = "Brasil" if area == "BR" else area
+        rows = read(csv_path)
+        base = os.path.join(folder, "radares")
         _write_json(base + ".geojson", to_geojson(rows))
         _write_text(base + ".kml", to_kml(rows, title))
         _write_text(base + ".gpx", to_gpx(rows, title))
