@@ -13,7 +13,7 @@ import json
 import re
 from typing import List, Optional
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common.geo import utm_to_latlng
 from datakit.common.model import Camera, CameraKind
 
@@ -23,8 +23,8 @@ CKAN = "https://dados.pbh.gov.br/api/3/action/package_show?id=fiscalizacao-eletr
 _POINT = re.compile(r"POINT\s*\(\s*([\d.]+)\s+([\d.]+)\s*\)", re.I)
 
 
-def _kind(tipo: str) -> Optional[CameraKind]:
-    t = tipo.lower()
+def _kind(kind_text: str) -> Optional[CameraKind]:
+    t = kind_text.lower()
     if "velocidade" in t:
         return CameraKind.FIXED
     if "avan" in t and "sem" in t:
@@ -54,6 +54,6 @@ def load(raw_dir: str, bbox=None):
     return parse(get_bytes_curl(res["url"]).decode("utf-8", "replace")), []
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py)."""
-    return Carga(*load(ctx.raw_dir))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py)."""
+    return SourceData(*load(ctx.raw_dir))

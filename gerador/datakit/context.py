@@ -3,10 +3,10 @@
 Antes, cada peça guardava o que já tinha carregado numa variável do próprio módulo (o extrato do
 OSM da região e as fontes oficiais em build.py, os locais desativados em cet_sp, as rotas do SNV
 em snv, os polígonos das UFs em ufpoly): duas execuções no mesmo processo (os testes) se
-misturavam, e o que cada função usava não aparecia na assinatura. Agora vive tudo no `Contexto`,
+misturavam, e o que cada função usava não aparecia na assinatura. Agora vive tudo no `BuildContext`,
 criado pelo build e passado adiante.
 
-Contrato das fontes oficiais: cada módulo expõe `carregar(ctx) -> Carga` (radares, limites e
+Contrato das fontes oficiais: cada módulo expõe `fetch(ctx) -> SourceData` (radares, limites e
 locais que o órgão desativou). Fonte que falha é registrada em `falhas` com o nome dela e o build
 segue sem ela; fonte com várias bases (DER-SP, capitais) registra cada base que falhar.
 """
@@ -16,39 +16,39 @@ import os
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
-from datakit import falhas
+from datakit import failures
 from datakit.common.model import Camera, Limit
 
-_NAO_CARREGADO = object()
+_NOT_LOADED = object()
 
 
 @dataclass
-class Carga:
+class SourceData:
     """O que uma fonte devolve."""
-    radares: List[Camera] = field(default_factory=list)
-    limites: List[Limit] = field(default_factory=list)
-    desativados: List[Tuple[float, float]] = field(default_factory=list)   # (lat, lng)
+    cameras: List[Camera] = field(default_factory=list)
+    limits: List[Limit] = field(default_factory=list)
+    deactivated: List[Tuple[float, float]] = field(default_factory=list)   # (lat, lng)
 
 
 def _try(label: str, fn, default):
     try:
         return fn()
     except Exception as e:  # noqa: BLE001
-        falhas.registrar(label, e)
+        failures.record(label, e)
         return default
 
 
-class Contexto:
-    """Uma execução do build. `fontes`: {nome: módulo com carregar(ctx)}, na ordem do manifest."""
+class BuildContext:
+    """Uma execução do build. `sources`: {nome: módulo com fetch(ctx)}, na ordem do manifest."""
 
-    def __init__(self, raw_dir: str, refresh_osm: bool = True, fontes: Optional[dict] = None):
+    def __init__(self, raw_dir: str, refresh_osm: bool = True, sources: Optional[dict] = None):
         self.raw_dir = raw_dir
         self.refresh_osm = refresh_osm
-        self.fontes = fontes or {}
+        self.sources = sources or {}
         self._polygons: Optional[dict] = None
-        self._rotas = _NAO_CARREGADO
-        self._oficiais: Optional[Dict[str, Carga]] = None
-        self._nacional: Optional[dict] = None
+        self._routes = _NOT_LOADED
+        self._official: Optional[Dict[str, SourceData]] = None
+        self._national: Optional[dict] = None
         self._osm_region: Optional[str] = None
         self._osm: Optional[tuple] = None
 
@@ -61,29 +61,29 @@ class Contexto:
             self._polygons = ufpoly.polygons(self.raw_dir)
         return self._polygons
 
-    def rotas_snv(self):
+    def snv_routes(self):
         """Rotas do SNV (SnvRoutes), ou None se o SNV falhar (a falha é registrada uma vez)."""
-        if self._rotas is _NAO_CARREGADO:
+        if self._routes is _NOT_LOADED:
             from datakit.sources import snv
-            self._rotas = snv.load_routes(self.raw_dir)
-        return self._rotas
+            self._routes = snv.load_routes(self.raw_dir)
+        return self._routes
 
-    def oficiais(self) -> Dict[str, Carga]:
+    def official(self) -> Dict[str, SourceData]:
         """Carga nacional de cada fonte oficial (sem recorte)."""
-        if self._oficiais is None:
-            self._oficiais = {}
-            for name, mod in self.fontes.items():
+        if self._official is None:
+            self._official = {}
+            for name, mod in self.sources.items():
                 try:
-                    carga = mod.carregar(self)
-                    print(f"[build] {name}: {len(carga.radares)} radares (nacional)")
+                    loaded = mod.fetch(self)
+                    print(f"[build] {name}: {len(loaded.cameras)} radares (nacional)")
                 except NotImplementedError as e:
-                    carga = Carga()
+                    loaded = SourceData()
                     print(f"[build] {name}: pulado ({e})")
                 except Exception as e:  # noqa: BLE001
-                    carga = Carga()
-                    falhas.registrar(name, e)
-                self._oficiais[name] = carga
-        return self._oficiais
+                    loaded = SourceData()
+                    failures.record(name, e)
+                self._official[name] = loaded
+        return self._official
 
     def osm(self, region: str, probes=None):
         """(extrato, radares, limites, estruturas, sentidos das sondas) do OSM da região. Só a
@@ -100,16 +100,16 @@ class Contexto:
             self._osm_region, self._osm = region, (ex, cams, lims, structs, probe_dirs)
         return self._osm
 
-    def nacional(self) -> dict:
+    def national(self) -> dict:
         """SNV (rotas + concessões), Inmetro e os limites oficiais. Cada base que falhar fica
         vazia — o pacote sai só sem aquela parte."""
-        if self._nacional is None:
+        if self._national is None:
             from datakit import inmetro_status
             from datakit.common.lrs import load_concessions
             from datakit.sources import antt_placas, cet_sp, inmetro, rio, snv
             raw = self.raw_dir
             paths = _try("SNV", lambda: snv.ensure(raw), None)
-            routes = self.rotas_snv() if paths else None
+            routes = self.snv_routes() if paths else None
             conc = _try("SNV concessões", lambda: load_concessions(paths[1]), {}) if paths else {}
             meters = _try("Inmetro", lambda: inmetro.load(raw), [])
             print(f"[build] Inmetro: {len(meters)} medidores; SNV {paths[2] if paths else '—'}")
@@ -117,7 +117,7 @@ class Contexto:
             rio_l = _try("Rio trechos", rio.load_limits, [])
             cet_l = _try("CET-SP", cet_sp.load_limits, [])
             print(f"[build] limites oficiais: ANTT {len(antt_l)}, Rio {len(rio_l)}, CET-SP {len(cet_l)} pontos")
-            self._nacional = dict(snv=routes, concessions=conc, snv_version=paths[2] if paths else None,
+            self._national = dict(snv=routes, concessions=conc, snv_version=paths[2] if paths else None,
                                   meters=inmetro_status.index_meters(meters), n_meters=len(meters),
                                   official_limits={"ANTT": antt_l, "RIO": rio_l, "CET-SP": cet_l})
-        return self._nacional
+        return self._national

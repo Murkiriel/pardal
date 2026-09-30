@@ -8,7 +8,7 @@ trecho é amostrado a cada STEP_KM. O km impresso na placa é o da concessão (P
 
 Onde os dois sentidos têm o mesmo limite, sai um ponto sem sentido. Onde diferem, ou só um
 sentido tem placa, sai um ponto por sentido com direction_deg (rumo do trânsito, pela
-geometria do SNV; ver common/sentido.py).
+geometria do SNV; ver common/direction.py).
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from typing import Dict, List, Optional, Tuple
 
 from datakit.common.lrs import SnvRoutes
 from datakit.common.model import Limit
-from datakit.common.sentido import direction_on
+from datakit.common.direction import direction_on
 from datakit.sources._http import ckan_resources, get_bytes, in_br, to_float
 
 CKAN = "https://dados.antt.gov.br/api/3/action/package_show?id=sinalizacao"
@@ -52,12 +52,12 @@ def parse_kml(kml: str) -> List[Sign]:
         m = re.search(r"(\d{2,3})", f.get("rodovia", ""))
         lat, lng = to_float(f.get("latitude")), to_float(f.get("longitude"))
         kmh = re.sub(r"\D", "", f.get("velocidade", ""))
-        sentido = f.get("sentido", "").lower()
+        direction_text = f.get("sentido", "").lower()
         if not m or lat is None or lng is None or not kmh or not in_br(lat, lng):
             continue
-        if not (20 <= int(kmh) <= 130) or sentido not in ("crescente", "decrescente"):
+        if not (20 <= int(kmh) <= 130) or direction_text not in ("crescente", "decrescente"):
             continue
-        out.append(Sign(int(m.group(1)), f.get("uf", "").upper(), sentido == "crescente", lat, lng, int(kmh)))
+        out.append(Sign(int(m.group(1)), f.get("uf", "").upper(), direction_text == "crescente", lat, lng, int(kmh)))
     return out
 
 

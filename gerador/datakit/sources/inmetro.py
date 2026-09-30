@@ -23,7 +23,7 @@ URL = "https://servicos.rbmlq.gov.br/dados-abertos/{uf}/medidores.json"
 @dataclass(frozen=True)
 class Meter:
     uf: str
-    municipio: str
+    municipality: str
     local: str
     fixed: bool
     valid: bool                    # aferição dentro da validade e último resultado "Aprovado"
@@ -37,10 +37,10 @@ def parse(records: list, uf: str, today: date) -> List[Meter]:
     for r in records:
         local = str(r.get("LocalVerificacao") or "")
         try:
-            validade = datetime.strptime(str(r.get("DataValidade") or ""), "%d/%m/%Y").date()
+            valid_until = datetime.strptime(str(r.get("DataValidade") or ""), "%d/%m/%Y").date()
         except ValueError:
-            validade = None
-        valid = validade is not None and validade >= today and r.get("UltimoResultado") == "Aprovado"
+            valid_until = None
+        valid = valid_until is not None and valid_until >= today and r.get("UltimoResultado") == "Aprovado"
         speeds = []
         for f in r.get("Faixas") or []:
             v = str(f.get("VelocidadeNominal") or "").strip()
@@ -49,7 +49,7 @@ def parse(records: list, uf: str, today: date) -> List[Meter]:
         road = parse_road(local)
         km = parse_km(local) if road else None
         out.append(Meter(
-            uf=str(r.get("SiglaUf") or uf).upper(), municipio=str(r.get("Municipio") or ""),
+            uf=str(r.get("SiglaUf") or uf).upper(), municipality=str(r.get("Municipio") or ""),
             local=local, fixed=r.get("TipoMedidor") == "Fixo", valid=valid,
             road=road, km=km, limit_kmh=min(speeds) if speeds else None,
         ))
@@ -71,12 +71,12 @@ def load(raw_dir: str, today: Optional[date] = None) -> List[Meter]:
             with open(path, "wb") as f:
                 f.write(data)
         except Exception as e:  # noqa: BLE001
-            from datakit import falhas
+            from datakit import failures
             if not os.path.exists(path):
-                falhas.registrar(f"Inmetro {uf}", e)
+                failures.record(f"Inmetro {uf}", e)
                 continue
-            quando = date.fromtimestamp(os.path.getmtime(path)).isoformat()
-            falhas.avisar(f"Inmetro {uf}", f"download falhou ({type(e).__name__}); usada a cópia de {quando}")
+            when = date.fromtimestamp(os.path.getmtime(path)).isoformat()
+            failures.warn(f"Inmetro {uf}", f"download falhou ({type(e).__name__}); usada a cópia de {when}")
         try:
             with open(path, encoding="utf-8-sig") as f:
                 records = json.load(f)

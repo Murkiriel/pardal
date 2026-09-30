@@ -13,7 +13,7 @@ except ImportError:  # pragma: no cover
 _MESH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw", "ibge_malha_uf.json")
 
 # Os 12 radares da ANTT na Ponte Rio-Niterói (BR-101): nenhum cai dentro do polígono do RJ.
-PONTE_RIO_NITEROI = [
+RIO_NITEROI_BRIDGE = [
     (-22.873872, -43.125076), (-22.873872, -43.125076), (-22.871861, -43.147095),
     (-22.870416, -43.163312), (-22.868429, -43.185028), (-22.868429, -43.185028),
     (-22.873761, -43.125056), (-22.873891, -43.125023), (-22.871847, -43.14727),
@@ -82,14 +82,14 @@ class BuildSelection(unittest.TestCase):
 
 
 @unittest.skipIf(box is None, "shapely não instalado")
-class MalhaIbge(unittest.TestCase):
+class IbgeMesh(unittest.TestCase):
     """A malha vem da API de malhas do IBGE (v3), que identifica a UF pelo código (codarea)."""
 
     def test_reads_the_official_mesh_by_ibge_code(self):
         import json
         import tempfile
         from unittest import mock
-        from datakit import falhas
+        from datakit import failures
         from datakit.common import ufpoly
 
         def square(x0, y0):
@@ -98,7 +98,7 @@ class MalhaIbge(unittest.TestCase):
         gj = {"type": "FeatureCollection", "features": [
             {"type": "Feature", "properties": {"codarea": "33"}, "geometry": square(-44, -23)},
             {"type": "Feature", "properties": {"codarea": "35"}, "geometry": square(-48, -24)}]}
-        antes = list(falhas._FALHAS)
+        before = list(failures._FAILURES)
         with tempfile.TemporaryDirectory() as raw, \
                 mock.patch("datakit.sources._http.get_bytes", side_effect=ConnectionError("sem rede no teste")):
             with open(os.path.join(raw, ufpoly.MESH_FILE), "w", encoding="utf-8") as f:
@@ -106,18 +106,18 @@ class MalhaIbge(unittest.TestCase):
             try:
                 polys = ufpoly.polygons(raw)
             finally:
-                falhas._FALHAS[:] = antes
+                failures._FAILURES[:] = before
         self.assertEqual(sorted(polys), ["RJ", "SP"])
         self.assertTrue(polys["RJ"].contains(__import__("shapely.geometry").geometry.Point(-43.5, -22.5)))
         self.assertIn("servicodados.ibge.gov.br/api/v3/malhas", ufpoly.MESH_URL)
 
 
 @unittest.skipUnless(box is not None and os.path.exists(_MESH), "sem a malha do IBGE em data/raw")
-class PonteRioNiteroi(unittest.TestCase):
+class RioNiteroiBridge(unittest.TestCase):
     def test_all_twelve_are_rj(self):
         from datakit.common.ufpoly import polygons
         a = UfAssigner(polygons(os.path.dirname(_MESH)))
-        self.assertEqual(a.assign([p[0] for p in PONTE_RIO_NITEROI], [p[1] for p in PONTE_RIO_NITEROI]),
+        self.assertEqual(a.assign([p[0] for p in RIO_NITEROI_BRIDGE], [p[1] for p in RIO_NITEROI_BRIDGE]),
                          ["RJ"] * 12)
 
 

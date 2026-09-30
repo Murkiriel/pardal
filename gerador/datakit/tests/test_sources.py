@@ -14,7 +14,7 @@ from datakit.sources import antt_placas, bh, df_detran, inmetro, rio
 from datakit.sources import cet_sp, der_go, der_sp, dnit, osm_pbf
 from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, join_sources, merge_cameras,
                                   merge_cross_agency, merge_limits, source_parts)
-from datakit.common.sentido import direction_on, hint_from_text, hint_target, orient_to_hint, parse_sentido
+from datakit.common.direction import direction_on, hint_from_text, hint_target, orient_to_hint, parse_increasing
 
 
 def _line():
@@ -91,7 +91,7 @@ class Inmetro(unittest.TestCase):
         idx = {(60, "GO"): [(2.3, False), (8.4, True)]}
         out, st = inmetro_status.apply(cams, "GO", idx, snv, {})
         self.assertEqual([c.active for c in out], [False, True, True])
-        self.assertEqual((st["desativados"], st["confirmados"]), (1, 1))
+        self.assertEqual((st["deactivated"], st["confirmed"]), (1, 1))
         out, _ = inmetro_status.apply(cams, "GO", idx, snv, {(60, "GO"): [(0.0, 11.2)]})
         self.assertTrue(all(c.active for c in out))  # trecho concedido: km não vale
 
@@ -114,10 +114,10 @@ class Inmetro(unittest.TestCase):
         cam = Camera(-16.05, -49.0, CameraKind.FIXED, 80, "ANTT+OSM", True)
         out, st = inmetro_status.apply([cam], "GO", idx, snv, {})
         self.assertTrue(out[0].active)
-        self.assertEqual(st["desativados"], 0)
+        self.assertEqual(st["deactivated"], 0)
 
 
-class AnttPlacas(unittest.TestCase):
+class AnttSigns(unittest.TestCase):
     KML = """<Placemark id="1"><description><![CDATA[<table>
       <tr><td>rodovia</td><td>BR-060</td></tr><tr><td>uf</td><td>GO</td></tr>
       <tr><td>sentido</td><td>{s}</td></tr><tr><td>latitude</td><td>{lat}</td></tr>
@@ -160,13 +160,13 @@ class AnttPlacas(unittest.TestCase):
         self.assertEqual(len(between), len({(x.lat, x.lng) for x in between}))
 
 
-class Sentido(unittest.TestCase):
+class Direction(unittest.TestCase):
     def test_bearing_along_increasing_km(self):
         line = _line()
         self.assertAlmostEqual(line.bearing_at(3.0), 0.0, delta=0.5)
         self.assertEqual(direction_on(line, 3.0, True), 0)
         self.assertEqual(direction_on(line, 3.0, False), 180)
-        self.assertEqual((parse_sentido("Crescente"), parse_sentido(" decrescente "), parse_sentido("Crescente/Decrescente")),
+        self.assertEqual((parse_increasing("Crescente"), parse_increasing(" decrescente "), parse_increasing("Crescente/Decrescente")),
                          (True, False, None))
 
     def test_line_from_extent_drawn_backwards(self):
@@ -195,7 +195,7 @@ class Sentido(unittest.TestCase):
             self.assertIsNone(osm_pbf._cam_direction({"direction": v}))
 
 
-class SentidoNominal(unittest.TestCase):
+class NominalDirection(unittest.TestCase):
     def test_dnit_lanes(self):
         self.assertEqual([dnit.lanes_increasing(t) for t in ("P-C-1, P-C-2", "P-D-1", "P-C-1, P-D-1", None)],
                          [True, False, None, None])
@@ -256,7 +256,7 @@ class SentidoNominal(unittest.TestCase):
         self.assertEqual([c.direction_deg for c in cams], [0, 180])
 
 
-class CetRadares(unittest.TestCase):
+class CetCameras(unittest.TestCase):
     ROWS = [
         {"CÓDIGO LOCAL": "1", "LATITUDE": -23.6798, "LONGITUDE": "-46.6868", "DESCRIÇÃO DO LOCAL":
          "AV. INTERLAGOS (CENTRO/BAIRRO) A MAIS 11 METROS DA R. X", "ENQUADRAMENTOS": "F,R,V,Z",
@@ -278,7 +278,7 @@ class CetRadares(unittest.TestCase):
         self.assertTrue(all(c.source == "CET-SP" for c in cams))
         self.assertAlmostEqual(cams[0].lng, -46.6868)
 
-    def test_centro_bairro_becomes_a_bearing_hint(self):
+    def test_center_suburb_becomes_a_bearing_hint(self):
         cams = cet_sp.rows_to_cameras(self.ROWS)
         # Interlagos fica ao sul-sudoeste do marco zero: centro->bairro aponta para lá
         out = float(cams[0].heading_hint[1:])
@@ -286,7 +286,7 @@ class CetRadares(unittest.TestCase):
         self.assertEqual(cams[1].heading_hint, "*")                # par de lugares: só pela posição
         back = float(cams[2].heading_hint[1:])                     # bairro->centro: volta ao marco zero
         self.assertTrue(0 <= back < 90 or back > 330, back)
-        self.assertIsNone(cet_sp.centro_bairro_hint("R X (CENTRO/BAIRRO)", -23.552, -46.635))  # < 1,5 km
+        self.assertIsNone(cet_sp.center_suburb_hint("R X (CENTRO/BAIRRO)", -23.552, -46.635))  # < 1,5 km
         self.assertEqual(hint_target("@203"), 203.0)
         self.assertEqual(hint_target("L"), 90.0)
 
@@ -378,7 +378,7 @@ class Absorb(unittest.TestCase):
         self.assertEqual(([c.active for c in out], n), ([False, True, True], 1))
 
     def test_cet_deactivated_rows(self):
-        rows = CetRadares.ROWS
+        rows = CetCameras.ROWS
         self.assertEqual(cet_sp.rows_to_deactivated(rows), [(-23.63, -46.69)])
 
 
@@ -438,8 +438,8 @@ class Rio(unittest.TestCase):
                          "AVENIDA AREIA BRANCA 1672")
         self.assertIsNone(rio.geocode_query("AVENIDA X,PROXIMO AO TERMINAL - SENTIDO Y"))
 
-    def test_trecho_points(self):
-        pts = rio.trecho_points([[[-43.2, -22.9], [-43.19, -22.9]]], 40)
+    def test_segment_points(self):
+        pts = rio.segment_points([[[-43.2, -22.9], [-43.19, -22.9]]], 40)
         self.assertGreaterEqual(len(pts), 2)
         self.assertTrue(all(p.limit_kmh == 40 and p.source == "RIO" for p in pts))
         for a, b in zip(pts, pts[1:]):
@@ -470,23 +470,23 @@ class BhDf(unittest.TestCase):
 class Municipal(unittest.TestCase):
     def test_failing_city_is_registered_and_the_others_still_load(self):
         from unittest import mock
-        from datakit import falhas
+        from datakit import failures
         from datakit.sources import municipal
 
         def boom(bbox):
             raise ConnectionError("fora do ar")
 
         ok = [Camera(-8.05, -34.9, CameraKind.FIXED, 60, "PCR", True)]
-        antes = list(falhas._FALHAS)
+        before = list(failures._FAILURES)
         try:
             with mock.patch.object(municipal, "_pmjp", boom), \
                     mock.patch.object(municipal, "_fortaleza", lambda bbox: []), \
                     mock.patch.object(municipal, "_recife", lambda bbox: ok):
                 cams, _ = municipal.load("")
             self.assertEqual(cams, ok)
-            self.assertTrue(any("João Pessoa" in f and "ConnectionError" in f for f in falhas.lista()), falhas.lista())
+            self.assertTrue(any("João Pessoa" in f and "ConnectionError" in f for f in failures.recorded()), failures.recorded())
         finally:
-            falhas._FALHAS[:] = antes
+            failures._FAILURES[:] = before
 
 
 class Formats(unittest.TestCase):
@@ -530,7 +530,7 @@ class Formats(unittest.TestCase):
         self.assertEqual(bf.description(rows[0]), "Fonte: DNIT · sentido 92° (leste)")
         self.assertEqual(bf.description(rows[1]), "Fonte: R&D <x>")
         self.assertIn("sentido 92° (leste)", bf.to_gpx(rows))
-        self.assertEqual(bf.sentido({"direction_deg": "350"}), "sentido 350° (norte)")
+        self.assertEqual(bf.direction_text({"direction_deg": "350"}), "sentido 350° (norte)")
 
 
 class Estimated(unittest.TestCase):
@@ -566,12 +566,12 @@ class Estimated(unittest.TestCase):
     def test_signed_value_is_never_replaced_by_estimate(self):
         from datakit.common.model import merge_limits
         real = Limit(-16.0, -49.0, 60, "OSM")
-        est = Limit(-16.0, -49.0, 100, "OSM:classe", True, 80)
+        est = Limit(-16.0, -49.0, 100, "OSM:class", True, 80)
         self.assertEqual(merge_limits([real], [est]), [real])
         self.assertEqual(merge_limits([est], [real]), [real])
 
-    def test_brasil_splits_estimated_limits(self):
-        from datakit.build_brasil import split_estimated
+    def test_brazil_splits_estimated_limits(self):
+        from datakit.build_brazil import split_estimated
         rows = [{"estimated": "0"}, {"estimated": "1"}, {}]
         signed, est = split_estimated(rows)
         self.assertEqual((len(signed), len(est)), (2, 1))
@@ -584,17 +584,17 @@ class Estimated(unittest.TestCase):
     def test_publish_paths_for_estimated_file(self):
         import sys
         sys.path.insert(0, "scripts")
-        from publicar import dest_for
+        from publish import dest_for
         self.assertEqual(dest_for("limites_estimados_BR.csv"), "brasil/limites_estimados.csv")
         self.assertEqual(dest_for("limites_estimados_BR.csv.gz"), "brasil/limites_estimados.csv.gz")
         self.assertEqual(dest_for("limites_GO.csv"), "estados/GO/limites.csv")
 
     def test_limit_row_roundtrip(self):
-        est = Limit(-16.0, -49.0, 100, "OSM:classe", True, 80)
+        est = Limit(-16.0, -49.0, 100, "OSM:class", True, 80)
         row = dict(zip(Limit.HEADER, est.row()))
         self.assertEqual(row["estimated"], "1")
         self.assertEqual(row["limit_low_kmh"], "80")
-        self.assertEqual(Limit.from_row(row), Limit(-16.0, -49.0, 100, "OSM:classe", True, 80))
+        self.assertEqual(Limit.from_row(row), Limit(-16.0, -49.0, 100, "OSM:class", True, 80))
         real = dict(zip(Limit.HEADER, Limit(-16.0, -49.0, 60, "OSM").row()))
         self.assertEqual((real["estimated"], real["limit_low_kmh"]), ("0", ""))
 

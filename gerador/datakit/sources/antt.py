@@ -3,7 +3,7 @@
 CSV com latitude/longitude prontos, delimitado por ';', encoding latin-1. Só os 'Ativo'.
 'velocidade_leve' vira o limite (é o do veículo leve, serve pra moto). source="ANTT".
 'sentido' (Crescente/Decrescente) vira direction_deg pela rota do SNV da BR (ver
-common/sentido.py); "Crescente/Decrescente" fica vazio (os dois sentidos).
+common/direction.py); "Crescente/Decrescente" fica vazio (os dois sentidos).
 """
 from __future__ import annotations
 
@@ -12,10 +12,10 @@ import io
 import re
 from typing import Callable, List, Optional, Tuple
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.common.lrs import SnvRoutes
-from datakit.common.sentido import direction_on, parse_sentido
+from datakit.common.direction import direction_on, parse_increasing
 from datakit.sources import snv
 from datakit.sources._http import ckan_resources, get_bytes, in_br, newest, to_float
 
@@ -62,7 +62,7 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None,
 
 
 def _direction(routes, row, idx, lat: float, lng: float) -> Optional[int]:
-    increasing = parse_sentido(row[idx["sentido"]])
+    increasing = parse_increasing(row[idx["sentido"]])
     m = re.search(r"(\d{2,3})", row[idx["rodovia"]]) if "rodovia" in idx else None
     if increasing is None or m is None or "uf" not in idx:
         return None
@@ -73,6 +73,6 @@ def _direction(routes, row, idx, lat: float, lng: float) -> Optional[int]:
     return direction_on(line, km, increasing)
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py); as rotas do SNV vêm do contexto (uma carga só)."""
-    return Carga(*load(ctx.raw_dir, routes=ctx.rotas_snv))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py); as rotas do SNV vêm do contexto (uma carga só)."""
+    return SourceData(*load(ctx.raw_dir, routes=ctx.snv_routes))

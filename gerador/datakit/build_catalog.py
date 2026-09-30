@@ -7,7 +7,7 @@ Gera:
   data/dist/catalog.json
 
 Quem consome os pacotes lê o catalog.json da raiz do repositório e baixa os arquivos que ele
-lista (scripts/publicar.py reescreve os caminhos para as pastas estados/ e brasil/).
+lista (scripts/publish.py reescreve os caminhos para as pastas estados/ e brasil/).
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ _FEDERAL = {"DNIT", "ANTT"}
 _MUNICIPAL = {"PMF", "PCR", "PMJP", "CET-SP", "RIO", "BHTRANS"}
 
 
-def _cobertura(cameras_csv: str) -> dict:
+def _coverage(cameras_csv: str) -> dict:
     """Que tipo de fonte de radar entrou nesta UF — pra UI ser honesta."""
     srcs: set = set()
     try:
@@ -36,15 +36,15 @@ def _cobertura(cameras_csv: str) -> dict:
                 srcs.update(p for p in (r.get("source") or "").split("+") if p)
     except OSError:
         pass
-    tem_federal = bool(srcs & _FEDERAL)
-    tem_estadual = any(s.startswith("DER-") for s in srcs)
-    tem_municipal = bool(srcs & _MUNICIPAL)
+    has_federal = bool(srcs & _FEDERAL)
+    has_state = any(s.startswith("DER-") for s in srcs)
+    has_municipal = bool(srcs & _MUNICIPAL)
     partes = []
-    if tem_federal:
+    if has_federal:
         partes.append("federal")
-    if tem_estadual:
+    if has_state:
         partes.append("estadual")
-    if tem_municipal:
+    if has_municipal:
         partes.append("municipal")
     if "OSM" in srcs and not partes:
         partes.append("osm")
@@ -90,7 +90,7 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             "bbox": man.get("bbox", []),
             "built_at": man.get("built_at"),
             "artifact_built_at": man.get("artifact_built_at"),
-            "cobertura": _cobertura(os.path.join(pdir, "cameras.csv")),
+            "cobertura": _coverage(os.path.join(pdir, "cameras.csv")),
             "radares": _file_ref(rad_dst, counts.get("cameras")),
             "limites": _file_ref(lim_dst, counts.get("limits")),
             "counts": counts,

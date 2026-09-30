@@ -4,7 +4,7 @@
 source="DER-SP" nas duas. `active` vem do status/cancelamento.
 Sentido: a Artesp dá o sentido nominal da rodovia (Norte/Sul/Leste/Oeste) e o DER-SP as faixas
 por sentido ("N-1, S-1" = os dois; "O-1" = só oeste). Viram heading_hint, que o build converte
-em direction_deg com a geometria do OSM (common/sentido.py).
+em direction_deg com a geometria do OSM (common/direction.py).
 """
 from __future__ import annotations
 
@@ -14,9 +14,9 @@ from typing import List, Optional, Tuple
 
 import openpyxl
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common import Camera, CameraKind, Limit, in_bbox
-from datakit.common.sentido import hint_from_text
+from datakit.common.direction import hint_from_text
 from datakit.sources._http import get_bytes, in_br, to_float
 
 ARTESP_XLSX = ("https://dadosabertos.artesp.sp.gov.br/dataset/491d79c5-ee09-4fe8-a3ce-1b425fe60bbe/"
@@ -35,7 +35,7 @@ def _artesp(bbox) -> List[Camera]:
     h = [str(c).strip() if c is not None else "" for c in next(rows)]
     di, si = h.index("Desc_Componente"), h.index("Cod_Status")
     la, lo = h.index("Latitude"), h.index("Longitude")
-    se = h.index("Sentido") if "Sentido" in h else None
+    dir_col = h.index("Sentido") if "Sentido" in h else None
     out: List[Camera] = []
     for row in rows:
         if not _ARTESP_RADAR.search(str(row[di] or "")):
@@ -44,7 +44,7 @@ def _artesp(bbox) -> List[Camera]:
         if lat is None or lng is None or not in_br(lat, lng) or not in_bbox(bbox, lat, lng):
             continue
         active = str(row[si] or "").strip() not in _ARTESP_DEAD
-        hint = hint_from_text(row[se]) if se is not None else None
+        hint = hint_from_text(row[dir_col]) if dir_col is not None else None
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, None, "DER-SP", active,
                           heading_hint=hint))
     return out
@@ -86,11 +86,11 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
         try:
             cams += fn(bbox)
         except Exception as e:  # noqa: BLE001 — uma base fora não derruba a outra
-            from datakit import falhas
-            falhas.registrar(f"DER-SP ({fn.__name__})", e)
+            from datakit import failures
+            failures.record(f"DER-SP ({fn.__name__})", e)
     return cams, []
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py)."""
-    return Carga(*load(ctx.raw_dir))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py)."""
+    return SourceData(*load(ctx.raw_dir))

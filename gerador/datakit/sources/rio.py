@@ -13,16 +13,16 @@ import io
 import re
 from typing import Iterable, List, Optional, Tuple
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common.geo import rdp, sample_polyline
 from datakit.common.model import Camera, CameraKind, Limit
 from datakit.sources._http import get_bytes, get_json, get_text
 
-TRECHOS = ("https://pgeo3.rio.rj.gov.br/arcgis/rest/services/CadLog/"
-           "Trechos_Logradouros/MapServer/0/query")
+SEGMENTS_URL = ("https://pgeo3.rio.rj.gov.br/arcgis/rest/services/CadLog/"
+                "Trechos_Logradouros/MapServer/0/query")
 GEOCODE = ("https://pgeo3.rio.rj.gov.br/arcgis/rest/services/Geocode/Geocode_NP/"
            "GeocodeServer/findAddressCandidates")
-LISTA_PAGINA = "https://cetrio.prefeitura.rio/fiscalizacao-eletronica/"
+LIST_PAGE = "https://cetrio.prefeitura.rio/fiscalizacao-eletronica/"
 PAGE = 2000
 MAX_GAP_M = 150.0
 MIN_SCORE = 95.0
@@ -30,7 +30,7 @@ MIN_SCORE = 95.0
 
 # ── limites ──────────────────────────────────────────────────────────────────
 
-def trecho_points(paths: List[List[List[float]]], kmh: int) -> List[Limit]:
+def segment_points(paths: List[List[List[float]]], kmh: int) -> List[Limit]:
     """Geometria ArcGIS (paths de [lng, lat]) -> pontos de limite. Puro, testado."""
     out: List[Limit] = []
     for path in paths:
@@ -45,13 +45,13 @@ def trecho_points(paths: List[List[List[float]]], kmh: int) -> List[Limit]:
 def load_limits() -> List[Limit]:
     from datakit.sources._arcgis import query_all
     out: List[Limit] = []
-    for ft in query_all(TRECHOS, {"where": "velocidade_regulamentada > 0",
-                                  "outFields": "velocidade_regulamentada", "outSR": 4326},
+    for ft in query_all(SEGMENTS_URL, {"where": "velocidade_regulamentada > 0",
+                                       "outFields": "velocidade_regulamentada", "outSR": 4326},
                         page=PAGE, order_by="objectid"):
         kmh = (ft.get("attributes") or {}).get("velocidade_regulamentada")
         paths = (ft.get("geometry") or {}).get("paths") or []
         if isinstance(kmh, int) and 10 <= kmh <= 130:
-            out.extend(trecho_points(paths, kmh))
+            out.extend(segment_points(paths, kmh))
     return out
 
 
@@ -121,7 +121,7 @@ def _geocode(q: str) -> Optional[Tuple[float, float]]:
 
 
 def _latest_pdf_url() -> str:
-    html = get_text(LISTA_PAGINA, timeout=60)
+    html = get_text(LIST_PAGE, timeout=60)
     urls = re.findall(r"https?://[^\"'<> ]+ListagemSMTR\.pdf", html)
     if not urls:
         raise RuntimeError("lista de radares do Rio não encontrada")
@@ -152,6 +152,6 @@ def load(raw_dir: str, bbox=None):
     return load_cameras(), []
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py)."""
-    return Carga(*load(ctx.raw_dir))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py)."""
+    return SourceData(*load(ctx.raw_dir))

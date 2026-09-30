@@ -9,7 +9,7 @@ Para cada estado e para o Brasil (radares_<X>.csv):
 
 Limites e estruturas ficam só em CSV: em GeoJSON os limites dos estados somavam 451 MB (70%
 do repositório) para os mesmos pontos do CSV. Quem quiser GeoJSON converte com o
-scripts/para_geojson.py do repositório. Em GPX/KML nenhum limite: GPS não usa ponto de
+scripts/to_geojson.py do repositório. Em GPX/KML nenhum limite: GPS não usa ponto de
 limite como ponto de interesse.
 """
 from __future__ import annotations
@@ -42,7 +42,7 @@ def name(r: Dict[str, str]) -> str:
 _ROSE = ("norte", "nordeste", "leste", "sudeste", "sul", "sudoeste", "oeste", "noroeste")
 
 
-def sentido(r: Dict[str, str]) -> str:
+def direction_text(r: Dict[str, str]) -> str:
     """'sentido 92° (leste)' para a descrição; vazio quando vale para os dois sentidos."""
     v = (r.get("direction_deg") or "").strip()
     if not v:
@@ -52,7 +52,7 @@ def sentido(r: Dict[str, str]) -> str:
 
 
 def description(r: Dict[str, str]) -> str:
-    return " · ".join(x for x in (f"Fonte: {r.get('source', '')}", sentido(r)) if x)
+    return " · ".join(x for x in (f"Fonte: {r.get('source', '')}", direction_text(r)) if x)
 
 
 def active(r: Dict[str, str]) -> bool:

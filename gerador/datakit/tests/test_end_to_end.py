@@ -49,16 +49,16 @@ class _Antt:
     sentido) e o radar da ponte."""
 
     @staticmethod
-    def carregar(ctx):
-        from datakit.contexto import Carga
-        return Carga([Camera(INLAND[0], _east(*INLAND, 29.0), CameraKind.FIXED, None, "ANTT", True, direction_deg=90),
-                      Camera(BRIDGE[0], BRIDGE[1], CameraKind.FIXED, 80, "ANTT", True, direction_deg=270)])
+    def fetch(ctx):
+        from datakit.context import SourceData
+        return SourceData([Camera(INLAND[0], _east(*INLAND, 29.0), CameraKind.FIXED, None, "ANTT", True, direction_deg=90),
+                           Camera(BRIDGE[0], BRIDGE[1], CameraKind.FIXED, 80, "ANTT", True, direction_deg=270)])
 
 
 @unittest.skipIf(osmium is None, "pyosmium/shapely não instalados")
-class PontaAPonta(unittest.TestCase):
+class EndToEnd(unittest.TestCase):
     def test_build_one_state(self):
-        from datakit import build, falhas
+        from datakit import build, failures
         from datakit.sources import cet_sp, inmetro, osm_pbf, rio, snv
 
         with tempfile.TemporaryDirectory() as tmp:
@@ -69,7 +69,7 @@ class PontaAPonta(unittest.TestCase):
             extract = osm_pbf.Extract(path=pbf, region="sudeste", file_date="Wed, 30 Sep 2026 00:00:00 GMT",
                                       sha256="0" * 64, bytes=os.path.getsize(pbf))
             polys = {"RJ": box(-43.30, -23.00, -43.18, -22.80), "ES": box(-41.0, -21.0, -40.0, -20.0)}
-            antes = list(falhas._FALHAS)
+            before = list(failures._FAILURES)
 
             def no_network(*a, **k):
                 raise AssertionError("o teste não pode ir à rede")
@@ -86,12 +86,12 @@ class PontaAPonta(unittest.TestCase):
                 try:
                     code = build.main(["--uf", "RJ", "--raw", raw, "--packs", os.path.join(tmp, "packs"),
                                        "--dist", os.path.join(tmp, "dist")])
-                    novas_falhas = falhas.lista()[len(antes):]
+                    new_failures = failures.recorded()[len(before):]
                 finally:
-                    falhas._FALHAS[:] = antes
+                    failures._FAILURES[:] = before
 
             self.assertEqual(code, 0)
-            self.assertEqual(novas_falhas, [])
+            self.assertEqual(new_failures, [])
             pack = os.path.join(tmp, "packs", "RJ")
             with open(os.path.join(pack, "cameras.csv"), encoding="utf-8") as f:
                 cams = list(csv.DictReader(f))
@@ -103,7 +103,7 @@ class PontaAPonta(unittest.TestCase):
                 manifest = json.load(f)
             with open(os.path.join(tmp, "dist", "catalog.json"), encoding="utf-8") as f:
                 catalog = json.load(f)
-            marca = os.path.exists(os.path.join(tmp, "dist", build.MARCA_EM_ANDAMENTO))
+            marker = os.path.exists(os.path.join(tmp, "dist", build.IN_PROGRESS_MARKER))
             with open(os.path.join(tmp, "audit", "juncoes_RJ.csv"), encoding="utf-8") as f:
                 audit = list(csv.DictReader(f))
 
@@ -113,16 +113,16 @@ class PontaAPonta(unittest.TestCase):
         bridge = by_pos[(round(BRIDGE[0], 5), round(BRIDGE[1], 5))]
         self.assertEqual((bridge["source"], bridge["direction_deg"]), ("ANTT", "270"))
         self.assertEqual(len(cams), 2)                                  # o do mar aberto ficou de fora
-        self.assertEqual([(a["regra"], a["fonte_a"], a["fonte_b"]) for a in audit], [("osm_oficial", "ANTT", "OSM")])
+        self.assertEqual([(a["rule"], a["source_a"], a["source_b"]) for a in audit], [("osm_official", "ANTT", "OSM")])
         self.assertEqual(len(structs), 1)
         self.assertEqual(structs[0]["kind"], "BRIDGE")
         self.assertTrue(lims and all(x["limit_kmh"] == "80" and x["source"] == "OSM" for x in lims))
         self.assertTrue(any(float(x["lng"]) > -43.18 for x in lims))   # limite da ponte, fora do polígono
         self.assertEqual(manifest["counts"], {"cameras": 2, "cameras_with_limit": 2, "cameras_inactive": 0,
                                               "sections": 0, "red_lights": 0, "limits": len(lims), "structs": 1})
-        self.assertEqual(catalog["falhas"], [])
+        self.assertEqual(catalog["failures"], [])
         self.assertIn("RJ", catalog["ufs"])
-        self.assertFalse(marca)
+        self.assertFalse(marker)
 
 
 if __name__ == "__main__":

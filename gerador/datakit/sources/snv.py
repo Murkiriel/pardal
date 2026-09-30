@@ -15,7 +15,7 @@ from datakit.sources._http import CONNECT_TIMEOUT, UA, guarded, session
 
 SHARE = "https://servicos.dnit.gov.br/dnitcloud/public.php/webdav/"
 TOKEN = "oTpPRmYs5AAdiNr"
-ROTAS = "SNV Rotas (2015-Atual) (SHP)/"
+ROUTES = "SNV Rotas (2015-Atual) (SHP)/"
 BASES = "SNV Bases Geométricas (2013-Atual) (SHP)/"
 
 
@@ -51,24 +51,24 @@ def _fetch_once(folder: str, name: str, dest: str) -> None:
 
 def load_routes(raw_dir: str):
     """Rotas do SNV (SnvRoutes); None se o SNV falhar (registrado em falhas). Carrega a cada
-    chamada: o build guarda o resultado no contexto (Contexto.rotas_snv)."""
+    chamada: o build guarda o resultado no contexto (BuildContext.snv_routes)."""
     from datakit.common.lrs import SnvRoutes
     try:
         return SnvRoutes.from_zip(ensure(raw_dir)[0])
     except Exception as e:  # noqa: BLE001 — sem SNV, só fica sem o sentido
-        from datakit import falhas
-        falhas.registrar("SNV (rotas)", e)
+        from datakit import failures
+        failures.record("SNV (rotas)", e)
         return None
 
 
 def ensure(raw_dir: str) -> Tuple[str, str, str]:
     """(caminho do zip das rotas, caminho do zip da base, versão ex. '202607A')."""
     os.makedirs(raw_dir, exist_ok=True)
-    rota = _latest(ROTAS, r"^rota_\d{6}[A-Z]\.zip$")
-    version = rota[len("rota_"):-len(".zip")]
+    route_zip = _latest(ROUTES, r"^rota_\d{6}[A-Z]\.zip$")
+    version = route_zip[len("rota_"):-len(".zip")]
     base = _latest(BASES, r"^\d{6}[A-Z]\.zip$")
     paths = []
-    for folder, name, local in ((ROTAS, rota, f"snv_rota_{version}.zip"),
+    for folder, name, local in ((ROUTES, route_zip, f"snv_rota_{version}.zip"),
                                 (BASES, base, f"snv_base_{base[:-4]}.zip")):
         path = os.path.join(raw_dir, local)
         if not os.path.exists(path):

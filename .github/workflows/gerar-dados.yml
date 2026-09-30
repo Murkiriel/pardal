@@ -2,11 +2,11 @@ name: Gerar dados
 
 # Gera brasil/, estados/ e catalog.json do zero (fontes oficiais + OpenStreetMap) e publica.
 #
-# A cada 29 dias: todo dia, às 03:00 em Brasília, o job "intervalo" lê a data de geração dos
+# A cada 29 dias: todo dia, às 03:00 em Brasília, o job "interval" lê a data de geração dos
 # dados publicados (built_at do catalog.json) e só segue para o build se tiverem 29 dias ou mais.
 # Se o build falhar, no dia seguinte tenta de novo (os dados publicados continuam velhos).
 # Também pode ser disparado à mão (Actions → Gerar dados → Run workflow), a qualquer momento; à
-# mão, só publica se "publicar" for marcado; sem isso, gera e confere (o log e a auditoria ficam
+# mão, só publica se "publish" for marcado; sem isso, gera e confere (o log e a auditoria ficam
 # nos artefatos).
 #
 # O DNIT e o Inmetro não aceitam conexão de fora do Brasil, e o portal de dados da ANTT às vezes
@@ -17,16 +17,16 @@ name: Gerar dados
 # Cada publicação vira também uma release (dados-AAAA-MM-DD) com um zip por estado, o Brasil
 # inteiro, só os radares do Brasil, o catálogo e os sha256 (scripts/release.py).
 #
-# O publicar.py não monta nada se alguma fonte falhou, se algum estado perdeu mais de 5% dos
+# O publish.py não monta nada se alguma fonte falhou, se algum estado perdeu mais de 5% dos
 # dados em relação ao publicado ou se algum arquivo passa de 95 MB: nesses casos o job falha e o
 # GitHub avisa por e-mail; nada é publicado.
 
 on:
   schedule:
-    - cron: "0 6 * * *"   # todo dia, 03:00 em Brasília (o job "intervalo" decide se gera)
+    - cron: "0 6 * * *"   # todo dia, 03:00 em Brasília (o job "interval" decide se gera)
   workflow_dispatch:
     inputs:
-      publicar:
+      publish:
         description: "Publicar os dados (commit no repositório). Sem marcar: só gera e confere."
         type: boolean
         default: false
@@ -39,53 +39,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  intervalo:
+  interval:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
-      rodar: ${{ steps.idade.outputs.rodar }}
+      run: ${{ steps.age.outputs.run }}
     steps:
       - name: Idade dos dados publicados
-        id: idade
+        id: age
         env:
-          INTERVALO_DIAS: "29"
+          INTERVAL_DAYS: "29"
           # Geração extra, fora do intervalo: a partir desta data (UTC), gera se os dados publicados
           # forem mais antigos que ela (e tenta de novo nos dias seguintes se falhar). Depois de
           # publicar, não tem mais efeito. Vazio = só o intervalo.
-          GERAR_A_PARTIR_DE: "2026-10-01"
-          EVENTO: ${{ github.event_name }}
+          GENERATE_FROM: "2026-10-01"
+          EVENT: ${{ github.event_name }}
         run: |
-          if [ "$EVENTO" != "schedule" ]; then
-            echo "disparado à mão: gera"; echo "rodar=true" >> "$GITHUB_OUTPUT"; exit 0
+          if [ "$EVENT" != "schedule" ]; then
+            echo "disparado à mão: gera"; echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          gerado=$(curl -sf https://raw.githubusercontent.com/Murkiriel/pardal/main/catalog.json \
-                   | python3 -c 'import json,sys; print(json.load(sys.stdin)["built_at"])') || gerado=""
-          if [ -z "$gerado" ]; then
-            echo "sem a data dos dados publicados: gera"; echo "rodar=true" >> "$GITHUB_OUTPUT"; exit 0
+          built=$(curl -sf https://raw.githubusercontent.com/Murkiriel/pardal/main/catalog.json \
+                  | python3 -c 'import json,sys; print(json.load(sys.stdin)["built_at"])') || built=""
+          if [ -z "$built" ]; then
+            echo "sem a data dos dados publicados: gera"; echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          hoje=$(date -u +%F)
-          if [ -n "$GERAR_A_PARTIR_DE" ] && [ ! "$hoje" \< "$GERAR_A_PARTIR_DE" ] && [ "${gerado:0:10}" \< "$GERAR_A_PARTIR_DE" ]; then
-            echo "geração extra marcada para $GERAR_A_PARTIR_DE (dados publicados de ${gerado:0:10}): gera"
-            echo "rodar=true" >> "$GITHUB_OUTPUT"; exit 0
+          today=$(date -u +%F)
+          if [ -n "$GENERATE_FROM" ] && [ ! "$today" \< "$GENERATE_FROM" ] && [ "${built:0:10}" \< "$GENERATE_FROM" ]; then
+            echo "geração extra marcada para $GENERATE_FROM (dados publicados de ${built:0:10}): gera"
+            echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
           # dias arredondados: o horário do build não empurra a geração para o dia seguinte
-          dias=$(( ( $(date -u +%s) - $(date -u -d "$gerado" +%s) + 43200 ) / 86400 ))
-          echo "dados publicados gerados em $gerado ($dias dias)"
-          if [ "$dias" -ge "$INTERVALO_DIAS" ]; then
-            echo "rodar=true" >> "$GITHUB_OUTPUT"
+          days=$(( ( $(date -u +%s) - $(date -u -d "$built" +%s) + 43200 ) / 86400 ))
+          echo "dados publicados gerados em $built ($days dias)"
+          if [ "$days" -ge "$INTERVAL_DAYS" ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
           else
-            echo "rodar=false" >> "$GITHUB_OUTPUT"
-            echo "ainda não: gera quando completar $INTERVALO_DIAS dias"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "ainda não: gera quando completar $INTERVAL_DAYS dias"
           fi
 
-  gerar:
-    needs: intervalo
-    if: needs.intervalo.outputs.rodar == 'true'
+  generate:
+    needs: interval
+    if: needs.interval.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     env:
-      PUBLICAR: ${{ github.event_name == 'schedule' || inputs.publicar == true }}
-      TUNEL_HOSTS: servicos.dnit.gov.br servicos.rbmlq.gov.br dados.antt.gov.br am.i.mullvad.net
+      PUBLISH: ${{ github.event_name == 'schedule' || inputs.publish == true }}
+      TUNNEL_HOSTS: servicos.dnit.gov.br servicos.rbmlq.gov.br dados.antt.gov.br am.i.mullvad.net
       PYTHONUNBUFFERED: "1"
     steps:
       - name: Código e dados publicados
@@ -127,16 +127,16 @@ jobs:
         run: |
           if [ -z "$WG_CONF" ]; then echo "::error::segredo MULLVAD_WG_CONF não configurado"; exit 1; fi
           sudo apt-get install -y -qq wireguard-tools >/dev/null
-          IPS=$(for h in $TUNEL_HOSTS; do getent ahostsv4 "$h" | awk '{print $1}'; done | sort -u | sed 's#$#/32#' | paste -sd, -)
+          IPS=$(for h in $TUNNEL_HOSTS; do getent ahostsv4 "$h" | awk '{print $1}'; done | sort -u | sed 's#$#/32#' | paste -sd, -)
           echo "pelo túnel: $IPS"
           printf '%s\n' "$WG_CONF" \
             | sed -E '/^[[:space:]]*DNS[[:space:]]*=/d; s#^[[:space:]]*AllowedIPs[[:space:]]*=.*#AllowedIPs = '"$IPS"'#' \
             | sudo tee /etc/wireguard/wg0.conf >/dev/null
           sudo chmod 600 /etc/wireguard/wg0.conf
           sudo wg-quick up wg0 >/dev/null 2>&1
-          saida=$(curl -s --max-time 20 https://am.i.mullvad.net/json)
-          echo "$saida" | python -c 'import json,sys; j=json.load(sys.stdin); print("saída:", j.get("country"), "/", j.get("city"), "| mullvad:", j.get("mullvad_exit_ip"))'
-          echo "$saida" | python -c 'import json,sys; j=json.load(sys.stdin); sys.exit(0 if j.get("mullvad_exit_ip") and j.get("country") == "Brazil" else 1)' \
+          exit_info=$(curl -s --max-time 20 https://am.i.mullvad.net/json)
+          echo "$exit_info" | python -c 'import json,sys; j=json.load(sys.stdin); print("saída:", j.get("country"), "/", j.get("city"), "| mullvad:", j.get("mullvad_exit_ip"))'
+          echo "$exit_info" | python -c 'import json,sys; j=json.load(sys.stdin); sys.exit(0 if j.get("mullvad_exit_ip") and j.get("country") == "Brazil" else 1)' \
             || { echo "::error::o túnel não saiu pelo Brasil"; exit 1; }
 
       - name: Build (27 estados + Brasil)
@@ -152,21 +152,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp ../catalog.json "$RUNNER_TEMP/catalogo_anterior.json"
-          if [ "$PUBLICAR" = "true" ] && [ "$GITHUB_REPOSITORY" = "Murkiriel/pardal" ]; then
+          if [ "$PUBLISH" = "true" ] && [ "$GITHUB_REPOSITORY" = "Murkiriel/pardal" ]; then
             git -C .. config user.name "Murkiriel"
             git -C .. config user.email "14956419+Murkiriel@users.noreply.github.com"
-            antes=$(git -C .. rev-parse HEAD)
-            python scripts/publicar.py --commit --push
-            if [ "$(git -C .. rev-parse HEAD)" != "$antes" ]; then
-              python scripts/release.py --anterior "$RUNNER_TEMP/catalogo_anterior.json" \
-                --avisos data/dist/catalog.json --criar
+            head_before=$(git -C .. rev-parse HEAD)
+            python scripts/publish.py --commit --push
+            if [ "$(git -C .. rev-parse HEAD)" != "$head_before" ]; then
+              python scripts/release.py --previous "$RUNNER_TEMP/catalogo_anterior.json" \
+                --warnings data/dist/catalog.json --create
             else
               echo "Nada mudou nos dados: sem commit e sem release."
             fi
           else
-            python scripts/publicar.py
-            python scripts/release.py --anterior "$RUNNER_TEMP/catalogo_anterior.json" --avisos data/dist/catalog.json
-            echo "Conferido e montado; sem publicar (publicar=$PUBLICAR, repositório=$GITHUB_REPOSITORY)."
+            python scripts/publish.py
+            python scripts/release.py --previous "$RUNNER_TEMP/catalogo_anterior.json" --warnings data/dist/catalog.json
+            echo "Conferido e montado; sem publicar (publish=$PUBLISH, repositório=$GITHUB_REPOSITORY)."
           fi
 
       - name: Desliga o túnel

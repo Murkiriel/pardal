@@ -4,7 +4,7 @@ Descobre o XLSX mais novo pela API do CKAN; coluna "Coordenadas (Lat/Long)" no f
 "LAT / LNG". PNCV não traz limite. source="DNIT".
 
 "Faixas" diz o sentido de cada faixa fiscalizada ("P-C-1" = pista crescente, "P-D-1" =
-decrescente). Só um dos dois -> direction_deg pela rota do SNV da BR (ver common/sentido.py);
+decrescente). Só um dos dois -> direction_deg pela rota do SNV da BR (ver common/direction.py);
 os dois -> vazio.
 """
 from __future__ import annotations
@@ -15,10 +15,10 @@ from typing import Callable, List, Optional, Tuple
 
 import openpyxl
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.common.lrs import SnvRoutes
-from datakit.common.sentido import direction_on
+from datakit.common.direction import direction_on
 from datakit.sources import snv
 from datakit.sources._http import ckan_resources, get_bytes, in_br, newest, to_float
 
@@ -75,6 +75,6 @@ def _direction(routes, row, col, lat: float, lng: float) -> Optional[int]:
     return direction_on(line, km, increasing)
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py); as rotas do SNV vêm do contexto (uma carga só)."""
-    return Carga(*load(ctx.raw_dir, routes=ctx.rotas_snv))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py); as rotas do SNV vêm do contexto (uma carga só)."""
+    return SourceData(*load(ctx.raw_dir, routes=ctx.snv_routes))

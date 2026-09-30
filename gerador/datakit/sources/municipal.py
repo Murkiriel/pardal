@@ -10,7 +10,7 @@ import json
 import re
 from typing import List, Optional, Tuple
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.sources._http import get_bytes, in_br, to_float
 
@@ -89,11 +89,11 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
         try:
             cams += fn(bbox)
         except Exception as e:  # noqa: BLE001 — uma cidade fora não derruba as outras
-            from datakit import falhas
-            falhas.registrar(f"municipal ({city})", e)
+            from datakit import failures
+            failures.record(f"municipal ({city})", e)
     return cams, []
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py)."""
-    return Carga(*load(ctx.raw_dir))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py)."""
+    return SourceData(*load(ctx.raw_dir))

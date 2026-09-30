@@ -19,18 +19,18 @@ import sys
 
 from datakit.build_catalog import build as build_catalog
 from datakit.build_pack import build as build_pack
-from datakit import falhas, inmetro_status
+from datakit import failures, inmetro_status
 from datakit.common import merge_cameras, merge_limits
 from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, merge_cross_agency,
                                   override_limits)
 from datakit.common.geo import in_bbox
 from datakit.common.ufassign import UfAssigner
 from datakit.common.ufs import UF_BBOX, geofabrik_region, uf_bbox
-from datakit.contexto import Contexto
+from datakit.context import BuildContext
 from datakit.sources import dnit, antt, der_go, der_sp, der_pe, municipal, bh, df_detran, rio, cet_sp
 
-# Fontes oficiais de radares, na ordem do manifest. Cada módulo expõe carregar(ctx) -> Carga
-# (datakit/contexto.py).
+# Fontes oficiais de radares, na ordem do manifest. Cada módulo expõe fetch(ctx) -> SourceData
+# (datakit/context.py).
 OFFICIAL = {
     "DNIT": dnit, "ANTT": antt,
     "DER-GO": der_go, "DER-SP": der_sp, "DER-PE": der_pe,
@@ -38,8 +38,8 @@ OFFICIAL = {
 }
 
 # Gravado em data/dist no início do build e apagado só no fim: enquanto existir (build rodando,
-# ou interrompido no meio), data/dist mistura pacotes de dois builds e o publicar.py não monta.
-MARCA_EM_ANDAMENTO = "BUILD_EM_ANDAMENTO"
+# ou interrompido no meio), data/dist mistura pacotes de dois builds e o publish.py não monta.
+IN_PROGRESS_MARKER = "BUILD_EM_ANDAMENTO"
 
 
 def _resolve_hints(cams, probe_dirs):
@@ -88,20 +88,20 @@ class _Split:
         return [s for s, a, b in zip(items, u1, u2) if uf in (a, b)]
 
 
-def build_one(uf: str, ctx: Contexto, packs_dir: str, split: "_Split | None" = None) -> dict:
+def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None" = None) -> dict:
     uf = uf.upper()
     split = split or _Split()
     region = geofabrik_region(uf)
-    official = ctx.oficiais()
-    probes = [c for carga in official.values() for c in carga.radares if c.heading_hint]
+    official = ctx.official()
+    probes = [c for loaded in official.values() for c in loaded.cameras if c.heading_hint]
     ex, osm_cams, osm_lims, osm_structs, probe_dirs = ctx.osm(region, probes)
-    nat = ctx.nacional()
+    nat = ctx.national()
 
     osm_c = split.points(uf, "osm-radares", osm_cams)
     osm_l = split.points(uf, "osm-limites", osm_lims)
     structs = split.structs(uf, "osm-estruturas", osm_structs)
-    off_c = _resolve_hints([c for name, carga in official.items()
-                            for c in split.points(uf, ("oficial", name), carga.radares)], probe_dirs)
+    off_c = _resolve_hints([c for name, loaded in official.items()
+                            for c in split.points(uf, ("oficial", name), loaded.cameras)], probe_dirs)
 
     # mesmo radar em dois órgãos, no oficial e no OSM, ou duas vezes no OSM: um só (common/model.py)
     audit: list = []
@@ -110,7 +110,7 @@ def build_one(uf: str, ctx: Contexto, packs_dir: str, split: "_Split | None" = N
     osm_c, n_osm = collapse_osm(osm_c, audit=audit)
     _write_audit(ctx.raw_dir, uf, audit)
     # radar do OSM num local que o órgão desativou (a CET), sem local ativo por perto: inativo
-    dead = [p for carga in official.values() for p in carga.desativados]
+    dead = [p for loaded in official.values() for p in loaded.deactivated]
     osm_c, n_dead = deactivate_near(osm_c, dead, off_c)
     print(f"[build] {uf}: juntados {n_cross} entre órgãos, {n_joined} OSM a oficiais, {n_osm} OSM a OSM; "
           f"{n_dead} marcados inativos (CET)")
@@ -124,7 +124,7 @@ def build_one(uf: str, ctx: Contexto, packs_dir: str, split: "_Split | None" = N
 
     sources = [{"name": f"OSM/Geofabrik {region}", "file_date": ex.file_date,
                 "sha256": ex.sha256, "bytes": ex.bytes}]
-    sources += [{"name": n, "count": len(official[n].radares) if n in official else 0} for n in ctx.fontes]
+    sources += [{"name": n, "count": len(official[n].cameras) if n in official else 0} for n in ctx.sources]
     sources += [{"name": f"{n} (limites)", "count": len(pts)} for n, pts in off_by_src.items()]
     if status:
         sources.append({"name": "Inmetro (situação)", "snv": nat["snv_version"], **status})
@@ -161,13 +161,13 @@ def main(argv=None) -> int:
     if not args.all and not args.uf:
         ap.error("informe --uf <UF> ou --all")
 
-    marca = os.path.join(args.dist, MARCA_EM_ANDAMENTO)
+    marker = os.path.join(args.dist, IN_PROGRESS_MARKER)
     os.makedirs(args.dist, exist_ok=True)
-    with open(marca, "w", encoding="utf-8") as f:
+    with open(marker, "w", encoding="utf-8") as f:
         from datetime import datetime, timezone
         f.write(f"{datetime.now(timezone.utc):%Y-%m-%dT%H:%M:%SZ} {' '.join(argv or sys.argv[1:])}\n")
 
-    ctx = Contexto(args.raw, refresh_osm=not args.osm_local, fontes=OFFICIAL)
+    ctx = BuildContext(args.raw, refresh_osm=not args.osm_local, sources=OFFICIAL)
     poly = {} if args.no_polygon else ctx.polygons()
     split = _Split(UfAssigner(poly) if poly else None)
     targets = sorted(UF_BBOX) if args.all else [u.strip().upper() for u in args.uf.split(",") if u.strip()]
@@ -183,43 +183,43 @@ def main(argv=None) -> int:
             build_one(uf, ctx, args.packs, split)
             ok += 1
         except Exception as e:  # noqa: BLE001
-            falhas.registrar(f"pacote {uf}", e)
+            failures.record(f"pacote {uf}", e)
 
     catalog = build_catalog(args.packs, args.dist)
     print(f"[build] catálogo: {len(catalog['ufs'])} UF(s), {ok}/{len(targets)} pacote(s) OK -> {args.dist}")
 
     if args.all and ok:
-        from datakit.build_brasil import build as build_brasil
-        br = build_brasil(args.packs, args.dist)
+        from datakit.build_brazil import build as build_brazil
+        br = build_brazil(args.packs, args.dist)
         print(f"[build] bundle Brasil: {br['counts']}")
         from datakit.build_formats import build as build_formats
         print(f"[build] formatos extras (GeoJSON/KML/GPX): {build_formats(args.dist)}")
 
-    from datakit.build_brasil import MAX_FILE_BYTES, oversized
+    from datakit.build_brazil import MAX_FILE_BYTES, oversized
     for name, size in oversized(args.dist):
-        falhas.registrar(f"tamanho {name}", ValueError(
+        failures.record(f"tamanho {name}", ValueError(
             f"{size / 1e6:.1f} MB passa do teto de {MAX_FILE_BYTES / 1e6:.0f} MB por arquivo"))
 
     _record_failures(args.dist)
-    os.remove(marca)
+    os.remove(marker)
     return 0 if ok else 1
 
 
 def _record_failures(dist_dir: str) -> None:
-    """Grava as fontes que falharam no catalog.json de dist (o publicar.py barra se houver)."""
+    """Grava as fontes que falharam no catalog.json de dist (o publish.py barra se houver)."""
     import json
     path = os.path.join(dist_dir, "catalog.json")
     with open(path, encoding="utf-8") as f:
         cat = json.load(f)
-    cat["falhas"] = falhas.lista()
-    cat["avisos"] = falhas.avisos()
+    cat["failures"] = failures.recorded()
+    cat["warnings"] = failures.warnings()
     with open(path, "w", encoding="utf-8") as f:
         json.dump(cat, f, ensure_ascii=False, indent=2)
-    for x in cat["avisos"]:
+    for x in cat["warnings"]:
         print(f"[build] aviso: {x}")
-    if cat["falhas"]:
-        print("[build] ATENÇÃO — fontes que falharam (o publicar.py não monta sem --aceitar-falhas):")
-        for x in cat["falhas"]:
+    if cat["failures"]:
+        print("[build] ATENÇÃO — fontes que falharam (o publish.py não monta sem --accept-failures):")
+        for x in cat["failures"]:
             print(f"  - {x}")
 
 

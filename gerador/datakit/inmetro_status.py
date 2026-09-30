@@ -56,7 +56,7 @@ def decide(near: List[Tuple[float, bool]], guard: List[Tuple[float, bool]]):
 
 
 def apply(cams: List[Camera], uf: str, meters_idx, snv: SnvRoutes, concessions) -> Tuple[List[Camera], Dict[str, int]]:
-    stats = {"confirmados": 0, "desativados": 0, "sem_medidor": 0}
+    stats = {"confirmed": 0, "deactivated": 0, "no_meter": 0}
     out: List[Camera] = []
     for c in cams:
         if c.kind != CameraKind.FIXED or not eligible(c.source):
@@ -75,12 +75,12 @@ def apply(cams: List[Camera], uf: str, meters_idx, snv: SnvRoutes, concessions) 
         guard = [m for m in ms if abs(m[0] - km) <= GUARD_KM]
         verdict = decide(near, guard)
         if verdict is None:
-            stats["sem_medidor"] += 1
+            stats["no_meter"] += 1
             out.append(c)
         elif verdict:
-            stats["confirmados"] += 1
+            stats["confirmed"] += 1
             out.append(c if c.active else replace(c, active=True))
         else:
-            stats["desativados"] += 1
+            stats["deactivated"] += 1
             out.append(replace(c, active=False))
     return out, stats

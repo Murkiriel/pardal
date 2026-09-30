@@ -1,10 +1,10 @@
 """Organiza data/dist/ nas pastas do repositório (brasil/, estados/ e catalog.json).
 
-    python scripts/publicar.py                        # só monta os arquivos na raiz do repositório
-    python scripts/publicar.py --commit               # monta e faz commit
-    python scripts/publicar.py --commit --push        # monta, commita e publica
-    python scripts/publicar.py --aceitar-queda        # monta mesmo com queda grande (ver quedas())
-    python scripts/publicar.py --aceitar-falhas       # monta mesmo com fonte que falhou no build
+    python scripts/publish.py                        # só monta os arquivos na raiz do repositório
+    python scripts/publish.py --commit               # monta e faz commit
+    python scripts/publish.py --commit --push        # monta, commita e publica
+    python scripts/publish.py --accept-drop        # monta mesmo com queda grande (ver drops())
+    python scripts/publish.py --accept-failures       # monta mesmo com fonte que falhou no build
 
 Estrutura gerada (na raiz, um nível acima de gerador/):
     catalog.json                 índice dos pacotes (caminhos já apontando para as pastas)
@@ -27,26 +27,26 @@ import subprocess
 import sys
 from typing import List, Optional
 
-GERADOR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO = os.path.dirname(GERADOR)
+GENERATOR_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO = os.path.dirname(GENERATOR_DIR)
 _NAME = re.compile(r"^(radares|limites_estimados|limites|estruturas)_([A-Z]{2})\.(csv\.gz|csv|geojson|kml|gpx)$")
 _MANAGED = ("brasil", "estados")
 
 # Uma fonte que falha no build é pulada e o build termina bem; sem estas checagens, um portal fora
 # do ar publicaria um estado com menos dados sem ninguém notar. Duas travas: a lista `falhas`
-# que o build grava no catálogo (datakit/falhas.py) e a comparação com o catalog.json já
-# publicado — queda de mais de MAX_QUEDA e de pelo menos MIN_QUEDA itens (radares, limites,
+# que o build grava no catálogo (datakit/failures.py) e a comparação com o catalog.json já
+# publicado — queda de mais de MAX_DROP e de pelo menos MIN_DROP itens (radares, limites,
 # estimados ou estruturas). A CET-SP fora do ar tirou 9% dos limites de SP; o OSM de um mês
 # para o outro varia bem menos que isso.
 # O build grava esta marca em data/dist ao começar e apaga ao terminar (datakit/build.py,
-# MARCA_EM_ANDAMENTO): se ela está lá, o build ainda roda ou caiu no meio.
-MARCA_EM_ANDAMENTO = "BUILD_EM_ANDAMENTO"
+# IN_PROGRESS_MARKER): se ela está lá, o build ainda roda ou caiu no meio.
+IN_PROGRESS_MARKER = "BUILD_EM_ANDAMENTO"
 # O GitHub recusa arquivo acima de 100 MB (o build já registra como falha; aqui é a última trava).
 MAX_FILE_BYTES = 95_000_000
-MAX_QUEDA = 0.05
-MIN_QUEDA = 50
-_CONTAGENS = (("cameras", "radares"), ("limits", "limites"), ("limits_estimated", "limites estimados"),
-              ("structs", "estruturas"))
+MAX_DROP = 0.05
+MIN_DROP = 50
+_COUNT_FIELDS = (("cameras", "radares"), ("limits", "limites"), ("limits_estimated", "limites estimados"),
+                 ("structs", "estruturas"))
 
 
 def dest_for(name: str) -> Optional[str]:
@@ -67,29 +67,29 @@ def _sha(path: str) -> str:
     return h.hexdigest()
 
 
-def quedas(publicado: dict, novo: dict, max_queda: float = MAX_QUEDA) -> List[str]:
+def drops(published: dict, new: dict, max_drop: float = MAX_DROP) -> List[str]:
     """Cada estado (e o Brasil) do catálogo publicado que sumiu do novo ou caiu mais que
     max_queda em alguma contagem. Vazio = pode publicar."""
     out = []
-    novos = novo.get("ufs") or {}
-    for uf, antigo in sorted((publicado.get("ufs") or {}).items()):
-        atual = novos.get(uf)
-        if atual is None:
+    new_ufs = new.get("ufs") or {}
+    for uf, old in sorted((published.get("ufs") or {}).items()):
+        current = new_ufs.get(uf)
+        if current is None:
             out.append(f"{uf}: sumiu do catálogo")
             continue
-        for chave, rotulo in _CONTAGENS:
-            a = (antigo.get("counts") or {}).get(chave) or 0
-            b = (atual.get("counts") or {}).get(chave) or 0
-            if a and b < a * (1 - max_queda) and a - b >= MIN_QUEDA:
-                out.append(f"{uf}: {rotulo} {a} -> {b} ({(b - a) / a:+.0%})")
+        for key, label in _COUNT_FIELDS:
+            a = (old.get("counts") or {}).get(key) or 0
+            b = (current.get("counts") or {}).get(key) or 0
+            if a and b < a * (1 - max_drop) and a - b >= MIN_DROP:
+                out.append(f"{uf}: {label} {a} -> {b} ({(b - a) / a:+.0%})")
     return out
 
 
 def rewrite_catalog(cat: dict) -> dict:
     """Mesmo catálogo, com cada `file` trocado pelo caminho dentro das pastas."""
     out = json.loads(json.dumps(cat))
-    out.pop("falhas", None)   # só serve para barrar a publicação; não vai para o repositório
-    out.pop("avisos", None)
+    out.pop("failures", None)   # só serve para barrar a publicação; não vai para o repositório
+    out.pop("warnings", None)
     for entry in out["ufs"].values():
         for key in ("radares", "limites", "limites_estimados", "estruturas"):
             meta = entry.get(key)
@@ -101,26 +101,26 @@ def rewrite_catalog(cat: dict) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", default=REPO, help="raiz do repositório (padrão: pasta acima de gerador/)")
-    ap.add_argument("--dist", default=os.path.join(GERADOR, "data", "dist"))
+    ap.add_argument("--dist", default=os.path.join(GENERATOR_DIR, "data", "dist"))
     ap.add_argument("--commit", action="store_true", help="faz commit no repositório")
     ap.add_argument("--push", action="store_true", help="publica (exige --commit)")
-    ap.add_argument("--aceitar-queda", action="store_true",
-                    help=f"monta mesmo se alguma contagem cair mais de {MAX_QUEDA:.0%} em relação ao publicado")
-    ap.add_argument("--aceitar-falhas", action="store_true",
-                    help="monta mesmo se alguma fonte falhou no build (campo falhas do catálogo)")
+    ap.add_argument("--accept-drop", action="store_true",
+                    help=f"monta mesmo se alguma contagem cair mais de {MAX_DROP * 100:.0f}%% em relação ao publicado")
+    ap.add_argument("--accept-failures", action="store_true",
+                    help="monta mesmo se alguma fonte falhou no build (campo failures do catálogo)")
     args = ap.parse_args(argv)
 
-    marca = os.path.join(args.dist, MARCA_EM_ANDAMENTO)
-    if os.path.exists(marca):
-        with open(marca, encoding="utf-8") as f:
-            desde = f.read().strip()
-        sys.exit(f"build em andamento ou interrompido ({marca}: {desde}); espere terminar ou rode o build de novo")
+    marker = os.path.join(args.dist, IN_PROGRESS_MARKER)
+    if os.path.exists(marker):
+        with open(marker, encoding="utf-8") as f:
+            since = f.read().strip()
+        sys.exit(f"build em andamento ou interrompido ({marker}: {since}); espere terminar ou rode o build de novo")
 
-    grandes = [f"{n} ({os.path.getsize(os.path.join(args.dist, n)) / 1e6:.1f} MB)"
-               for n in sorted(os.listdir(args.dist))
-               if dest_for(n) and os.path.getsize(os.path.join(args.dist, n)) > MAX_FILE_BYTES]
-    if grandes:
-        sys.exit(f"arquivo acima de {MAX_FILE_BYTES / 1e6:.0f} MB (o GitHub recusa):\n  " + "\n  ".join(grandes))
+    large_files = [f"{n} ({os.path.getsize(os.path.join(args.dist, n)) / 1e6:.1f} MB)"
+                   for n in sorted(os.listdir(args.dist))
+                   if dest_for(n) and os.path.getsize(os.path.join(args.dist, n)) > MAX_FILE_BYTES]
+    if large_files:
+        sys.exit(f"arquivo acima de {MAX_FILE_BYTES / 1e6:.0f} MB (o GitHub recusa):\n  " + "\n  ".join(large_files))
 
     with open(os.path.join(args.dist, "catalog.json"), encoding="utf-8") as f:
         cat = json.load(f)
@@ -130,20 +130,20 @@ def main(argv=None) -> int:
             if meta and meta.get("sha256") and _sha(os.path.join(args.dist, meta["file"])) != meta["sha256"]:
                 sys.exit(f"sha256 não confere: {meta['file']} ({uf})")
 
-    for aviso in cat.get("avisos") or []:
-        print(f"aviso (não bloqueia): {aviso}")
-    if cat.get("falhas") and not args.aceitar_falhas:
-        sys.exit("fontes falharam no build; rode de novo ou use --aceitar-falhas:\n  " + "\n  ".join(cat["falhas"]))
+    for warning in cat.get("warnings") or []:
+        print(f"aviso (não bloqueia): {warning}")
+    if cat.get("failures") and not args.accept_failures:
+        sys.exit("fontes falharam no build; rode de novo ou use --accept-failures:\n  " + "\n  ".join(cat["failures"]))
 
-    publicado = os.path.join(args.repo, "catalog.json")
-    if os.path.exists(publicado):
-        with open(publicado, encoding="utf-8") as f:
-            problemas = quedas(json.load(f), cat)
-        if problemas and not args.aceitar_queda:
+    published = os.path.join(args.repo, "catalog.json")
+    if os.path.exists(published):
+        with open(published, encoding="utf-8") as f:
+            problems = drops(json.load(f), cat)
+        if problems and not args.accept_drop:
             sys.exit("queda grande em relação ao que está publicado (fonte fora do ar no build?):\n  "
-                     + "\n  ".join(problemas)
-                     + "\nconfira as linhas FALHOU no log do build; para montar assim mesmo: --aceitar-queda")
-        for p in problemas:
+                     + "\n  ".join(problems)
+                     + "\nconfira as linhas FALHOU no log do build; para montar assim mesmo: --accept-drop")
+        for p in problems:
             print(f"aceito: {p}")
 
     wanted = {}

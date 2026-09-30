@@ -17,13 +17,13 @@ def _cat(built, **ufs):
     return {"built_at": built, "ufs": {uf: {"counts": c} for uf, c in ufs.items()}}
 
 
-class Nota(unittest.TestCase):
+class Notes(unittest.TestCase):
     def test_counts_differences_and_warnings(self):
-        antes = _cat("2026-09-30T12:13:21Z", BR={"cameras": 17798, "limits": 100, "limits_estimated": 5, "structs": 9},
-                     GO={"cameras": 1428, "limits": 125500, "structs": 4929})
-        novo = _cat("2026-10-01T06:40:00Z", BR={"cameras": 17810, "limits": 100, "limits_estimated": 4, "structs": 9},
-                    GO={"cameras": 1431, "limits": 125500, "structs": 4929})
-        n = rel.nota(novo, antes, ["Inmetro GO: usada a cópia de 2026-09-30"], "https://github.com/x/y")
+        before = _cat("2026-09-30T12:13:21Z", BR={"cameras": 17798, "limits": 100, "limits_estimated": 5, "structs": 9},
+                      GO={"cameras": 1428, "limits": 125500, "structs": 4929})
+        new = _cat("2026-10-01T06:40:00Z", BR={"cameras": 17810, "limits": 100, "limits_estimated": 4, "structs": 9},
+                   GO={"cameras": 1431, "limits": 125500, "structs": 4929})
+        n = rel.release_notes(new, before, ["Inmetro GO: usada a cópia de 2026-09-30"], "https://github.com/x/y")
         self.assertIn("Dados gerados em 01/10/2026", n)
         self.assertIn("| Radares | 17.810 (+12) |", n)
         self.assertIn("| Pontos de limite estimado | 4 (−1) |", n)
@@ -32,17 +32,17 @@ class Nota(unittest.TestCase):
         self.assertIn("## Avisos", n)
         self.assertIn("https://github.com/x/y/releases/latest/download/pardal-SP.zip", n)
         self.assertNotIn("| BR |", n)
-        self.assertEqual(rel.etiqueta(novo), "dados-2026-10-01")
+        self.assertEqual(rel.tag_for(new), "dados-2026-10-01")
 
     def test_first_release_has_no_differences(self):
-        n = rel.nota(_cat("2026-10-01T06:40:00Z", BR={"cameras": 1}, GO={"cameras": 1}), None, [], "u")
+        n = rel.release_notes(_cat("2026-10-01T06:40:00Z", BR={"cameras": 1}, GO={"cameras": 1}), None, [], "u")
         self.assertNotIn("(+", n)
         self.assertNotIn("diferença para a geração anterior", n)
         self.assertNotIn("## Avisos", n)
 
 
-class Pacotes(unittest.TestCase):
-    def test_zips_per_state_brasil_and_radares_only(self):
+class Assets(unittest.TestCase):
+    def test_zips_per_state_brazil_and_cameras_only(self):
         with tempfile.TemporaryDirectory() as repo:
             for uf in ("GO", "SP"):
                 os.makedirs(os.path.join(repo, "estados", uf))
@@ -56,8 +56,8 @@ class Pacotes(unittest.TestCase):
             with open(os.path.join(repo, "catalog.json"), "w") as fh:
                 json.dump(_cat("2026-10-01T06:40:00Z"), fh)
             out = os.path.join(repo, "_out")
-            anexos = [os.path.basename(a) for a in rel.pacotes(repo, out)]
-            self.assertEqual(anexos, ["pardal-GO.zip", "pardal-SP.zip", "pardal-brasil.zip",
+            assets = [os.path.basename(a) for a in rel.build_assets(repo, out)]
+            self.assertEqual(assets, ["pardal-GO.zip", "pardal-SP.zip", "pardal-brasil.zip",
                                       "pardal-brasil-radares.zip", "catalog.json", "SHA256SUMS.txt"])
             with zipfile.ZipFile(os.path.join(out, "pardal-GO.zip")) as z:
                 self.assertEqual(sorted(z.namelist()),

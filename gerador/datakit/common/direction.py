@@ -14,7 +14,7 @@ from datakit.common.lrs import MeasuredLine
 from datakit.common.model import to_dir
 
 
-def parse_sentido(text: Optional[str]) -> Optional[bool]:
+def parse_increasing(text: Optional[str]) -> Optional[bool]:
     """'Crescente' -> True, 'Decrescente' -> False; os dois sentidos, vazio ou outro -> None."""
     t = (text or "").strip().lower()
     if t == "crescente":

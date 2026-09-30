@@ -4,7 +4,7 @@
 Já traz LATITUDE/LONGITUDE e VELOCIDADE ("60 km/h"). source="DER-GO".
 SENTIDO (Crescente/Decrescente) vira direction_deg pela malha rodoviária estadual da GOINFRA
 (trechos por SRE com km inicial/final, desenhados do inicial para o final: medido em 1.002
-de 1.010 radares, o km do radar cai a 4 m da posição na mediana). Ver common/sentido.py.
+de 1.010 radares, o km do radar cai a 4 m da posição na mediana). Ver common/direction.py.
 """
 from __future__ import annotations
 
@@ -12,15 +12,15 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.common.lrs import MeasuredLine, parse_km
-from datakit.common.sentido import direction_on, parse_sentido
+from datakit.common.direction import direction_on, parse_increasing
 from datakit.sources._http import in_br
 
 _BASE = "https://services2.arcgis.com/7dQGISjrwMAayhWe/arcgis/rest/services/"
 FS = _BASE + "Controle_de_Subst_de_Radares/FeatureServer/0/query"
-MALHA = _BASE + "MalhaEstadual_gdb/FeatureServer/0/query"
+NETWORK_URL = _BASE + "MalhaEstadual_gdb/FeatureServer/0/query"
 SNAP_M = 150.0
 
 
@@ -33,7 +33,7 @@ def _pages(url: str, fields: str, geometry: bool) -> List[dict]:
 def load_network() -> Dict[str, List[MeasuredLine]]:
     """Trechos da malha estadual por SRE (ex. '070EGO0170'), com km em cada vértice."""
     lines: Dict[str, List[MeasuredLine]] = defaultdict(list)
-    for ft in _pages(MALHA, "sre,km_inicial,km_final", True):
+    for ft in _pages(NETWORK_URL, "sre,km_inicial,km_final", True):
         a = ft.get("attributes", {})
         k0, k1 = a.get("km_inicial"), a.get("km_final")
         if not isinstance(k0, (int, float)) or not isinstance(k1, (int, float)) or k0 == k1:
@@ -45,9 +45,9 @@ def load_network() -> Dict[str, List[MeasuredLine]]:
     return dict(lines)
 
 
-def direction(network: Dict[str, List[MeasuredLine]], sre: str, sentido: str, km_text: str,
+def direction(network: Dict[str, List[MeasuredLine]], sre: str, direction_text: str, km_text: str,
               lat: float, lng: float) -> Optional[int]:
-    increasing = parse_sentido(sentido)
+    increasing = parse_increasing(direction_text)
     if increasing is None:
         return None
     best = None
@@ -75,8 +75,8 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
     try:
         network = load_network()
     except Exception as e:  # noqa: BLE001 — sem a malha, os radares saem sem sentido
-        from datakit import falhas
-        falhas.registrar("DER-GO (malha estadual, sentido)", e)
+        from datakit import failures
+        failures.record("DER-GO (malha estadual, sentido)", e)
         network = {}
     out: List[Camera] = []
     for ft in _pages(FS, "LATITUDE,LONGITUDE,VELOCIDADE,SRE,SENTIDO,COMPLEMENT", False):
@@ -94,6 +94,6 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
     return out, []
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py)."""
-    return Carga(*load(ctx.raw_dir))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py)."""
+    return SourceData(*load(ctx.raw_dir))

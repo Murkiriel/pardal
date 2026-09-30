@@ -17,7 +17,7 @@ from __future__ import annotations
 import re
 from typing import Dict, List, Optional, Tuple
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common import Camera, CameraKind, in_bbox
 from datakit.common.geo import bearing_deg, haversine_m, sample_polyline
 from datakit.common.model import Limit
@@ -55,20 +55,20 @@ PBI_API = "https://wabi-brazil-south-b-primary-api.analysis.windows.net"
 PBI_TABLE = "tblFiscalizacaoEletronica"
 PBI_COLS = ["CÓDIGO LOCAL", "LATITUDE", "LONGITUDE", "DESCRIÇÃO DO LOCAL", "ENQUADRAMENTOS",
             "VELOCIDADE", "DESATIVAÇÃO"]
-MARCO_ZERO = (-23.550333, -46.633944)   # Praça da Sé
+CITY_CENTER = (-23.550333, -46.633944)   # Praça da Sé
 RADIAL_MIN_M = 1500.0                     # perto do centro, "sair do centro" não define rumo
 _CB = re.compile(r"\(\s*(CENTRO|C)\s*/\s*(BAIRRO|B)\s*\)", re.I)
 _BC = re.compile(r"\(\s*(BAIRRO|B)\s*/\s*(CENTRO|C)\s*\)", re.I)
 
 
-def centro_bairro_hint(desc: str, lat: float, lng: float) -> Optional[str]:
+def center_suburb_hint(desc: str, lat: float, lng: float) -> Optional[str]:
     """'(CENTRO/BAIRRO)' -> rumo que se afasta do marco zero; '(BAIRRO/CENTRO)' -> que se
     aproxima; como heading_hint '@<graus>'. None sem o par ou perto demais do centro."""
     out = _CB.search(desc or "")
     inn = _BC.search(desc or "")
-    if bool(out) == bool(inn) or haversine_m(MARCO_ZERO, (lat, lng)) < RADIAL_MIN_M:
+    if bool(out) == bool(inn) or haversine_m(CITY_CENTER, (lat, lng)) < RADIAL_MIN_M:
         return None
-    b = bearing_deg(MARCO_ZERO, (lat, lng)) if out else bearing_deg((lat, lng), MARCO_ZERO)
+    b = bearing_deg(CITY_CENTER, (lat, lng)) if out else bearing_deg((lat, lng), CITY_CENTER)
     return f"@{b:.0f}"
 
 
@@ -106,7 +106,7 @@ def rows_to_cameras(rows: List[Dict], bbox: Optional[Tuple[float, float, float, 
             continue
         m = re.match(r"\s*(\d{2,3})", str(r.get("VELOCIDADE") or ""))
         limit = int(m.group(1)) if kind == CameraKind.FIXED and m and 20 <= int(m.group(1)) <= 130 else None
-        hint = centro_bairro_hint(r.get("DESCRIÇÃO DO LOCAL") or "", lat, lng) or "*"
+        hint = center_suburb_hint(r.get("DESCRIÇÃO DO LOCAL") or "", lat, lng) or "*"
         out.append(Camera(round(lat, 6), round(lng, 6), kind, limit, "CET-SP", True, heading_hint=hint))
     return out
 
@@ -116,7 +116,7 @@ CACHE_FILE = "cet_sp_locais.json"
 
 def _rows_with_fallback(raw_dir: str) -> List[Dict]:
     """A tabela da CET pelo Power BI; guarda a leitura boa em data/raw/ e, se o Power BI falhar
-    (API não documentada), usa essa cópia e avisa (falhas.avisar). Sem cópia, a falha sobe."""
+    (API não documentada), usa essa cópia e avisa (failures.warn). Sem cópia, a falha sobe."""
     import json
     import os
     from datetime import date
@@ -129,9 +129,9 @@ def _rows_with_fallback(raw_dir: str) -> List[Dict]:
     except Exception as e:  # noqa: BLE001
         if not os.path.exists(path):
             raise
-        from datakit import falhas
-        quando = date.fromtimestamp(os.path.getmtime(path)).isoformat()
-        falhas.avisar("CET-SP (radares)", f"Power BI falhou ({type(e).__name__}); usada a cópia de {quando}")
+        from datakit import failures
+        when = date.fromtimestamp(os.path.getmtime(path)).isoformat()
+        failures.warn("CET-SP (radares)", f"Power BI falhou ({type(e).__name__}); usada a cópia de {when}")
         with open(path, encoding="utf-8") as f:
             return json.load(f)
     os.makedirs(raw_dir, exist_ok=True)
@@ -145,11 +145,11 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
     return rows_to_cameras(_rows_with_fallback(raw_dir), bbox), []
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py). Vão junto os locais que a CET desativou: o
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py). Vão junto os locais que a CET desativou: o
     build marca inativo o radar do OSM que ficou num deles (model.deactivate_near)."""
     rows = _rows_with_fallback(ctx.raw_dir)
-    return Carga(rows_to_cameras(rows), [], rows_to_deactivated(rows))
+    return SourceData(rows_to_cameras(rows), [], rows_to_deactivated(rows))
 
 
 def load_limits() -> List[Limit]:

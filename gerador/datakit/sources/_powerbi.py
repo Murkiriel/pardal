@@ -13,7 +13,7 @@ import base64
 import json
 from typing import Any, Dict, List, Optional
 
-from datakit.sources._http import com_retentativa
+from datakit.sources._http import with_retries
 
 WINDOW = 30000  # linhas por consulta; as tabelas usadas aqui têm poucos milhares
 
@@ -32,7 +32,7 @@ def _post(api: str, key: str, path: str, body: dict) -> dict:
                           headers={**UA, "X-PowerBI-ResourceKey": key, "Content-Type": "application/json"})
         x.raise_for_status()
         return x.json()
-    return com_retentativa(once, "Power BI " + path)
+    return with_retries(once, "Power BI " + path)
 
 
 def model_id(api: str, key: str) -> int:
@@ -44,7 +44,7 @@ def model_id(api: str, key: str) -> int:
                          headers={**UA, "X-PowerBI-ResourceKey": key}, timeout=HTTP_TIMEOUT)
         x.raise_for_status()
         return x.json()["models"][0]["id"]
-    return com_retentativa(once, "Power BI modelo")
+    return with_retries(once, "Power BI modelo")
 
 
 def query_table(api: str, key: str, model_id: int, entity: str, columns: List[str]) -> List[Dict[str, Any]]:

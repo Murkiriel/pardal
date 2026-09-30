@@ -1,6 +1,6 @@
 """Bundle "Brasil" — junta todos os pacotes de UF num arquivo só.
 
-    python -m datakit.build_brasil            # depois de datakit.build --all
+    python -m datakit.build_brazil            # depois de datakit.build --all
 
 Gera data/dist/radares_BR.csv, limites_BR.csv, estruturas_BR.csv e acrescenta a
 entrada "BR" ao catalog.json ("Brasil (tudo)"). Dedupe nas divisas (coordenada a ~1 m).
@@ -207,7 +207,7 @@ def build(packs_dir: str, dist_dir: str) -> dict:
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(prog="datakit.build_brasil")
+    ap = argparse.ArgumentParser(prog="datakit.build_brazil")
     ap.add_argument("--packs", default="data/packs")
     ap.add_argument("--dist", default="data/dist")
     args = ap.parse_args(argv)

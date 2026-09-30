@@ -30,9 +30,9 @@ from datakit.common.geo import angle_diff, bearing_deg
 from datakit.common.infer import class_limit, is_yes, zone_limit
 from datakit.common.lrs import _proj_seg
 from datakit.common.model import to_dir
-from datakit.common.sentido import orient_to_hint
+from datakit.common.direction import orient_to_hint
 from datakit.common.spatial import lat_span_deg, lng_span_deg
-from datakit.sources._http import HTTP_TIMEOUT, UA, com_retentativa
+from datakit.sources._http import HTTP_TIMEOUT, UA, with_retries
 from datakit.common import (
     Camera, CameraKind, Limit, Struct,
     parse_maxspeed, in_bbox, haversine_m, rdp, sample_polyline,
@@ -97,7 +97,7 @@ def ensure_extract(region: str, raw_dir: str, refresh: bool = True) -> Extract:
     """<region>-latest.osm.pbf em raw_dir, na versão atual da Geofabrik: com refresh, pergunta
     a data da versão publicada (HEAD) e baixa de novo se for mais nova que a guardada. Sem
     refresh (build --osm-local), usa o arquivo guardado se existir. Se a consulta falhar, usa
-    o guardado e registra a falha (o publicar.py barra: os dados podem estar velhos)."""
+    o guardado e registra a falha (o publish.py barra: os dados podem estar velhos)."""
     os.makedirs(raw_dir, exist_ok=True)
     path = os.path.join(raw_dir, f"{region}-latest.osm.pbf")
     stamp = os.path.join(raw_dir, f"{region}.last-modified")
@@ -105,16 +105,16 @@ def ensure_extract(region: str, raw_dir: str, refresh: bool = True) -> Extract:
     download = not os.path.exists(path)
     if not download and refresh:
         try:
-            remote = com_retentativa(lambda: _remote_last_modified(url), url)
+            remote = with_retries(lambda: _remote_last_modified(url), url)
             download = needs_update(_read_or(stamp, ""), remote)
             if not download:
                 print(f"[osm_pbf] {region}: versão guardada é a atual ({remote})")
         except Exception as e:  # noqa: BLE001
-            from datakit import falhas
-            falhas.registrar(f"OSM {region} (conferir versão; usado o arquivo guardado)", e)
+            from datakit import failures
+            failures.record(f"OSM {region} (conferir versão; usado o arquivo guardado)", e)
     if download:
         print(f"[osm_pbf] baixando {url}")
-        last_mod = com_retentativa(lambda: _download(url, path), url)
+        last_mod = with_retries(lambda: _download(url, path), url)
         with open(stamp, "w") as m:
             m.write(last_mod)
     last_mod = _read_or(stamp, "")
@@ -219,7 +219,7 @@ def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None
                 else:
                     est = class_limit(hw, is_yes(tags.get("lit")))
                     if est is not None:
-                        _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:classe", True, est[1]))
+                        _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:class", True, est[1]))
         elif o.is_relation():
             if tags.get("type") != "enforcement":
                 continue
@@ -253,7 +253,7 @@ def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None
     for hw, verts, pts in pending_main:
         est = class_limit(hw, _is_urban(pts, urban))
         if est is not None:
-            _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:classe", True, est[1]))
+            _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:class", True, est[1]))
 
     missing = wanted - node_pt.keys()
     if missing:

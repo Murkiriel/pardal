@@ -17,10 +17,10 @@ HTTP_TIMEOUT = 120
 BR_BBOX = (-34.0, -74.5, 6.0, -32.0)
 
 # Portais do governo caem por instantes (conexão encerrada no meio do download, 502/503):
-# cada requisição tenta TENTATIVAS vezes, esperando ESPERA_S, 2×ESPERA_S... entre elas. Erro
+# cada requisição tenta ATTEMPTS vezes, esperando WAIT_S, 2×WAIT_S... entre elas. Erro
 # que não passa com nova tentativa (404, 403, formato mudou) sobe na hora.
-TENTATIVAS = 3
-ESPERA_S = 5.0
+ATTEMPTS = 3
+WAIT_S = 5.0
 # Abrir a conexão demora no máximo isto; o download em si pode levar HTTP_TIMEOUT. Um servidor que
 # não aceita conexão (fora do ar, ou bloqueando o lugar de onde se roda — o DNIT e o Inmetro não
 # respondem fora do Brasil) custa segundos, não 3 × 120 s por requisição.
@@ -43,7 +43,7 @@ def session() -> requests.Session:
     return _SESSION
 
 
-def transitorio(e: BaseException) -> bool:
+def is_transient(e: BaseException) -> bool:
     """Falha que vale tentar de novo: rede, tempo esgotado, 429 ou 5xx, curl sem resposta."""
     import subprocess
     if isinstance(e, requests.HTTPError):
@@ -55,16 +55,16 @@ def transitorio(e: BaseException) -> bool:
                           requests.exceptions.ChunkedEncodingError, ConnectionError, TimeoutError, OSError))
 
 
-def com_retentativa(fn: Callable[[], T], rotulo: str = "", tentativas: int = TENTATIVAS,
-                    espera_s: float = ESPERA_S, dormir: Optional[Callable[[float], None]] = None) -> T:
-    for i in range(1, tentativas + 1):
+def with_retries(fn: Callable[[], T], label: str = "", attempts: int = ATTEMPTS,
+                 wait_s: float = WAIT_S, sleep_fn: Optional[Callable[[float], None]] = None) -> T:
+    for i in range(1, attempts + 1):
         try:
             return fn()
         except Exception as e:  # noqa: BLE001 — decide abaixo se tenta de novo
-            if i == tentativas or not transitorio(e):
+            if i == attempts or not is_transient(e):
                 raise
-            print(f"[http] {rotulo or 'requisição'}: {type(e).__name__}; nova tentativa em {espera_s * i:.0f} s")
-            (dormir or time.sleep)(espera_s * i)
+            print(f"[http] {label or 'requisição'}: {type(e).__name__}; nova tentativa em {wait_s * i:.0f} s")
+            (sleep_fn or time.sleep)(wait_s * i)
     raise AssertionError("inalcançável")
 
 
@@ -74,13 +74,13 @@ def _host(url: str) -> str:
 
 
 def guarded(url: str, fn: Callable[[], T]) -> T:
-    """com_retentativa + desistência por servidor: se o servidor de `url` já não abriu conexão
+    """with_retries + desistência por servidor: se o servidor de `url` já não abriu conexão
     nesta execução, falha na hora; se não abrir agora (depois das tentativas), fica marcado."""
     host = _host(url)
     if host in _DEAD_HOSTS:
         raise ConnectionError(f"{host} não abriu conexão antes nesta execução")
     try:
-        return com_retentativa(fn, url)
+        return with_retries(fn, url)
     except (requests.ConnectionError, requests.Timeout) as e:
         if isinstance(e, (requests.ConnectTimeout, requests.exceptions.ConnectionError)) and \
                 not isinstance(e, requests.exceptions.ChunkedEncodingError):
@@ -92,7 +92,7 @@ def get_bytes_curl(url: str) -> bytes:
     """Via o binário `curl`: alguns portais (PBH) barram o handshake TLS do Python com 403
     qualquer que seja o User-Agent, mas deixam o curl passar."""
     import subprocess
-    return com_retentativa(lambda: subprocess.run(
+    return with_retries(lambda: subprocess.run(
         ["curl", "-sSL", "--fail", "--connect-timeout", str(CONNECT_TIMEOUT), "-m", str(HTTP_TIMEOUT),
          "-A", "Mozilla/5.0", url],
         capture_output=True, check=True).stdout, url)

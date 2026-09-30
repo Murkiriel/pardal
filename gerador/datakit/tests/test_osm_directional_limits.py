@@ -41,7 +41,7 @@ EAST = [(-16.0, -49.0), (-16.0, -48.99)]           # desenhado de oeste para les
 
 
 @unittest.skipIf(osmium is None, "pyosmium não instalado")
-class LimitePorSentido(unittest.TestCase):
+class DirectionalLimits(unittest.TestCase):
     def test_forward_and_backward_without_maxspeed(self):
         lims = _load([({"highway": "residential", "maxspeed:forward": "60", "maxspeed:backward": "40"}, EAST)])
         got = {(x.limit_kmh, x.direction_deg, x.estimated) for x in lims}

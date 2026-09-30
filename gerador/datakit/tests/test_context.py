@@ -3,11 +3,11 @@ import unittest
 from unittest import mock
 
 
-class ContratoDasFontes(unittest.TestCase):
-    def test_every_official_source_has_carregar(self):
+class SourceContract(unittest.TestCase):
+    def test_every_official_source_has_fetch(self):
         from datakit import build
         for name, mod in build.OFFICIAL.items():
-            self.assertTrue(callable(getattr(mod, "carregar", None)), name)
+            self.assertTrue(callable(getattr(mod, "fetch", None)), name)
 
     def test_no_module_level_caches_left(self):
         from datakit import build
@@ -17,48 +17,48 @@ class ContratoDasFontes(unittest.TestCase):
                           (cet_sp, "_DESATIVADOS"), (snv, "_ROUTES"), (ufpoly, "_cache")):
             self.assertFalse(hasattr(mod, attr), f"{mod.__name__}.{attr}")
 
-    def test_cet_returns_deactivated_sites_in_the_carga(self):
-        from datakit.contexto import Contexto
+    def test_cet_returns_deactivated_sites_in_the_source_data(self):
+        from datakit.context import BuildContext
         from datakit.sources import cet_sp
         rows = [{"LATITUDE": "-23.55", "LONGITUDE": "-46.63", "ENQUADRAMENTOS": "V", "VELOCIDADE": "50"},
                 {"LATITUDE": "-23.56", "LONGITUDE": "-46.64", "ENQUADRAMENTOS": "V", "DESATIVAÇÃO": "2024-01-01"}]
         with mock.patch.object(cet_sp, "_rows_with_fallback", lambda raw_dir: rows):
-            carga = cet_sp.carregar(Contexto("raw"))
-        self.assertEqual(len(carga.radares), 1)
-        self.assertEqual(carga.desativados, [(-23.56, -46.64)])
+            loaded = cet_sp.fetch(BuildContext("raw"))
+        self.assertEqual(len(loaded.cameras), 1)
+        self.assertEqual(loaded.deactivated, [(-23.56, -46.64)])
 
 
-class Contexto_(unittest.TestCase):
+class BuildContextTests(unittest.TestCase):
     def test_a_failing_source_is_registered_and_the_others_load(self):
-        from datakit import falhas
+        from datakit import failures
         from datakit.common import Camera
-        from datakit.contexto import Carga, Contexto
+        from datakit.context import SourceData, BuildContext
 
-        class Boa:
+        class Good:
             @staticmethod
-            def carregar(ctx):
-                return Carga([Camera(-16.0, -49.0, source="BOA")])
+            def fetch(ctx):
+                return SourceData([Camera(-16.0, -49.0, source="BOA")])
 
-        class Ruim:
+        class Bad:
             @staticmethod
-            def carregar(ctx):
+            def fetch(ctx):
                 raise ConnectionError("fora do ar")
 
-        antes = list(falhas._FALHAS)
+        before = list(failures._FAILURES)
         try:
-            ctx = Contexto("raw", fontes={"RUIM": Ruim, "BOA": Boa})
-            got = ctx.oficiais()
-            self.assertIs(ctx.oficiais(), got)                      # carregado uma vez
-            novas = falhas.lista()[len(antes):]
+            ctx = BuildContext("raw", sources={"RUIM": Bad, "BOA": Good})
+            got = ctx.official()
+            self.assertIs(ctx.official(), got)                      # carregado uma vez
+            new_failures = failures.recorded()[len(before):]
         finally:
-            falhas._FALHAS[:] = antes
-        self.assertEqual([len(got["RUIM"].radares), len(got["BOA"].radares)], [0, 1])
-        self.assertEqual(len(novas), 1)
-        self.assertIn("RUIM", novas[0])
+            failures._FAILURES[:] = before
+        self.assertEqual([len(got["RUIM"].cameras), len(got["BOA"].cameras)], [0, 1])
+        self.assertEqual(len(new_failures), 1)
+        self.assertIn("RUIM", new_failures[0])
 
     def test_snv_routes_and_polygons_are_loaded_once_per_context(self):
         from datakit.common import ufpoly
-        from datakit.contexto import Contexto
+        from datakit.context import BuildContext
         from datakit.sources import snv
         calls = {"snv": 0, "poly": 0}
 
@@ -71,11 +71,11 @@ class Contexto_(unittest.TestCase):
             return {"GO": object()}
 
         with mock.patch.object(snv, "load_routes", rotas), mock.patch.object(ufpoly, "polygons", polys):
-            ctx = Contexto("raw")
-            self.assertEqual([ctx.rotas_snv(), ctx.rotas_snv()], ["rotas", "rotas"])
+            ctx = BuildContext("raw")
+            self.assertEqual([ctx.snv_routes(), ctx.snv_routes()], ["rotas", "rotas"])
             ctx.polygons()
             ctx.polygons()
-            Contexto("raw").rotas_snv()                               # outro contexto: carrega de novo
+            BuildContext("raw").snv_routes()                               # outro contexto: carrega de novo
         self.assertEqual(calls, {"snv": 2, "poly": 1})
 
 

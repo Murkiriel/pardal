@@ -1,7 +1,7 @@
 """Diagnóstico das fontes: cada endereço que o gerador usa responde daqui?
 
-    python scripts/testar_fontes.py                 # tabela no terminal
-    python scripts/testar_fontes.py --json saida.json
+    python scripts/check_sources.py                 # tabela no terminal
+    python scripts/check_sources.py --json saida.json
 
 Faz uma requisição leve por fonte (a mesma rota do gerador: Python/requests, ou curl onde o
 gerador usa curl), sem novas tentativas, e mede status e tempo. Serve para descobrir, antes de
@@ -56,12 +56,12 @@ def _pbi():
 
 
 def _webdav():
-    r = requests.request("PROPFIND", snv.SHARE + requests.utils.quote(snv.ROTAS), auth=(snv.TOKEN, ""),
+    r = requests.request("PROPFIND", snv.SHARE + requests.utils.quote(snv.ROUTES), auth=(snv.TOKEN, ""),
                          headers={**UA, "Depth": "1"}, timeout=TIMEOUT)
     return r.status_code, r.content[:4096]
 
 
-FONTES = [
+SOURCES = [
     # (fonte, o que é, função que faz a requisição)
     ("DNIT (PNCV)", "catálogo CKAN dos radares federais", lambda: _req("GET", dnit.CKAN)),
     ("DNIT (SNV)", "rotas com km, WebDAV", _webdav),
@@ -69,7 +69,7 @@ FONTES = [
     ("ANTT (placas)", "catálogo CKAN", lambda: _req("GET", antt_placas.CKAN)),
     ("Inmetro", "medidores de SP (json)", lambda: _req("GET", inmetro.URL.format(uf="SP"))),
     ("DER-GO (radares)", "ArcGIS", lambda: _req("GET", der_go.FS, params={"where": "1=1", "returnCountOnly": "true", "f": "json"})),
-    ("DER-GO (malha)", "ArcGIS", lambda: _req("GET", der_go.MALHA, params={"where": "1=1", "returnCountOnly": "true", "f": "json"})),
+    ("DER-GO (malha)", "ArcGIS", lambda: _req("GET", der_go.NETWORK_URL, params={"where": "1=1", "returnCountOnly": "true", "f": "json"})),
     ("Artesp", "planilha de recursos (xlsx)", lambda: _req("GET", der_sp.ARTESP_XLSX)),
     ("DER-SP", "planilha de radares (xlsx)", lambda: _req("GET", der_sp.DER_SP_OWN_XLSX)),
     ("DER-PE", "página com a tabela", lambda: _req("GET", der_pe.URL)),
@@ -78,9 +78,9 @@ FONTES = [
     ("Recife", "CSV", lambda: _req("GET", municipal.RECIFE_CSV)),
     ("BH (BHTrans)", "catálogo CKAN (via curl)", lambda: _curl(bh.CKAN)),
     ("Detran-DF", "ArcGIS", lambda: _req("GET", df_detran.BASE, params={"f": "json"})),
-    ("Rio (lista)", "página da lista de radares", lambda: _req("GET", rio.LISTA_PAGINA)),
+    ("Rio (lista)", "página da lista de radares", lambda: _req("GET", rio.LIST_PAGE)),
     ("Rio (geocodificador)", "ArcGIS da prefeitura", lambda: _req("GET", rio.GEOCODE, params={"SingleLine": "AVENIDA BRASIL 1000", "f": "json"})),
-    ("Rio (trechos)", "ArcGIS da prefeitura", lambda: _req("GET", rio.TRECHOS, params={"where": "1=1", "returnCountOnly": "true", "f": "json"})),
+    ("Rio (trechos)", "ArcGIS da prefeitura", lambda: _req("GET", rio.SEGMENTS_URL, params={"where": "1=1", "returnCountOnly": "true", "f": "json"})),
     ("CET-SP (radares)", "Power BI público", _pbi),
     ("CET-SP (limites)", "GeoSampa WFS", lambda: _req("GET", cet_sp.WFS, params={"service": "WFS", "request": "GetCapabilities"})),
     ("OpenStreetMap", "Geofabrik (HEAD do extrato)", lambda: _req("HEAD", f"{osm_pbf.GEOFABRIK_BASE}/norte-latest.osm.pbf")),
@@ -88,7 +88,7 @@ FONTES = [
 ]
 
 
-def _parece_bloqueio(body: bytes) -> bool:
+def _looks_blocked(body: bytes) -> bool:
     b = body[:2000].lower()
     return any(s in b for s in (b"captcha", b"access denied", b"forbidden", b"cloudflare", b"request rejected",
                                 b"location.replace", b"bot protection"))
@@ -99,23 +99,23 @@ def main(argv=None) -> int:
     ap.add_argument("--json", help="grava o resultado neste arquivo")
     args = ap.parse_args(argv)
     out = []
-    for nome, desc, fn in FONTES:
+    for name, desc, fn in SOURCES:
         t0 = time.time()
         try:
             status, body = fn()
-            ok = 200 <= status < 400 and not _parece_bloqueio(body)
-            erro = "" if ok else ("página de bloqueio" if _parece_bloqueio(body) else f"HTTP {status}")
+            ok = 200 <= status < 400 and not _looks_blocked(body)
+            error = "" if ok else ("página de bloqueio" if _looks_blocked(body) else f"HTTP {status}")
         except Exception as e:  # noqa: BLE001
-            status, ok, erro = 0, False, f"{type(e).__name__}: {e}"[:200]
+            status, ok, error = 0, False, f"{type(e).__name__}: {e}"[:200]
         dt = time.time() - t0
-        out.append({"fonte": nome, "o_que": desc, "ok": ok, "status": status, "segundos": round(dt, 1), "erro": erro})
-        print(f"{'OK  ' if ok else 'FALHA'} {nome:22} {status:>4} {dt:6.1f}s  {desc}{'  -> ' + erro if erro else ''}", flush=True)
+        out.append({"fonte": name, "o_que": desc, "ok": ok, "status": status, "segundos": round(dt, 1), "erro": error})
+        print(f"{'OK  ' if ok else 'FALHA'} {name:22} {status:>4} {dt:6.1f}s  {desc}{'  -> ' + error if error else ''}", flush=True)
     if args.json:
         with open(args.json, "w", encoding="utf-8") as f:
             json.dump(out, f, ensure_ascii=False, indent=1)
-    falhas = [x["fonte"] for x in out if not x["ok"]]
-    print(f"\n{len(out) - len(falhas)}/{len(out)} fontes responderam" + (f"; falharam: {', '.join(falhas)}" if falhas else ""))
-    return 1 if falhas else 0
+    failures = [x["fonte"] for x in out if not x["ok"]]
+    print(f"\n{len(out) - len(failures)}/{len(out)} fontes responderam" + (f"; falharam: {', '.join(failures)}" if failures else ""))
+    return 1 if failures else 0
 
 
 if __name__ == "__main__":

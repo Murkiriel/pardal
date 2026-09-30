@@ -2,9 +2,9 @@
 """Converte um arquivo CSV do Pardal para GeoJSON.
 
 Uso:
-    python scripts/para_geojson.py estados/GO/limites.csv
-    python scripts/para_geojson.py estados/GO/limites.csv --sem-estimados
-    python scripts/para_geojson.py brasil/limites_estimados.csv.gz -o estimados.geojson
+    python scripts/to_geojson.py estados/GO/limites.csv
+    python scripts/to_geojson.py estados/GO/limites.csv --no-estimated
+    python scripts/to_geojson.py brasil/limites_estimados.csv.gz -o estimados.geojson
 
 Funciona com radares, limites, limites estimados e estruturas, em .csv ou .csv.gz. O tipo é
 reconhecido pelas colunas: `lat,lng` vira ponto; `lat1,lng1,lat2,lng2` (estruturas) vira
@@ -65,46 +65,46 @@ def feature(row: Dict[str, str]) -> Optional[dict]:
     return {"type": "Feature", "geometry": geometry, "properties": props}
 
 
-def features(rows: Iterable[Dict[str, str]], sem_estimados: bool = False) -> Iterator[dict]:
+def features(rows: Iterable[Dict[str, str]], no_estimated: bool = False) -> Iterator[dict]:
     for row in rows:
-        if sem_estimados and row.get("estimated") == "1":
+        if no_estimated and row.get("estimated") == "1":
             continue
         f = feature(row)
         if f is not None:
             yield f
 
 
-def converter(entrada: str, saida: str, sem_estimados: bool = False) -> int:
+def converter(input_path: str, output: str, no_estimated: bool = False) -> int:
     """Grava o GeoJSON em saida, um Feature por vez (não carrega o arquivo inteiro na
     memória). Devolve quantos Features foram escritos."""
     n = 0
-    with _open(entrada) as fi, open(saida, "w", encoding="utf-8") as fo:
+    with _open(input_path) as fi, open(output, "w", encoding="utf-8") as fo:
         fo.write('{"type":"FeatureCollection","attribution":' + json.dumps(ATTRIBUTION, ensure_ascii=False)
                  + ',"features":[\n')
-        for f in features(csv.DictReader(fi), sem_estimados):
+        for f in features(csv.DictReader(fi), no_estimated):
             fo.write((",\n" if n else "") + json.dumps(f, ensure_ascii=False, separators=(",", ":")))
             n += 1
         fo.write("\n]}\n")
     return n
 
 
-def saida_padrao(entrada: str) -> str:
-    base = entrada[:-3] if entrada.endswith(".gz") else entrada
+def default_output(input_path: str) -> str:
+    base = input_path[:-3] if input_path.endswith(".gz") else input_path
     return (base[:-4] if base.endswith(".csv") else base) + ".geojson"
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description="Converte um CSV do Pardal (radares, limites, estruturas) para GeoJSON.")
-    ap.add_argument("entrada", help="arquivo .csv ou .csv.gz do Pardal")
-    ap.add_argument("-o", "--saida", help="arquivo .geojson de saída (padrão: ao lado da entrada)")
-    ap.add_argument("--sem-estimados", action="store_true",
+    ap.add_argument("input_path", help="arquivo .csv ou .csv.gz do Pardal")
+    ap.add_argument("-o", "--output", help="arquivo .geojson de saída (padrão: ao lado da entrada)")
+    ap.add_argument("--no-estimated", action="store_true",
                     help="deixa de fora os limites estimados (estimated=1), só os sinalizados")
     args = ap.parse_args(argv)
-    if not os.path.exists(args.entrada):
-        ap.error(f"arquivo não encontrado: {args.entrada}")
-    saida = args.saida or saida_padrao(args.entrada)
-    n = converter(args.entrada, saida, args.sem_estimados)
-    print(f"{n} itens -> {saida}")
+    if not os.path.exists(args.input_path):
+        ap.error(f"arquivo não encontrado: {args.input_path}")
+    output = args.output or default_output(args.input_path)
+    n = converter(args.input_path, output, args.no_estimated)
+    print(f"{n} itens -> {output}")
     return 0
 
 

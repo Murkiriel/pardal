@@ -1,4 +1,4 @@
-"""Testes da publicação (scripts/publicar.py) e das novas tentativas de download (_http).
+"""Testes da publicação (scripts/publish.py) e das novas tentativas de download (_http).
 
     python -m unittest discover -s datakit/tests -t .     # de dentro de gerador/
 """
@@ -11,7 +11,7 @@ import requests
 
 from datakit.sources import _http
 
-_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "publicar.py"))
+_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "publish.py"))
 _spec = importlib.util.spec_from_file_location("publicar", _PATH)
 assert _spec is not None and _spec.loader is not None
 pub = importlib.util.module_from_spec(_spec)
@@ -22,48 +22,48 @@ def _cat(**ufs):
     return {"ufs": {uf: {"counts": c} for uf, c in ufs.items()}}
 
 
-class Quedas(unittest.TestCase):
+class Drops(unittest.TestCase):
     OLD = _cat(SP={"cameras": 4772, "limits": 459962, "structs": 20092},
                GO={"cameras": 1515, "limits": 120941, "structs": 4915})
 
     def test_same_or_growing_passes(self):
         new = _cat(SP={"cameras": 4800, "limits": 459962, "structs": 20092},
                    GO={"cameras": 1515, "limits": 125310, "structs": 4915})
-        self.assertEqual(pub.quedas(self.OLD, new), [])
+        self.assertEqual(pub.drops(self.OLD, new), [])
 
     def test_a_source_down_is_caught(self):
         # CET-SP fora do ar: ~43 mil pontos de limite a menos em SP
         new = _cat(SP={"cameras": 4772, "limits": 416991, "structs": 20092},
                    GO={"cameras": 1515, "limits": 120941, "structs": 4915})
-        self.assertEqual(pub.quedas(self.OLD, new), ["SP: limites 459962 -> 416991 (-9%)"])
+        self.assertEqual(pub.drops(self.OLD, new), ["SP: limites 459962 -> 416991 (-9%)"])
 
     def test_small_states_do_not_trip_on_a_few_items(self):
         old = _cat(AC={"cameras": 5, "limits": 6301, "structs": 377})
         new = _cat(AC={"cameras": 3, "limits": 6301, "structs": 377})   # -40%, mas só 2 radares
-        self.assertEqual(pub.quedas(old, new), [])
+        self.assertEqual(pub.drops(old, new), [])
 
     def test_failures_list_never_reaches_the_published_catalog(self):
-        self.assertNotIn("falhas", pub.rewrite_catalog({"ufs": {}, "falhas": ["CET-SP: erro"]}))
+        self.assertNotIn("failures", pub.rewrite_catalog({"ufs": {}, "failures": ["CET-SP: erro"]}))
 
     def test_missing_state_and_big_drop(self):
         new = _cat(SP={"cameras": 2000, "limits": 459962, "structs": 20092})
-        self.assertEqual(pub.quedas(self.OLD, new), ["GO: sumiu do catálogo", "SP: radares 4772 -> 2000 (-58%)"])
+        self.assertEqual(pub.drops(self.OLD, new), ["GO: sumiu do catálogo", "SP: radares 4772 -> 2000 (-58%)"])
 
     def test_first_publication_has_nothing_to_compare(self):
-        self.assertEqual(pub.quedas({}, self.OLD), [])
+        self.assertEqual(pub.drops({}, self.OLD), [])
 
 
-class Falhas(unittest.TestCase):
+class Failures(unittest.TestCase):
     def test_registered_once_and_listed(self):
-        from datakit import falhas
-        antes = len(falhas.lista())
-        falhas.registrar("CET-SP", ConnectionResetError("reset"))
-        falhas.registrar("CET-SP", ConnectionResetError("reset"))
-        self.assertEqual(len(falhas.lista()), antes + 1)
-        self.assertTrue(falhas.lista()[-1].startswith("CET-SP: ConnectionResetError"))
+        from datakit import failures
+        before = len(failures.recorded())
+        failures.record("CET-SP", ConnectionResetError("reset"))
+        failures.record("CET-SP", ConnectionResetError("reset"))
+        self.assertEqual(len(failures.recorded()), before + 1)
+        self.assertTrue(failures.recorded()[-1].startswith("CET-SP: ConnectionResetError"))
 
 
-class OsmAtualizado(unittest.TestCase):
+class OsmUpdate(unittest.TestCase):
     def test_downloads_only_a_newer_extract(self):
         from datakit.sources.osm_pbf import needs_update
         old, new = "Mon, 28 Sep 2026 22:49:39 GMT", "Tue, 29 Sep 2026 21:10:02 GMT"
@@ -74,7 +74,7 @@ class OsmAtualizado(unittest.TestCase):
         self.assertTrue(needs_update(old, ""))        # Geofabrik sem data: baixa
 
 
-class Retentativa(unittest.TestCase):
+class Retries(unittest.TestCase):
     def _flaky(self, errors):
         calls = []
 
@@ -88,32 +88,32 @@ class Retentativa(unittest.TestCase):
     def test_retries_a_dropped_connection_then_succeeds(self):
         fn, calls = self._flaky([requests.exceptions.ChunkedEncodingError("reset")])
         waits = []
-        self.assertEqual(_http.com_retentativa(fn, dormir=waits.append), "ok")
-        self.assertEqual((len(calls), waits), (2, [_http.ESPERA_S]))
+        self.assertEqual(_http.with_retries(fn, sleep_fn=waits.append), "ok")
+        self.assertEqual((len(calls), waits), (2, [_http.WAIT_S]))
 
     def test_gives_up_after_the_last_attempt(self):
         fn, calls = self._flaky([requests.ConnectionError("x")] * 5)
         with self.assertRaises(requests.ConnectionError):
-            _http.com_retentativa(fn, dormir=lambda s: None)
-        self.assertEqual(len(calls), _http.TENTATIVAS)
+            _http.with_retries(fn, sleep_fn=lambda s: None)
+        self.assertEqual(len(calls), _http.ATTEMPTS)
 
     def test_client_errors_are_not_retried(self):
         resp = requests.Response()
         resp.status_code = 404
         fn, calls = self._flaky([requests.HTTPError(response=resp)])
         with self.assertRaises(requests.HTTPError):
-            _http.com_retentativa(fn, dormir=lambda s: None)
+            _http.with_retries(fn, sleep_fn=lambda s: None)
         self.assertEqual(len(calls), 1)
-        self.assertFalse(_http.transitorio(subprocess.CalledProcessError(22, "curl")))
+        self.assertFalse(_http.is_transient(subprocess.CalledProcessError(22, "curl")))
         resp.status_code = 503
-        self.assertTrue(_http.transitorio(requests.HTTPError(response=resp)))
+        self.assertTrue(_http.is_transient(requests.HTTPError(response=resp)))
 
 
 if __name__ == "__main__":
     unittest.main()
 
 
-class Resiliencia(unittest.TestCase):
+class Resilience(unittest.TestCase):
     def setUp(self):
         from unittest import mock
         _http._DEAD_HOSTS.clear()
@@ -131,23 +131,23 @@ class Resiliencia(unittest.TestCase):
         def boom():
             calls.append(1)
             raise requests.ConnectTimeout("sem conexão")
-        orig = _http.ESPERA_S
-        _http.ESPERA_S = 0
+        orig = _http.WAIT_S
+        _http.WAIT_S = 0
         try:
             with self.assertRaises(requests.ConnectTimeout):
                 _http.guarded("https://servicos.exemplo.gov.br/a.json", boom)
-            self.assertEqual(len(calls), _http.TENTATIVAS)
+            self.assertEqual(len(calls), _http.ATTEMPTS)
             with self.assertRaises(ConnectionError):
                 _http.guarded("https://servicos.exemplo.gov.br/b.json", boom)
-            self.assertEqual(len(calls), _http.TENTATIVAS)           # nem tentou de novo
+            self.assertEqual(len(calls), _http.ATTEMPTS)           # nem tentou de novo
             self.assertEqual(_http.guarded("https://outro.gov.br/x", lambda: "ok"), "ok")
         finally:
-            _http.ESPERA_S = orig
+            _http.WAIT_S = orig
             _http._DEAD_HOSTS.clear()
 
     def test_read_timeout_does_not_condemn_the_host(self):
-        orig = _http.ESPERA_S
-        _http.ESPERA_S = 0
+        orig = _http.WAIT_S
+        _http.WAIT_S = 0
         try:
             def slow():
                 raise requests.ReadTimeout("lento")
@@ -155,13 +155,13 @@ class Resiliencia(unittest.TestCase):
                 _http.guarded("https://lento.gov.br/a", slow)
             self.assertNotIn("lento.gov.br", _http._DEAD_HOSTS)
         finally:
-            _http.ESPERA_S = orig
+            _http.WAIT_S = orig
 
     def test_cet_uses_the_saved_copy_and_warns_when_power_bi_fails(self):
         import json
         import tempfile
         from unittest import mock
-        from datakit import falhas
+        from datakit import failures
         from datakit.sources import cet_sp
         raw = tempfile.mkdtemp()
         rows = [{"CÓDIGO LOCAL": "1", "LATITUDE": -23.60, "LONGITUDE": -46.66, "DESCRIÇÃO DO LOCAL": "R X",
@@ -169,36 +169,36 @@ class Resiliencia(unittest.TestCase):
         with mock.patch.object(cet_sp._powerbi, "model_id", return_value=1), \
                 mock.patch.object(cet_sp._powerbi, "query_table", return_value=rows):
             self.assertEqual(len(cet_sp.load(raw)[0]), 1)             # leitura boa: guarda a cópia
-        antes = len(falhas.avisos())
+        before = len(failures.warnings())
         with mock.patch.object(cet_sp._powerbi, "model_id", side_effect=RuntimeError("mudou")):
             self.assertEqual(len(cet_sp.load(raw)[0]), 1)             # falhou: usa a cópia
-        self.assertEqual(len(falhas.avisos()), antes + 1)
-        self.assertIn("CET-SP", falhas.avisos()[-1])
+        self.assertEqual(len(failures.warnings()), before + 1)
+        self.assertIn("CET-SP", failures.warnings()[-1])
         with open(os.path.join(raw, cet_sp.CACHE_FILE), encoding="utf-8") as f:
             self.assertEqual(json.load(f), rows)
 
     def test_inmetro_state_without_copy_is_a_failure_with_copy_a_warning(self):
         import tempfile
         from unittest import mock
-        from datakit import falhas
+        from datakit import failures
         from datakit.sources import inmetro
         raw = tempfile.mkdtemp()
         os.makedirs(os.path.join(raw, "inmetro"))
         with open(os.path.join(raw, "inmetro", "GO.json"), "w", encoding="utf-8") as f:
             f.write("[]")
-        f0, a0 = len(falhas.lista()), len(falhas.avisos())
+        f0, a0 = len(failures.recorded()), len(failures.warnings())
         with mock.patch.object(inmetro, "get_bytes", side_effect=requests.ConnectTimeout("x")):
             inmetro.load(raw)
-        self.assertEqual(len(falhas.lista()) - f0, 25)            # 25 UFs sem cópia (o DF não tem arquivo)
-        self.assertEqual(len(falhas.avisos()) - a0, 1)            # GO usou a cópia
-        self.assertTrue(falhas.avisos()[-1].startswith("Inmetro GO"))
+        self.assertEqual(len(failures.recorded()) - f0, 25)            # 25 UFs sem cópia (o DF não tem arquivo)
+        self.assertEqual(len(failures.warnings()) - a0, 1)            # GO usou a cópia
+        self.assertTrue(failures.warnings()[-1].startswith("Inmetro GO"))
 
     def test_warnings_never_reach_the_published_catalog(self):
-        self.assertNotIn("avisos", pub.rewrite_catalog({"ufs": {}, "avisos": ["Inmetro DF: cópia"]}))
+        self.assertNotIn("warnings", pub.rewrite_catalog({"ufs": {}, "warnings": ["Inmetro DF: cópia"]}))
 
 
-class CommitSoDosDados(unittest.TestCase):
-    """publicar.py --commit só leva brasil/, estados/ e catalog.json — nunca o que mais estiver
+class CommitDataOnly(unittest.TestCase):
+    """publish.py --commit só leva brasil/, estados/ e catalog.json — nunca o que mais estiver
     pendente no repositório (código do gerador não revisado, arquivos soltos)."""
 
     def _git(self, repo, *a):
@@ -242,9 +242,9 @@ class CommitSoDosDados(unittest.TestCase):
             shutil.rmtree(dist, ignore_errors=True)
 
 
-class BuildEmAndamento(unittest.TestCase):
+class BuildInProgress(unittest.TestCase):
     """Enquanto o build roda (ou se ele caiu no meio), data/dist tem pacotes de dois builds
-    misturados: o publicar.py não monta nada."""
+    misturados: o publish.py não monta nada."""
 
     def _dist(self, tmp):
         import json
@@ -254,16 +254,16 @@ class BuildEmAndamento(unittest.TestCase):
             json.dump({"ufs": {}}, f)
         return dist
 
-    def test_publicar_refuses_while_the_marker_exists(self):
+    def test_publish_refuses_while_the_marker_exists(self):
         import tempfile
         from datakit import build
         with tempfile.TemporaryDirectory() as tmp:
             dist, repo = self._dist(tmp), os.path.join(tmp, "repo")
             os.makedirs(repo)
-            with open(os.path.join(dist, build.MARCA_EM_ANDAMENTO), "w", encoding="utf-8") as f:
+            with open(os.path.join(dist, build.IN_PROGRESS_MARKER), "w", encoding="utf-8") as f:
                 f.write("2026-09-30T00:00:00Z\n")
             with self.assertRaises(SystemExit) as cm:
-                pub.main(["--repo", repo, "--dist", dist, "--aceitar-falhas", "--aceitar-queda"])
+                pub.main(["--repo", repo, "--dist", dist, "--accept-failures", "--accept-drop"])
             self.assertIn("andamento", str(cm.exception.code))
             self.assertEqual(os.listdir(repo), [])
 
@@ -275,7 +275,7 @@ class BuildEmAndamento(unittest.TestCase):
         seen = []
 
         def fake_one(uf, ctx, packs_dir, split):
-            seen.append(os.path.exists(os.path.join(dist, build.MARCA_EM_ANDAMENTO)))
+            seen.append(os.path.exists(os.path.join(dist, build.IN_PROGRESS_MARKER)))
 
         def fake_catalog(packs, d):
             if catalog_fails:
@@ -290,7 +290,7 @@ class BuildEmAndamento(unittest.TestCase):
                 build.main(["--uf", "GO", "--no-polygon", "--dist", dist, "--packs", os.path.join(tmp, "p")])
             except RuntimeError:
                 pass
-        return seen, os.path.exists(os.path.join(dist, build.MARCA_EM_ANDAMENTO))
+        return seen, os.path.exists(os.path.join(dist, build.IN_PROGRESS_MARKER))
 
     def test_build_marks_while_running_and_clears_at_the_end(self):
         import tempfile
@@ -303,7 +303,7 @@ class BuildEmAndamento(unittest.TestCase):
             self.assertEqual(self._run_build(tmp, catalog_fails=True), ([True], True))
 
 
-class SessaoHttp(unittest.TestCase):
+class HttpSession(unittest.TestCase):
     """Uma sessão HTTP para o build inteiro: as requisições ao mesmo servidor (27 UFs do Inmetro,
     páginas do ArcGIS) reusam a conexão. Mesmos cabeçalhos e tempos de antes."""
 

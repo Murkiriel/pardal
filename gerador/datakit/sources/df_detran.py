@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from typing import List, Optional
 
-from datakit.contexto import Carga, Contexto
+from datakit.context import SourceData, BuildContext
 from datakit.common.model import Camera, CameraKind
 from datakit.sources._arcgis import query_all
 from datakit.sources._http import in_br
@@ -44,6 +44,6 @@ def load(raw_dir: str, bbox=None):
     return out, []
 
 
-def carregar(ctx: Contexto) -> Carga:
-    """Contrato das fontes (datakit/contexto.py)."""
-    return Carga(*load(ctx.raw_dir))
+def fetch(ctx: BuildContext) -> SourceData:
+    """Contrato das fontes (datakit/context.py)."""
+    return SourceData(*load(ctx.raw_dir))

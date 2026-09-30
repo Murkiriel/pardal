@@ -31,7 +31,7 @@ class Camera:
     end_lng: Optional[float] = None
     direction_deg: Optional[int] = None
     # Sentido nominal da rodovia ("N", "S", "L", "O"), para as fontes que dão só isso (SP).
-    # Vira direction_deg com a geometria do OSM (common/sentido.py); não vai para o CSV.
+    # Vira direction_deg com a geometria do OSM (common/direction.py); não vai para o CSV.
     heading_hint: Optional[str] = field(default=None, compare=False)
 
     HEADER = ("lat", "lng", "kind", "limit_kmh", "source", "active", "end_lat", "end_lng", "direction_deg")
@@ -192,16 +192,16 @@ def _fold(keep: Camera, other: Camera, source: str) -> Camera:
 # cada equipamento: um por pista, por faixa ou por aproximação de cruzamento).
 def _audit_row(rule: str, a: Camera, b: Camera, dist: float) -> dict:
     """Uma junção, para a auditoria (data/audit/juncoes_<UF>.csv; não é publicada)."""
-    return {"regra": rule, "fonte_a": a.source, "fonte_b": b.source, "dist_m": round(dist, 1),
-            "tipo_a": a.kind.value, "tipo_b": b.kind.value,
-            "limite_a": "" if a.limit_kmh is None else a.limit_kmh, "limite_b": "" if b.limit_kmh is None else b.limit_kmh,
-            "sentido_a": "" if a.direction_deg is None else a.direction_deg,
-            "sentido_b": "" if b.direction_deg is None else b.direction_deg,
-            "ativo_a": int(a.active), "ativo_b": int(b.active), "lat": a.lat, "lng": a.lng}
+    return {"rule": rule, "source_a": a.source, "source_b": b.source, "dist_m": round(dist, 1),
+            "kind_a": a.kind.value, "kind_b": b.kind.value,
+            "limit_a": "" if a.limit_kmh is None else a.limit_kmh, "limit_b": "" if b.limit_kmh is None else b.limit_kmh,
+            "direction_a": "" if a.direction_deg is None else a.direction_deg,
+            "direction_b": "" if b.direction_deg is None else b.direction_deg,
+            "active_a": int(a.active), "active_b": int(b.active), "lat": a.lat, "lng": a.lng}
 
 
-AUDIT_HEADER = ("regra", "fonte_a", "fonte_b", "dist_m", "tipo_a", "tipo_b", "limite_a", "limite_b",
-                "sentido_a", "sentido_b", "ativo_a", "ativo_b", "lat", "lng")
+AUDIT_HEADER = ("rule", "source_a", "source_b", "dist_m", "kind_a", "kind_b", "limit_a", "limit_b",
+                "direction_a", "direction_b", "active_a", "active_b", "lat", "lng")
 
 
 def merge_cross_agency(official: List[Camera], radius_m: float = 30.0,
@@ -226,7 +226,7 @@ def merge_cross_agency(official: List[Camera], radius_m: float = 30.0,
             if not _absorbs(c, o) or dist > radius_m:
                 continue
             if audit is not None:
-                audit.append(_audit_row("entre_orgaos", c, o, dist))
+                audit.append(_audit_row("cross_agency", c, o, dist))
             keep, other = (o, c) if (c.direction_deg is None and o.direction_deg is not None) else (c, o)
             c = replace(_fold(keep, other, join_sources(c.source, o.source)), active=c.active or o.active)
             cams[i] = c
@@ -319,7 +319,7 @@ def absorb_osm(official: List[Camera], osm: List[Camera], radius_m: float = ABSO
         i = best[1]
         o = official[i]
         if audit is not None:
-            audit.append(_audit_row("osm_oficial", o, c, best[0][1]))
+            audit.append(_audit_row("osm_official", o, c, best[0][1]))
         official[i] = replace(_fold(o, replace(c, direction_deg=None), join_sources(o.source, "OSM")),
                               direction_deg=o.direction_deg)
         joined += 1

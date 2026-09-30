@@ -34,15 +34,15 @@ def _ensure_mesh(raw_dir: str) -> Optional[str]:
             with open(path, "wb") as f:
                 f.write(data)
         except Exception as e:  # noqa: BLE001
-            from datakit import falhas
-            falhas.registrar("IBGE (malha das UFs; recorte por bbox)", e)
+            from datakit import failures
+            failures.record("IBGE (malha das UFs; recorte por bbox)", e)
             return None
     return path
 
 
 def polygons(raw_dir: str) -> Dict[str, object]:
     """{UF: shapely geometry}. {} se shapely ou a malha não estiverem disponíveis. Lê a cada
-    chamada: o build guarda o resultado no contexto (Contexto.polygons)."""
+    chamada: o build guarda o resultado no contexto (BuildContext.polygons)."""
     try:
         from shapely.geometry import shape
     except Exception:  # noqa: BLE001

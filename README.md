@@ -35,13 +35,13 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
   estruturas.csv
 catalog.json            índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
-scripts/para_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
+scripts/to_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
 gerador/                código que baixa as fontes e gera todos os arquivos acima
 ```
 
 Limites e estruturas são publicados só em CSV (os limites do Brasil com os estimados num
 arquivo à parte, para caber no limite de 100 MB por arquivo do GitHub). Para ter qualquer um
-deles em GeoJSON, use o `scripts/para_geojson.py`.
+deles em GeoJSON, use o `scripts/to_geojson.py`.
 Limites não saem em GPX nem KML: aparelhos de GPS usam esses formatos para pontos de
 interesse, e o limite é um valor da via, não um lugar.
 
@@ -67,7 +67,7 @@ Paulo), ele substitui o do OpenStreetMap naquele trecho.
 
 | Coluna | Significado |
 |---|---|
-| `source` | `ANTT`, `RIO`, `CET-SP`, `OSM` (valor sinalizado no mapa), `OSM:zone` ou `OSM:classe` (estimados) |
+| `source` | `ANTT`, `RIO`, `CET-SP`, `OSM` (valor sinalizado no mapa), `OSM:zone` ou `OSM:class` (estimados) |
 | `estimated` | `1` quando o valor **não é sinalizado**: foi estimado pela regra do Código de Trânsito para aquele tipo de via (rodovia, avenida, via local), porque a via não tem limite cadastrado. `0` para valor sinalizado ou oficial |
 | `limit_low_kmh` | Só nos estimados: a mesma estimativa pelo lado baixo da faixa legal, para quem prefere errar para o lado cauteloso (ex.: 80 onde o típico é 100) |
 | `direction_deg` | Preenchido quando a placa vale só para um sentido (rumo do trânsito em graus, como nos radares). Nas rodovias concedidas em que cada sentido tem um limite diferente, e nas vias do OpenStreetMap marcadas com um limite por sentido (`maxspeed:forward`/`maxspeed:backward`), há um ponto para cada sentido no mesmo lugar. Vazio = vale para os dois sentidos |
@@ -81,14 +81,14 @@ Todos em UTF-8, coordenadas em graus decimais (WGS84/SIRGAS 2000).
 
 ## Converter para GeoJSON
 
-O `scripts/para_geojson.py` converte qualquer CSV do Pardal (radares, limites, limites estimados,
+O `scripts/to_geojson.py` converte qualquer CSV do Pardal (radares, limites, limites estimados,
 estruturas, inclusive `.csv.gz`) para GeoJSON. Só precisa de Python 3.8 ou mais novo, sem
 instalar nada:
 
 ```
-python scripts/para_geojson.py estados/GO/limites.csv                   # gera estados/GO/limites.geojson
-python scripts/para_geojson.py estados/GO/limites.csv --sem-estimados   # só os limites sinalizados
-python scripts/para_geojson.py brasil/limites_estimados.csv -o estimados.geojson
+python scripts/to_geojson.py estados/GO/limites.csv                   # gera estados/GO/limites.geojson
+python scripts/to_geojson.py estados/GO/limites.csv --no-estimated   # só os limites sinalizados
+python scripts/to_geojson.py brasil/limites_estimados.csv -o estimados.geojson
 ```
 
 Pontos viram `Point`, estruturas viram `LineString` e as demais colunas viram propriedades
@@ -112,7 +112,7 @@ Paulo e o `maxspeed` do OpenStreetMap no resto, mais os estimados na rede princi
 `estados/<UF>/limites.csv`.
 
 **Como abrir os limites no QGIS ou num mapa web?** Converta para GeoJSON com
-`python scripts/para_geojson.py estados/<UF>/limites.csv`, ou abra o CSV direto no QGIS como camada
+`python scripts/to_geojson.py estados/<UF>/limites.csv`, ou abra o CSV direto no QGIS como camada
 de texto delimitado, com `lng` como X e `lat` como Y.
 
 **O que é limite estimado? Posso ignorar?** Quando a via não tem limite cadastrado, o
