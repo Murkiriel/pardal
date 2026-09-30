@@ -22,25 +22,10 @@ from typing import Optional
 from datakit.build_pack import CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE
 from datakit.common.ufs import uf_name
 
-# Etiquetas antigas, em português, escritas junto com as novas enquanto quem lê o catálogo migra
-# ("expandir e depois contrair"; ver Convenções no README). Saem na versão 2 do formato (schema 2).
-LEGACY_KEYS = {"name": "nome", "coverage": "cobertura", "cameras": "radares", "limits": "limites",
-               "limits_estimated": "limites_estimados", "structs": "estruturas", "included_ufs": "ufs_incluidas"}
-_LEGACY_LEVEL = {"state": "estadual", "none": "nenhum"}
-
-
-def with_legacy_keys(entry: dict) -> dict:
-    """A entrada com as etiquetas antigas acrescentadas (mesmo conteúdo das novas)."""
-    out = dict(entry)
-    for new, old in LEGACY_KEYS.items():
-        if new in entry:
-            out[old] = entry[new]
-    cov = entry.get("coverage")
-    if cov is not None:
-        out["cobertura"] = {"nivel": "+".join(_LEGACY_LEVEL.get(p, p) for p in cov["level"].split("+")),
-                            "fontes": cov["sources"]}
-    return out
-
+# Versão do formato do catálogo. 2 (2026-09-30): nome catalogo.json e etiquetas em inglês (name,
+# coverage, cameras, limits, limits_estimated, structs, included_ufs); a 1 era catalog.json com
+# nome, cobertura, radares, limites, limites_estimados, estruturas, ufs_incluidas.
+SCHEMA = 2
 
 _FEDERAL = {"DNIT", "ANTT"}
 _MUNICIPAL = {"PMF", "PCR", "PMJP", "CET-SP", "RIO", "BHTRANS"}
@@ -120,10 +105,10 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             struct_dst = os.path.join(out, STRUCTS_FILE)
             shutil.copyfile(struct_src, struct_dst)
             entry["structs"] = _file_ref(struct_dst, counts.get("structs"), dist_dir)
-        ufs[uf] = with_legacy_keys(entry)
+        ufs[uf] = entry
 
     catalog = {
-        "schema": 1,
+        "schema": SCHEMA,
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "base_url": base_url,  # dica; quem consome pode sobrescrever
         "ufs": ufs,

@@ -51,8 +51,8 @@ class Brazil(unittest.TestCase):
                              [("-15.8", "-47.8", "40", "OSM:class", "1", "30", "")])
             self.assertEqual(len(_rows(os.path.join(dist, "brasil", "estruturas.csv"))), 2)
             self.assertEqual(br["cameras"]["file"], "brasil/radares.csv")
-            self.assertEqual(br["radares"], br["cameras"])             # etiqueta antiga, até o schema 2
-            self.assertEqual(br["ufs_incluidas"], br["included_ufs"])
+            self.assertEqual(br["included_ufs"], ["DF", "GO"])
+            self.assertNotIn("radares", br)                            # etiquetas antigas saíram no schema 2
             self.assertEqual(br["counts"], {"cameras": 3, "limits": 2, "limits_estimated": 1, "structs": 2})
             self.assertEqual(br["cameras"]["count"], 3)
 
@@ -67,9 +67,9 @@ class Brazil(unittest.TestCase):
 
 
 class CatalogKeys(unittest.TestCase):
-    """Etiquetas em inglês no catalogo.json, com as antigas (português) ao lado até o schema 2."""
+    """Etiquetas em inglês no catalogo.json (schema 2); as antigas, em português, não saem mais."""
 
-    def test_state_entry_has_new_and_legacy_keys(self):
+    def test_state_entry_has_only_the_english_keys(self):
         import json
         from datakit import build_catalog
         with tempfile.TemporaryDirectory() as tmp:
@@ -78,16 +78,16 @@ class CatalogKeys(unittest.TestCase):
                   ["-16.0,-49.0,60,OSM,0,,"], ["-16.0,-49.0,-16.0,-49.01,BRIDGE"])
             with open(os.path.join(packs, "GO", "manifesto.json"), "w", encoding="utf-8") as f:
                 json.dump({"bbox": [1, 2, 3, 4], "counts": {"cameras": 2, "limits": 1, "structs": 1}}, f)
-            go = build_catalog.build(packs, dist)["ufs"]["GO"]
+            cat = build_catalog.build(packs, dist)
+            go = cat["ufs"]["GO"]
+        self.assertEqual(cat["schema"], 2)
         self.assertEqual(go["name"], "Goiás")
         self.assertEqual(go["cameras"]["file"], "estados/GO/radares.csv")
         self.assertEqual(go["limits"]["file"], "estados/GO/limites.csv")
         self.assertEqual(go["structs"]["file"], "estados/GO/estruturas.csv")
         self.assertEqual(go["coverage"], {"level": "federal+state", "sources": ["DER-GO", "DNIT", "OSM"]})
-        # as antigas, iguais, até o schema 2
-        self.assertEqual((go["nome"], go["radares"], go["limites"], go["estruturas"]),
-                         (go["name"], go["cameras"], go["limits"], go["structs"]))
-        self.assertEqual(go["cobertura"], {"nivel": "federal+estadual", "fontes": ["DER-GO", "DNIT", "OSM"]})
+        for old in ("nome", "cobertura", "radares", "limites", "estruturas"):
+            self.assertNotIn(old, go)
 
 
 class FileSize(unittest.TestCase):

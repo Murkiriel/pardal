@@ -35,9 +35,9 @@ REPO = os.path.dirname(GENERATOR_DIR)
 _PUBLISHED_NAME = re.compile(r"^(radares|limites_estimados|limites|estruturas)\.(csv\.gz|csv|geojson|kml|gpx)$")
 _MANAGED = ("brasil", "estados")
 CATALOG = "catalogo.json"
-# O nome antigo do catálogo, publicado junto (conteúdo idêntico) enquanto quem lê migra para o novo
-# ("expandir e depois contrair"; ver Convenções no README do gerador). Sai numa próxima versão.
-LEGACY_CATALOG = "catalog.json"
+# Nome do catálogo até o schema 1: lido como o publicado anterior se o novo ainda não existir, e
+# apagado do repositório na publicação (entra no commit como remoção).
+OLD_CATALOG = "catalog.json"
 
 # Uma fonte que falha no build é pulada e o build termina bem; sem estas checagens, um portal fora
 # do ar publicaria um estado com menos dados sem ninguém notar. Duas travas: a lista `falhas`
@@ -140,7 +140,7 @@ def main(argv=None) -> int:
 
     published = os.path.join(args.repo, CATALOG)
     if not os.path.exists(published):
-        published = os.path.join(args.repo, LEGACY_CATALOG)
+        published = os.path.join(args.repo, OLD_CATALOG)
     if os.path.exists(published):
         with open(published, encoding="utf-8") as f:
             problems = drops(json.load(f), cat)
@@ -162,9 +162,10 @@ def main(argv=None) -> int:
         dst = os.path.join(args.repo, *rel.split("/"))
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         shutil.copy2(src, dst)
-    for name in (CATALOG, LEGACY_CATALOG):
-        with open(os.path.join(args.repo, name), "w", encoding="utf-8") as f:
-            json.dump(rewrite_catalog(cat), f, ensure_ascii=False, indent=1)
+    with open(os.path.join(args.repo, CATALOG), "w", encoding="utf-8") as f:
+        json.dump(rewrite_catalog(cat), f, ensure_ascii=False, indent=1)
+    if os.path.exists(os.path.join(args.repo, OLD_CATALOG)):
+        os.remove(os.path.join(args.repo, OLD_CATALOG))
     print(f"{len(wanted)} arquivos montados em {args.repo}")
 
     if not args.commit:
@@ -175,7 +176,7 @@ def main(argv=None) -> int:
     # Só os dados: o commit nunca leva o que mais estiver pendente no repositório (código do
     # gerador ainda não revisado, arquivos soltos). Inclui caminhos que só existem no índice
     # (pasta apagada por inteiro), para a remoção também entrar.
-    paths = [p for p in (*_MANAGED, CATALOG, LEGACY_CATALOG)
+    paths = [p for p in (*_MANAGED, CATALOG, OLD_CATALOG)
              if os.path.exists(os.path.join(args.repo, p)) or subprocess.run(
                  ["git", "-C", args.repo, "ls-files", "--", p], capture_output=True, text=True).stdout.strip()]
     git("add", "-A", "--", *paths)

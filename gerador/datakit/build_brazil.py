@@ -198,12 +198,12 @@ def build(packs_dir: str, dist_dir: str) -> dict:
 
     # acrescenta "BR" ao catalogo.json
     cat_path = os.path.join(dist_dir, "catalogo.json")
-    catalog: dict = {"schema": 1, "ufs": {}}
+    from datakit.build_catalog import SCHEMA
+    catalog: dict = {"schema": SCHEMA, "ufs": {}}
     if os.path.exists(cat_path):
         with open(cat_path, encoding="utf-8") as f:
             catalog = json.load(f)
-    from datakit.build_catalog import with_legacy_keys
-    catalog["ufs"]["BR"] = with_legacy_keys({
+    catalog["ufs"]["BR"] = {
         "name": "Brasil (tudo)",
         "bbox": [-34.0, -74.5, 6.0, -32.0],
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -215,7 +215,7 @@ def build(packs_dir: str, dist_dir: str) -> dict:
         "structs": files_meta.get("estruturas.csv"),
         "counts": counts,
         "included_ufs": ufs,
-    })
+    }
     with open(cat_path, "w", encoding="utf-8") as f:
         json.dump(catalog, f, ensure_ascii=False, indent=2)
     return catalog["ufs"]["BR"]

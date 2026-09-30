@@ -35,7 +35,6 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
   estruturas.csv
 catalogo.json           índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
-catalog.json            o mesmo índice com o nome antigo (sai numa próxima versão)
 scripts/to_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
 gerador/                código que baixa as fontes e gera todos os arquivos acima
 ```

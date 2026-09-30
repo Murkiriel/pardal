@@ -215,6 +215,8 @@ class CommitDataOnly(unittest.TestCase):
             self._git(repo, "config", "user.name", "teste")
             with open(os.path.join(repo, "LEIAME.md"), "w", encoding="utf-8") as f:
                 f.write("x")
+            with open(os.path.join(repo, "catalog.json"), "w", encoding="utf-8") as f:   # nome do schema 1
+                f.write('{"schema": 1, "ufs": {}}')
             self._git(repo, "add", "-A")
             self._git(repo, "commit", "-q", "-m", "inicial")
             # pendências que NÃO podem entrar no commit de dados
@@ -234,6 +236,8 @@ class CommitDataOnly(unittest.TestCase):
             self.assertEqual(pub.main(["--repo", repo, "--dist", dist, "--commit"]), 0)
             committed = set(self._git(repo, "show", "--name-only", "--pretty=format:", "HEAD").split())
             self.assertEqual(committed, {"catalogo.json", "catalog.json", "estados/GO/radares.csv"})
+            self.assertFalse(os.path.exists(os.path.join(repo, "catalog.json")))   # o nome antigo sai
+            self.assertEqual(self._git(repo, "ls-files", "catalog.json"), "")
             pending = self._git(repo, "status", "--porcelain")
             self.assertIn("solto.txt", pending)
             self.assertIn("gerador/", pending)
