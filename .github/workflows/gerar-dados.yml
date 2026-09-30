@@ -2,8 +2,12 @@ name: Gerar dados
 
 # Gera brasil/, estados/ e catalog.json do zero (fontes oficiais + OpenStreetMap) e publica.
 #
-# Todo dia 5, e quando disparado à mão (Actions → Gerar dados → Run workflow). À mão, só publica
-# se "publicar" for marcado; sem isso, gera e confere (o log e a auditoria ficam nos artefatos).
+# A cada 29 dias: todo dia, às 03:00 em Brasília, o job "intervalo" lê a data de geração dos
+# dados publicados (built_at do catalog.json) e só segue para o build se tiverem 29 dias ou mais.
+# Se o build falhar, no dia seguinte tenta de novo (os dados publicados continuam velhos).
+# Também pode ser disparado à mão (Actions → Gerar dados → Run workflow), a qualquer momento; à
+# mão, só publica se "publicar" for marcado; sem isso, gera e confere (o log e a auditoria ficam
+# nos artefatos).
 #
 # O DNIT e o Inmetro não aceitam conexão de fora do Brasil, e o portal de dados da ANTT às vezes
 # devolve uma página de bloqueio em vez dos dados; as máquinas do Actions ficam nos EUA. O
@@ -16,7 +20,7 @@ name: Gerar dados
 
 on:
   schedule:
-    - cron: "0 6 5 * *"   # dia 5, 03:00 em Brasília
+    - cron: "0 6 * * *"   # todo dia, 03:00 em Brasília (o job "intervalo" decide se gera)
   workflow_dispatch:
     inputs:
       publicar:
@@ -32,7 +36,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  intervalo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      rodar: ${{ steps.idade.outputs.rodar }}
+    steps:
+      - name: Idade dos dados publicados
+        id: idade
+        env:
+          INTERVALO_DIAS: "29"
+          EVENTO: ${{ github.event_name }}
+        run: |
+          if [ "$EVENTO" != "schedule" ]; then
+            echo "disparado à mão: gera"; echo "rodar=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          gerado=$(curl -sf https://raw.githubusercontent.com/Murkiriel/pardal/main/catalog.json \
+                   | python3 -c 'import json,sys; print(json.load(sys.stdin)["built_at"])') || gerado=""
+          if [ -z "$gerado" ]; then
+            echo "sem a data dos dados publicados: gera"; echo "rodar=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # dias arredondados: o horário do build não empurra a geração para o dia seguinte
+          dias=$(( ( $(date -u +%s) - $(date -u -d "$gerado" +%s) + 43200 ) / 86400 ))
+          echo "dados publicados gerados em $gerado ($dias dias)"
+          if [ "$dias" -ge "$INTERVALO_DIAS" ]; then
+            echo "rodar=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "rodar=false" >> "$GITHUB_OUTPUT"
+            echo "ainda não: gera quando completar $INTERVALO_DIAS dias"
+          fi
+
   gerar:
+    needs: intervalo
+    if: needs.intervalo.outputs.rodar == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 240
     env:

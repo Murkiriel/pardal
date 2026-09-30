@@ -83,8 +83,10 @@ O `publicar.py` não monta os arquivos se:
 
 ## Publicação automática
 
-O workflow `.github/workflows/gerar-dados.yml` gera e publica os dados todo dia 5 (03:00 em
-Brasília) numa máquina do GitHub Actions, e pode ser disparado à mão (Actions → Gerar dados →
+O workflow `.github/workflows/gerar-dados.yml` gera e publica os dados a cada 29 dias numa
+máquina do GitHub Actions: todo dia, às 03:00 em Brasília, confere a data de geração dos dados
+publicados (`built_at` do `catalog.json`) e só gera quando eles têm 29 dias ou mais — se o build
+falhar, tenta de novo no dia seguinte. Também pode ser disparado à mão (Actions → Gerar dados →
 Run workflow; só publica com "publicar" marcado). Roda os testes, o build completo e o
 `publicar.py --commit --push`, com as mesmas travas: fonte que falhou, estado que perdeu mais de
 5% ou arquivo acima de 95 MB fazem o job falhar sem publicar nada. O log do build, a auditoria
