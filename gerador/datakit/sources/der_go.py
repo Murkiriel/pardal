@@ -12,10 +12,11 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
 
+from datakit.contexto import Carga, Contexto
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.common.lrs import MeasuredLine, parse_km
 from datakit.common.sentido import direction_on, parse_sentido
-from datakit.sources._http import UA, HTTP_TIMEOUT, get_json, in_br
+from datakit.sources._http import in_br
 
 _BASE = "https://services2.arcgis.com/7dQGISjrwMAayhWe/arcgis/rest/services/"
 FS = _BASE + "Controle_de_Subst_de_Radares/FeatureServer/0/query"
@@ -24,18 +25,9 @@ SNAP_M = 150.0
 
 
 def _pages(url: str, fields: str, geometry: bool) -> List[dict]:
-    out, offset = [], 0
-    while True:
-        j = get_json(url, params={
-            "where": "1=1", "outFields": fields, "f": "json", "outSR": 4326,
-            "returnGeometry": "true" if geometry else "false",
-            "resultOffset": offset, "resultRecordCount": 1000,
-        })
-        feats = j.get("features", [])
-        out += feats
-        if len(feats) < 1000:
-            return out
-        offset += 1000
+    from datakit.sources._arcgis import query_all
+    return query_all(url, {"where": "1=1", "outFields": fields, "outSR": 4326,
+                           "returnGeometry": "true" if geometry else "false"})
 
 
 def load_network() -> Dict[str, List[MeasuredLine]]:
@@ -60,7 +52,7 @@ def direction(network: Dict[str, List[MeasuredLine]], sre: str, sentido: str, km
         return None
     best = None
     for line in network.get((sre or "").strip(), []):
-        if not line.near_bbox((lat, lng), SNAP_M / 100_000.0):
+        if not line.near_bbox((lat, lng), SNAP_M):
             continue
         km, d = line.project((lat, lng), SNAP_M)
         if d <= SNAP_M and (best is None or d < best[2]):
@@ -100,3 +92,8 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, limit, "DER-GO", True,
                           direction_deg=d))
     return out, []
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py)."""
+    return Carga(*load(ctx.raw_dir))

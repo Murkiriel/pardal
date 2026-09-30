@@ -11,9 +11,10 @@ from datakit.common.lrs import MeasuredLine, SnvRoutes, in_ranges, parse_km, par
 from datakit.common.model import override_limits
 from datakit import inmetro_status
 from datakit.sources import antt_placas, bh, df_detran, inmetro, rio
-from datakit.sources import der_go, der_sp, dnit, osm_pbf
-from datakit.common.model import merge_cameras, merge_limits
-from datakit.common.sentido import direction_on, hint_from_text, orient_to_hint, parse_sentido
+from datakit.sources import cet_sp, der_go, der_sp, dnit, osm_pbf
+from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, join_sources, merge_cameras,
+                                  merge_cross_agency, merge_limits, source_parts)
+from datakit.common.sentido import direction_on, hint_from_text, hint_target, orient_to_hint, parse_sentido
 
 
 def _line():
@@ -80,7 +81,8 @@ class Inmetro(unittest.TestCase):
 
     def test_apply_marks_by_km_skips_concessions_and_sources_with_status(self):
         snv = SnvRoutes({(60, "GO"): [_line()]})
-        at = lambda km: _line().at(km)
+        def at(km):
+            return _line().at(km)
         cams = [
             Camera(*at(2.0), CameraKind.FIXED, None, "OSM", True),     # medidor vencido perto
             Camera(*at(8.0), CameraKind.FIXED, None, "DNIT", True),    # medidor válido perto
@@ -92,6 +94,27 @@ class Inmetro(unittest.TestCase):
         self.assertEqual((st["desativados"], st["confirmados"]), (1, 1))
         out, _ = inmetro_status.apply(cams, "GO", idx, snv, {(60, "GO"): [(0.0, 11.2)]})
         self.assertTrue(all(c.active for c in out))  # trecho concedido: km não vale
+
+    def test_eligible_only_if_every_official_source_lacks_status(self):
+        """ANTT e DER-SP já dizem a situação; juntar o radar com o OSM não pode passar a
+        situação para o Inmetro."""
+        e = inmetro_status.eligible
+        self.assertFalse(e("ANTT+OSM"))
+        self.assertFalse(e("DER-SP+OSM"))
+        self.assertFalse(e("DNIT+ANTT"))
+        self.assertTrue(e("DNIT+OSM"))
+        self.assertTrue(e("OSM"))
+        self.assertTrue(e("DNIT"))
+        self.assertTrue(e("DETRAN-DF+DNIT"))
+
+    def test_apply_leaves_antt_osm_alone(self):
+        from datakit.common.lrs import MeasuredLine
+        snv = SnvRoutes({(60, "GO"): [MeasuredLine([(-16.0, -49.0), (-16.1, -49.0)], [0.0, 11.1])]})
+        idx = {(60, "GO"): [(5.55, False)]}
+        cam = Camera(-16.05, -49.0, CameraKind.FIXED, 80, "ANTT+OSM", True)
+        out, st = inmetro_status.apply([cam], "GO", idx, snv, {})
+        self.assertTrue(out[0].active)
+        self.assertEqual(st["desativados"], 0)
 
 
 class AnttPlacas(unittest.TestCase):
@@ -189,17 +212,32 @@ class SentidoNominal(unittest.TestCase):
         self.assertEqual(orient_to_hint(100.0, True, "L"), 100.0)  # mão única no sentido nominal
         self.assertIsNone(orient_to_hint(280.0, True, "L"))      # a outra pista
 
-    def test_probe_picks_the_carriageway_that_matches(self):
-        cam = Camera(-16.0, -49.0001, heading_hint="S")
-        grid = osm_pbf._probe_grid([cam])
-        best = {}
-        # pista norte (mão única) mais perto, pista sul a 20 m: vence a sul
-        osm_pbf._probe_way(grid, [(-16.01, -49.0), (-15.99, -49.0)], True, best)
-        osm_pbf._probe_way(grid, [(-15.99, -49.0003), (-16.01, -49.0003)], True, best)
-        self.assertAlmostEqual(best[(-16.0, -49.0001, "S")][1], 180.0, delta=0.5)
-        far = {}
-        osm_pbf._probe_way(grid, [(-16.01, -49.01), (-15.99, -49.01)], False, far)
-        self.assertEqual(far, {})
+    def _probe(self, hint, ways, **kw):
+        cam = Camera(-16.0, -49.0001, heading_hint=hint)
+        found = {}
+        for pts, oneway in ways:
+            osm_pbf._probe_way(osm_pbf._probe_grid([cam]), pts, oneway, found)
+        return osm_pbf.resolve_probes(found, **kw).get((-16.0, -49.0001, hint))
+
+    NORTH_LANE = ([(-16.01, -49.0), (-15.99, -49.0)], True)        # ~11 m a leste do radar, rumo norte
+    SOUTH_LANE = ([(-15.99, -49.0003), (-16.01, -49.0003)], True)  # ~21 m a oeste, rumo sul
+    TWO_WAY = ([(-16.01, -49.0), (-15.99, -49.0)], False)
+
+    def test_position_on_a_one_way_carriageway_decides(self):
+        self.assertAlmostEqual(self._probe("N", [self.NORTH_LANE, self.SOUTH_LANE]), 0.0, delta=0.5)
+        self.assertIsNone(self._probe("S", [self.NORTH_LANE, self.SOUTH_LANE]))      # nominal contraria a posição
+        self.assertAlmostEqual(self._probe("*", [self.NORTH_LANE, self.SOUTH_LANE]), 0.0, delta=0.5)
+
+    def test_carriageways_too_close_or_two_way_road_give_nothing(self):
+        near_south = ([(-15.99, -49.00015), (-16.01, -49.00015)], True)            # ~5 m: ambíguo
+        self.assertIsNone(self._probe("N", [self.NORTH_LANE, near_south]))
+        self.assertIsNone(self._probe("S", [self.TWO_WAY]))
+        self.assertIsNone(self._probe("*", [self.TWO_WAY]))
+        # com position_confirms=False, o nominal vale em via de mão dupla
+        self.assertAlmostEqual(self._probe("S", [self.TWO_WAY], position_confirms=False), 180.0, delta=0.5)
+
+    def test_far_roads_are_ignored(self):
+        self.assertIsNone(self._probe("*", [([(-16.01, -49.01), (-15.99, -49.01)], True)]))
 
     def test_forward_backward_take_the_way_direction(self):
         class Loc:
@@ -216,6 +254,132 @@ class SentidoNominal(unittest.TestCase):
         osm_pbf._apply_way_direction(Way(), {2: (0, True)}, cams)
         osm_pbf._apply_way_direction(Way(), {2: (1, False)}, cams)
         self.assertEqual([c.direction_deg for c in cams], [0, 180])
+
+
+class CetRadares(unittest.TestCase):
+    ROWS = [
+        {"CÓDIGO LOCAL": "1", "LATITUDE": -23.6798, "LONGITUDE": "-46.6868", "DESCRIÇÃO DO LOCAL":
+         "AV. INTERLAGOS (CENTRO/BAIRRO) A MAIS 11 METROS DA R. X", "ENQUADRAMENTOS": "F,R,V,Z",
+         "VELOCIDADE": "50 km/h", "DESATIVAÇÃO": None},
+        {"CÓDIGO LOCAL": "2", "LATITUDE": -23.60, "LONGITUDE": -46.66, "DESCRIÇÃO DO LOCAL": "AV Y (RAPOSO/MARGINAL)",
+         "ENQUADRAMENTOS": "V,A,P", "VELOCIDADE": "90/60 km/h", "DESATIVAÇÃO": None},
+        {"CÓDIGO LOCAL": "3", "LATITUDE": -23.61, "LONGITUDE": -46.67, "DESCRIÇÃO DO LOCAL": "R Z (B/C)",
+         "ENQUADRAMENTOS": "A,P", "VELOCIDADE": "", "DESATIVAÇÃO": None},
+        {"CÓDIGO LOCAL": "4", "LATITUDE": -23.62, "LONGITUDE": -46.68, "DESCRIÇÃO DO LOCAL": "R W",
+         "ENQUADRAMENTOS": "R,EXE", "VELOCIDADE": "50 km/h", "DESATIVAÇÃO": None},
+        {"CÓDIGO LOCAL": "5", "LATITUDE": -23.63, "LONGITUDE": -46.69, "DESCRIÇÃO DO LOCAL": "R V",
+         "ENQUADRAMENTOS": "V", "VELOCIDADE": "40 km/h", "DESATIVAÇÃO": 1711324800000},
+    ]
+
+    def test_only_active_speed_and_red_light(self):
+        cams = cet_sp.rows_to_cameras(self.ROWS)
+        self.assertEqual([(c.kind, c.limit_kmh) for c in cams],
+                         [(CameraKind.FIXED, 50), (CameraKind.FIXED, 90), (CameraKind.RED_LIGHT, None)])
+        self.assertTrue(all(c.source == "CET-SP" for c in cams))
+        self.assertAlmostEqual(cams[0].lng, -46.6868)
+
+    def test_centro_bairro_becomes_a_bearing_hint(self):
+        cams = cet_sp.rows_to_cameras(self.ROWS)
+        # Interlagos fica ao sul-sudoeste do marco zero: centro->bairro aponta para lá
+        out = float(cams[0].heading_hint[1:])
+        self.assertTrue(180 < out < 230, out)
+        self.assertEqual(cams[1].heading_hint, "*")                # par de lugares: só pela posição
+        back = float(cams[2].heading_hint[1:])                     # bairro->centro: volta ao marco zero
+        self.assertTrue(0 <= back < 90 or back > 330, back)
+        self.assertIsNone(cet_sp.centro_bairro_hint("R X (CENTRO/BAIRRO)", -23.552, -46.635))  # < 1,5 km
+        self.assertEqual(hint_target("@203"), 203.0)
+        self.assertEqual(hint_target("L"), 90.0)
+
+
+class PowerBi(unittest.TestCase):
+    def test_decode_repeats_nulls_and_dictionaries(self):
+        from datakit.sources import _powerbi
+        resp = {"results": [{"result": {"data": {"dsr": {"DS": [{"IC": True, "ValueDicts": {"D0": ["A", "B"]},
+            "PH": [{"DM0": [
+                {"S": [{"N": "G0", "T": 1}, {"N": "G1", "T": 1, "DN": "D0"}, {"N": "G2", "T": 3}], "C": [1, 0, 2.5]},
+                {"C": [2, 1], "Ø": 4},           # G2 nulo
+                {"C": [3], "R": 6},              # G1 e G2 repetem a anterior
+            ]}]}]}}}}]}
+        self.assertEqual(_powerbi.decode(resp), [[1, "A", 2.5], [2, "B", None], [3, "B", None]])
+        resp["results"][0]["result"]["data"]["dsr"]["DS"][0]["RT"] = [["x"]]
+        with self.assertRaises(RuntimeError):
+            _powerbi.decode(resp)
+
+    def test_resource_key_from_the_view_link(self):
+        from datakit.sources import _powerbi
+        self.assertEqual(_powerbi.resource_key(cet_sp.PBI_VIEW), "d8b9566c-25e1-4f66-a54b-ae3b02bda6e7")
+
+
+class Absorb(unittest.TestCase):
+    def test_osm_duplicate_folds_into_the_official_one(self):
+        off = [Camera(-16.0, -49.0, source="DNIT", limit_kmh=None, direction_deg=90)]
+        osm = [Camera(-16.0001, -49.0001, source="OSM", limit_kmh=60),        # ~15 m: mesmo radar
+               Camera(-16.001, -49.0, source="OSM", limit_kmh=80)]            # ~110 m: outro
+        o, rest, n = absorb_osm(off, osm)
+        self.assertEqual(n, 1)
+        self.assertEqual((o[0].lat, o[0].source, o[0].limit_kmh, o[0].direction_deg), (-16.0, "DNIT+OSM", 60, 90))
+        self.assertEqual([c.limit_kmh for c in rest], [80])
+
+    def test_red_light_next_to_a_speed_camera_stays_separate(self):
+        off = [Camera(-16.0, -49.0, CameraKind.FIXED, 50, source="CET-SP")]
+        osm = [Camera(-16.0001, -49.0, CameraKind.RED_LIGHT, source="OSM")]
+        _, rest, n = absorb_osm(off, osm)
+        self.assertEqual((n, len(rest)), (0, 1))
+
+    def test_section_end_and_active_official_preferred(self):
+        off = [Camera(-16.0, -49.0, source="DER-SP", active=False),
+               Camera(-16.0002, -49.0, source="DER-SP", limit_kmh=100)]
+        osm = [Camera(-16.0001, -49.0, CameraKind.SECTION, 100, "OSM", end_lat=-16.05, end_lng=-49.0)]
+        o, rest, n = absorb_osm(off, osm)
+        self.assertEqual((n, rest), (1, []))
+        self.assertEqual(o[0], off[0])                        # o inativo não levou nada
+        self.assertEqual((o[1].kind, o[1].end_lat), (CameraKind.SECTION, -16.05))
+
+    def test_official_cameras_never_merge_with_each_other(self):
+        off = [Camera(-16.0, -49.0, source="ANTT", direction_deg=0), Camera(-16.0001, -49.0, source="ANTT", direction_deg=180)]
+        o, _, _ = absorb_osm(off, [])
+        self.assertEqual(o, off)
+
+    def test_same_radar_from_two_agencies_becomes_one(self):
+        dnit = Camera(-15.80, -47.90, source="DNIT")
+        df = Camera(-15.80020, -47.90, source="DETRAN-DF", limit_kmh=60, direction_deg=180, active=False)
+        other_df = Camera(-15.80005, -47.90, source="DETRAN-DF")          # mesmo órgão: fica
+        out, n = merge_cross_agency([dnit, df, other_df])
+        self.assertEqual(n, 1)
+        merged = next(c for c in out if "+" in c.source)
+        self.assertEqual((merged.source, merged.lat, merged.limit_kmh, merged.direction_deg, merged.active),
+                         ("DNIT+DETRAN-DF", -15.80020, 60, 180, True))     # posição de quem tem sentido
+        self.assertEqual(len(out), 2)
+
+    def test_opposite_directions_from_two_agencies_stay_apart(self):
+        a = Camera(-16.0, -49.0, source="ANTT", direction_deg=0)
+        b = Camera(-16.0001, -49.0, source="DNIT", direction_deg=180)
+        self.assertEqual(merge_cross_agency([a, b])[1], 0)
+
+    def test_osm_points_a_few_metres_apart_collapse(self):
+        lanes = [Camera(-16.0, -49.0, source="OSM"), Camera(-16.00003, -49.0, source="OSM", limit_kmh=80)]  # ~3 m
+        other_carriageway = Camera(-16.0002, -49.0, source="OSM")                                            # ~22 m
+        red = Camera(-16.00002, -49.0, CameraKind.RED_LIGHT, source="OSM")
+        out, n = collapse_osm(lanes + [other_carriageway, red])
+        self.assertEqual(n, 1)
+        self.assertEqual(sorted((c.kind.value, c.limit_kmh or 0) for c in out),
+                         [("FIXED", 0), ("FIXED", 80), ("RED_LIGHT", 0)])
+
+    def test_source_helpers(self):
+        self.assertEqual(join_sources("OSM", "DNIT"), "DNIT+OSM")
+        self.assertEqual(join_sources("DNIT+OSM", "DETRAN-DF"), "DNIT+DETRAN-DF+OSM")
+        self.assertEqual(source_parts("DNIT+OSM"), ["DNIT", "OSM"])
+
+    def test_osm_at_a_deactivated_site_becomes_inactive(self):
+        osm = [Camera(-23.60, -46.66, source="OSM"), Camera(-23.61, -46.66, source="OSM"), Camera(-23.62, -46.66, source="OSM")]
+        dead = [(-23.60005, -46.66), (-23.61005, -46.66)]
+        alive = [Camera(-23.61010, -46.66, source="CET-SP")]  # o segundo local foi reativado ao lado
+        out, n = deactivate_near(osm, dead, alive)
+        self.assertEqual(([c.active for c in out], n), ([False, True, True], 1))
+
+    def test_cet_deactivated_rows(self):
+        rows = CetRadares.ROWS
+        self.assertEqual(cet_sp.rows_to_deactivated(rows), [(-23.63, -46.69)])
 
 
 class MergeDirections(unittest.TestCase):
@@ -301,6 +465,28 @@ class BhDf(unittest.TestCase):
         cams = df_detran.parse([{"geometry": {"x": -47.77, "y": -15.9}, "attributes": {"Velocidade": "30 kmh@30"}},
                                 {"geometry": {"x": -47.77, "y": -15.9}, "attributes": {"Velocidade": None}}])
         self.assertEqual([c.limit_kmh for c in cams], [30, None])
+
+
+class Municipal(unittest.TestCase):
+    def test_failing_city_is_registered_and_the_others_still_load(self):
+        from unittest import mock
+        from datakit import falhas
+        from datakit.sources import municipal
+
+        def boom(bbox):
+            raise ConnectionError("fora do ar")
+
+        ok = [Camera(-8.05, -34.9, CameraKind.FIXED, 60, "PCR", True)]
+        antes = list(falhas._FALHAS)
+        try:
+            with mock.patch.object(municipal, "_pmjp", boom), \
+                    mock.patch.object(municipal, "_fortaleza", lambda bbox: []), \
+                    mock.patch.object(municipal, "_recife", lambda bbox: ok):
+                cams, _ = municipal.load("")
+            self.assertEqual(cams, ok)
+            self.assertTrue(any("João Pessoa" in f and "ConnectionError" in f for f in falhas.lista()), falhas.lista())
+        finally:
+            falhas._FALHAS[:] = antes
 
 
 class Formats(unittest.TestCase):

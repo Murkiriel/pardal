@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import math
-from typing import Iterable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 Point = Tuple[float, float]  # (lat, lng)
 

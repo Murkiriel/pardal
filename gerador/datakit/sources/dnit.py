@@ -11,11 +11,13 @@ from __future__ import annotations
 
 import io
 import re
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import openpyxl
 
+from datakit.contexto import Carga, Contexto
 from datakit.common import Camera, CameraKind, Limit, in_bbox
+from datakit.common.lrs import SnvRoutes
 from datakit.common.sentido import direction_on
 from datakit.sources import snv
 from datakit.sources._http import ckan_resources, get_bytes, in_br, newest, to_float
@@ -30,8 +32,9 @@ def lanes_increasing(faixas: Optional[str]) -> Optional[bool]:
     return (sides.pop() == "C") if len(sides) == 1 else None
 
 
-def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
-         ) -> Tuple[List[Camera], List[Limit]]:
+def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None,
+         routes: Optional[Callable[[], Optional[SnvRoutes]]] = None) -> Tuple[List[Camera], List[Limit]]:
+    """`routes`: devolve as rotas do SNV (para o sentido); sem ele, carrega do raw_dir."""
     res = newest(ckan_resources(CKAN), "XLSX", "controle de velocidade")
     wb = openpyxl.load_workbook(io.BytesIO(get_bytes(res["url"])), read_only=True, data_only=True)
     ws = wb[wb.sheetnames[0]]
@@ -40,9 +43,10 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
     try:
         ci = header.index("Coordenadas (Lat/Long)")
     except ValueError:
-        raise RuntimeError(f"coluna de coordenadas não encontrada; header={header}")
+        raise RuntimeError(f"coluna de coordenadas não encontrada; header={header}") from None
     col = {name: header.index(name) for name in ("UF", "Rodovia", "Faixas") if name in header}
-    routes = snv.routes(raw_dir) if len(col) == 3 else None
+    get_routes = routes or (lambda: snv.load_routes(raw_dir))
+    snv_routes = get_routes() if len(col) == 3 else None
 
     out: List[Camera] = []
     for row in rows:
@@ -53,7 +57,7 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
         lat, lng = to_float(a), to_float(b)
         if lat is None or lng is None or not in_br(lat, lng) or not in_bbox(bbox, lat, lng):
             continue
-        direction = _direction(routes, row, col, lat, lng) if routes is not None else None
+        direction = _direction(snv_routes, row, col, lat, lng) if snv_routes is not None else None
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, None, "DNIT", True,
                           direction_deg=direction))
     return out, []
@@ -69,3 +73,8 @@ def _direction(routes, row, col, lat: float, lng: float) -> Optional[int]:
         return None
     line, km, _ = hit
     return direction_on(line, km, increasing)
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py); as rotas do SNV vêm do contexto (uma carga só)."""
+    return Carga(*load(ctx.raw_dir, routes=ctx.rotas_snv))

@@ -10,9 +10,11 @@ from __future__ import annotations
 import csv
 import io
 import re
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
+from datakit.contexto import Carga, Contexto
 from datakit.common import Camera, CameraKind, Limit, in_bbox
+from datakit.common.lrs import SnvRoutes
 from datakit.common.sentido import direction_on, parse_sentido
 from datakit.sources import snv
 from datakit.sources._http import ckan_resources, get_bytes, in_br, newest, to_float
@@ -22,8 +24,9 @@ SNAP_M = 150.0
 CKAN = "https://dados.antt.gov.br/api/3/action/package_show?id=radar"
 
 
-def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
-         ) -> Tuple[List[Camera], List[Limit]]:
+def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None,
+         routes: Optional[Callable[[], Optional[SnvRoutes]]] = None) -> Tuple[List[Camera], List[Limit]]:
+    """`routes`: devolve as rotas do SNV (para o sentido); sem ele, carrega do raw_dir."""
     res = newest(ckan_resources(CKAN), "CSV", "dados dos radares")
     text = get_bytes(res["url"]).decode("latin-1")
     reader = csv.reader(io.StringIO(text), delimiter=";")
@@ -34,7 +37,8 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
     if not {"latitude", "longitude", "situacao"} <= idx.keys():
         raise RuntimeError(f"colunas ANTT inesperadas: {header}")
 
-    routes = snv.routes(raw_dir) if "sentido" in idx else None
+    get_routes = routes or (lambda: snv.load_routes(raw_dir))
+    snv_routes = get_routes() if "sentido" in idx else None
     out: List[Camera] = []
     for row in reader:
         if len(row) <= max(idx.values()):
@@ -50,8 +54,8 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
             if digits:
                 limit = int(digits)
         direction = None
-        if routes is not None:
-            direction = _direction(routes, row, idx, lat, lng)
+        if snv_routes is not None:
+            direction = _direction(snv_routes, row, idx, lat, lng)
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, limit, "ANTT", True,
                           direction_deg=direction))
     return out, []
@@ -67,3 +71,8 @@ def _direction(routes, row, idx, lat: float, lng: float) -> Optional[int]:
         return None
     line, km, _ = hit
     return direction_on(line, km, increasing)
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py); as rotas do SNV vêm do contexto (uma carga só)."""
+    return Carga(*load(ctx.raw_dir, routes=ctx.rotas_snv))

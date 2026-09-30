@@ -11,6 +11,7 @@ import unittest
 
 _PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "scripts", "para_geojson.py"))
 _spec = importlib.util.spec_from_file_location("para_geojson", _PATH)
+assert _spec is not None and _spec.loader is not None
 pg = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pg)
 

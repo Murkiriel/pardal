@@ -14,6 +14,7 @@ from typing import List, Optional, Tuple
 
 import openpyxl
 
+from datakit.contexto import Carga, Contexto
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.common.sentido import hint_from_text
 from datakit.sources._http import get_bytes, in_br, to_float
@@ -88,3 +89,8 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
             from datakit import falhas
             falhas.registrar(f"DER-SP ({fn.__name__})", e)
     return cams, []
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py)."""
+    return Carga(*load(ctx.raw_dir))

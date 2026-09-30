@@ -1,0 +1,4 @@
+# Ferramentas de verificação (não precisam para gerar os dados). Versões testadas.
+-r requirements.txt
+ruff==0.16.9
+mypy==2.1.0

@@ -13,6 +13,7 @@ import io
 import re
 from typing import Iterable, List, Optional, Tuple
 
+from datakit.contexto import Carga, Contexto
 from datakit.common.geo import rdp, sample_polyline
 from datakit.common.model import Camera, CameraKind, Limit
 from datakit.sources._http import get_bytes, get_json, get_text
@@ -42,23 +43,15 @@ def trecho_points(paths: List[List[List[float]]], kmh: int) -> List[Limit]:
 
 
 def load_limits() -> List[Limit]:
+    from datakit.sources._arcgis import query_all
     out: List[Limit] = []
-    offset = 0
-    while True:
-        j = get_json(TRECHOS, params={
-            "where": "velocidade_regulamentada > 0", "outFields": "velocidade_regulamentada",
-            "outSR": 4326, "f": "json", "resultOffset": offset, "resultRecordCount": PAGE,
-            "orderByFields": "objectid",
-        })
-        feats = j.get("features", [])
-        for ft in feats:
-            kmh = (ft.get("attributes") or {}).get("velocidade_regulamentada")
-            paths = (ft.get("geometry") or {}).get("paths") or []
-            if isinstance(kmh, int) and 10 <= kmh <= 130:
-                out.extend(trecho_points(paths, kmh))
-        if len(feats) < PAGE and not j.get("exceededTransferLimit"):
-            break
-        offset += len(feats)
+    for ft in query_all(TRECHOS, {"where": "velocidade_regulamentada > 0",
+                                  "outFields": "velocidade_regulamentada", "outSR": 4326},
+                        page=PAGE, order_by="objectid"):
+        kmh = (ft.get("attributes") or {}).get("velocidade_regulamentada")
+        paths = (ft.get("geometry") or {}).get("paths") or []
+        if isinstance(kmh, int) and 10 <= kmh <= 130:
+            out.extend(trecho_points(paths, kmh))
     return out
 
 
@@ -157,3 +150,8 @@ def load_cameras() -> List[Camera]:
 def load(raw_dir: str, bbox=None):
     """Interface das fontes oficiais de radar (build.OFFICIAL)."""
     return load_cameras(), []
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py)."""
+    return Carga(*load(ctx.raw_dir))

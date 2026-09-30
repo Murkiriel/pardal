@@ -10,8 +10,9 @@ import json
 import re
 from typing import List, Optional, Tuple
 
+from datakit.contexto import Carga, Contexto
 from datakit.common import Camera, CameraKind, Limit, in_bbox
-from datakit.sources._http import get_bytes, get_json, in_br, to_float
+from datakit.sources._http import get_bytes, in_br, to_float
 
 PMJP_FS = ("https://services7.arcgis.com/KTW4hifejtFfNNYu/arcgis/rest/services/"
            "MEDIDORES_DE_VELOCIDADE_24/FeatureServer/0/query")
@@ -31,10 +32,9 @@ def _kmh(raw) -> Optional[int]:
 
 
 def _pmjp(bbox) -> List[Camera]:
-    j = get_json(PMJP_FS, params={"where": "1=1", "outFields": "KM_H", "f": "json",
-                                  "outSR": 4326, "resultRecordCount": 5000})
+    from datakit.sources._arcgis import query_all
     out: List[Camera] = []
-    for ft in j.get("features", []):
+    for ft in query_all(PMJP_FS, {"where": "1=1", "outFields": "KM_H", "outSR": 4326}):
         g = ft.get("geometry") or {}
         lat, lng = g.get("y"), g.get("x")
         if not isinstance(lat, (int, float)) or not isinstance(lng, (int, float)):
@@ -85,9 +85,15 @@ def _recife(bbox) -> List[Camera]:
 def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
          ) -> Tuple[List[Camera], List[Limit]]:
     cams: List[Camera] = []
-    for fn in (_pmjp, _fortaleza, _recife):
+    for city, fn in (("João Pessoa", _pmjp), ("Fortaleza", _fortaleza), ("Recife", _recife)):
         try:
             cams += fn(bbox)
-        except Exception as e:  # noqa: BLE001
-            print(f"[municipal] {fn.__name__} falhou: {type(e).__name__}: {e}")
+        except Exception as e:  # noqa: BLE001 — uma cidade fora não derruba as outras
+            from datakit import falhas
+            falhas.registrar(f"municipal ({city})", e)
     return cams, []
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py)."""
+    return Carga(*load(ctx.raw_dir))

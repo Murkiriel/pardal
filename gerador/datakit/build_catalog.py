@@ -24,7 +24,7 @@ from typing import Optional
 from datakit.common.ufs import uf_name
 
 _FEDERAL = {"DNIT", "ANTT"}
-_MUNICIPAL = {"PMF", "PCR", "PMJP", "CET-SP"}
+_MUNICIPAL = {"PMF", "PCR", "PMJP", "CET-SP", "RIO", "BHTRANS"}
 
 
 def _cobertura(cameras_csv: str) -> dict:
@@ -33,8 +33,7 @@ def _cobertura(cameras_csv: str) -> dict:
     try:
         with open(cameras_csv, newline="", encoding="utf-8") as f:
             for r in csv.DictReader(f):
-                if r.get("source"):
-                    srcs.add(r["source"])
+                srcs.update(p for p in (r.get("source") or "").split("+") if p)
     except OSError:
         pass
     tem_federal = bool(srcs & _FEDERAL)

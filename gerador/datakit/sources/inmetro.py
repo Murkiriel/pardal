@@ -63,20 +63,24 @@ def load(raw_dir: str, today: Optional[date] = None) -> List[Meter]:
     os.makedirs(folder, exist_ok=True)
     meters: List[Meter] = []
     for uf in sorted(UF_BBOX):
+        if uf == "DF":
+            continue  # não há arquivo do DF (404 sempre): os medidores de Brasília estão no de GO
         path = os.path.join(folder, f"{uf}.json")
         try:
             data = get_bytes(URL.format(uf=uf))
             with open(path, "wb") as f:
                 f.write(data)
         except Exception as e:  # noqa: BLE001
+            from datakit import falhas
             if not os.path.exists(path):
-                print(f"[inmetro] {uf}: FALHOU ({type(e).__name__}: {e})")
+                falhas.registrar(f"Inmetro {uf}", e)
                 continue
-            print(f"[inmetro] {uf}: download falhou, usando cópia anterior")
+            quando = date.fromtimestamp(os.path.getmtime(path)).isoformat()
+            falhas.avisar(f"Inmetro {uf}", f"download falhou ({type(e).__name__}); usada a cópia de {quando}")
         try:
             with open(path, encoding="utf-8-sig") as f:
                 records = json.load(f)
         except ValueError:
-            continue  # DF volta vazio: os medidores de Brasília estão dentro de GO
+            continue  # cópia corrompida/não-JSON: melhor sem esta UF do que parar o build
         meters.extend(parse(records, uf, today))
     return meters

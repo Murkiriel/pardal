@@ -11,7 +11,7 @@ from typing import Tuple
 
 import requests
 
-from datakit.sources._http import UA, com_retentativa
+from datakit.sources._http import CONNECT_TIMEOUT, UA, guarded, session
 
 SHARE = "https://servicos.dnit.gov.br/dnitcloud/public.php/webdav/"
 TOKEN = "oTpPRmYs5AAdiNr"
@@ -20,12 +20,12 @@ BASES = "SNV Bases Geométricas (2013-Atual) (SHP)/"
 
 
 def _latest(folder: str, pattern: str) -> str:
-    return com_retentativa(lambda: _latest_once(folder, pattern), "SNV " + folder)
+    return guarded(SHARE, lambda: _latest_once(folder, pattern))
 
 
 def _latest_once(folder: str, pattern: str) -> str:
-    r = requests.request("PROPFIND", SHARE + requests.utils.quote(folder), auth=(TOKEN, ""),
-                         headers={**UA, "Depth": "1"}, timeout=120)
+    r = session().request("PROPFIND", SHARE + requests.utils.quote(folder), auth=(TOKEN, ""),
+                         headers={**UA, "Depth": "1"}, timeout=(CONNECT_TIMEOUT, 120))
     r.raise_for_status()
     names = re.findall(r"<d:href>[^<]*/([^/<]+\.zip)</d:href>", r.text)
     names = [requests.utils.unquote(n) for n in names if re.search(pattern, requests.utils.unquote(n))]
@@ -35,12 +35,12 @@ def _latest_once(folder: str, pattern: str) -> str:
 
 
 def _fetch(folder: str, name: str, dest: str) -> None:
-    com_retentativa(lambda: _fetch_once(folder, name, dest), "SNV " + name)
+    guarded(SHARE, lambda: _fetch_once(folder, name, dest))
 
 
 def _fetch_once(folder: str, name: str, dest: str) -> None:
-    with requests.get(SHARE + requests.utils.quote(folder + name), auth=(TOKEN, ""), headers=UA,
-                      stream=True, timeout=600) as r:
+    with session().get(SHARE + requests.utils.quote(folder + name), auth=(TOKEN, ""), headers=UA,
+                      stream=True, timeout=(CONNECT_TIMEOUT, 600)) as r:
         r.raise_for_status()
         tmp = dest + ".part"
         with open(tmp, "wb") as f:
@@ -49,20 +49,16 @@ def _fetch_once(folder: str, name: str, dest: str) -> None:
         os.replace(tmp, dest)
 
 
-_ROUTES: dict = {}
-
-
-def routes(raw_dir: str):
-    """Rotas do SNV (SnvRoutes), carregadas uma vez por execução; None se o SNV falhar."""
-    if raw_dir not in _ROUTES:
-        from datakit.common.lrs import SnvRoutes
-        try:
-            _ROUTES[raw_dir] = SnvRoutes.from_zip(ensure(raw_dir)[0])
-        except Exception as e:  # noqa: BLE001 — sem SNV, só fica sem o sentido
-            from datakit import falhas
-            falhas.registrar("SNV (rotas)", e)
-            _ROUTES[raw_dir] = None
-    return _ROUTES[raw_dir]
+def load_routes(raw_dir: str):
+    """Rotas do SNV (SnvRoutes); None se o SNV falhar (registrado em falhas). Carrega a cada
+    chamada: o build guarda o resultado no contexto (Contexto.rotas_snv)."""
+    from datakit.common.lrs import SnvRoutes
+    try:
+        return SnvRoutes.from_zip(ensure(raw_dir)[0])
+    except Exception as e:  # noqa: BLE001 — sem SNV, só fica sem o sentido
+        from datakit import falhas
+        falhas.registrar("SNV (rotas)", e)
+        return None
 
 
 def ensure(raw_dir: str) -> Tuple[str, str, str]:

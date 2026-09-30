@@ -16,7 +16,7 @@ from dataclasses import replace
 from typing import Dict, List, Tuple
 
 from datakit.common.lrs import SnvRoutes, in_ranges
-from datakit.common.model import Camera, CameraKind
+from datakit.common.model import Camera, CameraKind, source_parts
 from datakit.sources.inmetro import Meter
 
 # Só fontes sem situação própria: ANTT e DER-SP/Artesp já dizem se o radar está ativo.
@@ -25,6 +25,15 @@ STATUS_FROM_INMETRO = {"OSM", "DNIT", "DER-GO", "DETRAN-DF"}
 ON_ROUTE_M = 60.0
 MATCH_KM = 1.0
 GUARD_KM = 3.0
+
+
+def eligible(source: str) -> bool:
+    """A situação do radar pode vir do Inmetro? Só se nenhuma das fontes oficiais dele tiver
+    situação própria (radar juntado 'ANTT+OSM' fica com a situação da ANTT); só do OSM, sim."""
+    official = [p for p in source_parts(source) if p != "OSM"]
+    if not official:
+        return "OSM" in STATUS_FROM_INMETRO
+    return all(p in STATUS_FROM_INMETRO for p in official)
 
 
 def index_meters(meters: List[Meter]) -> Dict[Tuple[int, str], List[Tuple[float, bool]]]:
@@ -50,7 +59,7 @@ def apply(cams: List[Camera], uf: str, meters_idx, snv: SnvRoutes, concessions) 
     stats = {"confirmados": 0, "desativados": 0, "sem_medidor": 0}
     out: List[Camera] = []
     for c in cams:
-        if c.kind != CameraKind.FIXED or c.source not in STATUS_FROM_INMETRO:
+        if c.kind != CameraKind.FIXED or not eligible(c.source):
             out.append(c)
             continue
         hit = snv.nearest_any(uf, (c.lat, c.lng), ON_ROUTE_M)

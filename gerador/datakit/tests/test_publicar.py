@@ -13,6 +13,7 @@ from datakit.sources import _http
 
 _PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "scripts", "publicar.py"))
 _spec = importlib.util.spec_from_file_location("publicar", _PATH)
+assert _spec is not None and _spec.loader is not None
 pub = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(pub)
 
@@ -110,3 +111,223 @@ class Retentativa(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Resiliencia(unittest.TestCase):
+    def setUp(self):
+        from unittest import mock
+        _http._DEAD_HOSTS.clear()
+        # as esperas entre tentativas (5 s, 10 s) não precisam acontecer de verdade no teste
+        self._sleep = mock.patch.object(_http.time, "sleep", lambda s: None)
+        self._sleep.start()
+
+    def tearDown(self):
+        self._sleep.stop()
+        _http._DEAD_HOSTS.clear()
+
+    def test_host_that_never_connects_is_skipped_for_the_rest_of_the_run(self):
+        calls = []
+
+        def boom():
+            calls.append(1)
+            raise requests.ConnectTimeout("sem conexão")
+        orig = _http.ESPERA_S
+        _http.ESPERA_S = 0
+        try:
+            with self.assertRaises(requests.ConnectTimeout):
+                _http.guarded("https://servicos.exemplo.gov.br/a.json", boom)
+            self.assertEqual(len(calls), _http.TENTATIVAS)
+            with self.assertRaises(ConnectionError):
+                _http.guarded("https://servicos.exemplo.gov.br/b.json", boom)
+            self.assertEqual(len(calls), _http.TENTATIVAS)           # nem tentou de novo
+            self.assertEqual(_http.guarded("https://outro.gov.br/x", lambda: "ok"), "ok")
+        finally:
+            _http.ESPERA_S = orig
+            _http._DEAD_HOSTS.clear()
+
+    def test_read_timeout_does_not_condemn_the_host(self):
+        orig = _http.ESPERA_S
+        _http.ESPERA_S = 0
+        try:
+            def slow():
+                raise requests.ReadTimeout("lento")
+            with self.assertRaises(requests.ReadTimeout):
+                _http.guarded("https://lento.gov.br/a", slow)
+            self.assertNotIn("lento.gov.br", _http._DEAD_HOSTS)
+        finally:
+            _http.ESPERA_S = orig
+
+    def test_cet_uses_the_saved_copy_and_warns_when_power_bi_fails(self):
+        import json
+        import tempfile
+        from unittest import mock
+        from datakit import falhas
+        from datakit.sources import cet_sp
+        raw = tempfile.mkdtemp()
+        rows = [{"CÓDIGO LOCAL": "1", "LATITUDE": -23.60, "LONGITUDE": -46.66, "DESCRIÇÃO DO LOCAL": "R X",
+                 "ENQUADRAMENTOS": "V", "VELOCIDADE": "50 km/h", "DESATIVAÇÃO": None}]
+        with mock.patch.object(cet_sp._powerbi, "model_id", return_value=1), \
+                mock.patch.object(cet_sp._powerbi, "query_table", return_value=rows):
+            self.assertEqual(len(cet_sp.load(raw)[0]), 1)             # leitura boa: guarda a cópia
+        antes = len(falhas.avisos())
+        with mock.patch.object(cet_sp._powerbi, "model_id", side_effect=RuntimeError("mudou")):
+            self.assertEqual(len(cet_sp.load(raw)[0]), 1)             # falhou: usa a cópia
+        self.assertEqual(len(falhas.avisos()), antes + 1)
+        self.assertIn("CET-SP", falhas.avisos()[-1])
+        with open(os.path.join(raw, cet_sp.CACHE_FILE), encoding="utf-8") as f:
+            self.assertEqual(json.load(f), rows)
+
+    def test_inmetro_state_without_copy_is_a_failure_with_copy_a_warning(self):
+        import tempfile
+        from unittest import mock
+        from datakit import falhas
+        from datakit.sources import inmetro
+        raw = tempfile.mkdtemp()
+        os.makedirs(os.path.join(raw, "inmetro"))
+        with open(os.path.join(raw, "inmetro", "GO.json"), "w", encoding="utf-8") as f:
+            f.write("[]")
+        f0, a0 = len(falhas.lista()), len(falhas.avisos())
+        with mock.patch.object(inmetro, "get_bytes", side_effect=requests.ConnectTimeout("x")):
+            inmetro.load(raw)
+        self.assertEqual(len(falhas.lista()) - f0, 25)            # 25 UFs sem cópia (o DF não tem arquivo)
+        self.assertEqual(len(falhas.avisos()) - a0, 1)            # GO usou a cópia
+        self.assertTrue(falhas.avisos()[-1].startswith("Inmetro GO"))
+
+    def test_warnings_never_reach_the_published_catalog(self):
+        self.assertNotIn("avisos", pub.rewrite_catalog({"ufs": {}, "avisos": ["Inmetro DF: cópia"]}))
+
+
+class CommitSoDosDados(unittest.TestCase):
+    """publicar.py --commit só leva brasil/, estados/ e catalog.json — nunca o que mais estiver
+    pendente no repositório (código do gerador não revisado, arquivos soltos)."""
+
+    def _git(self, repo, *a):
+        return subprocess.run(["git", "-C", repo, *a], check=True, capture_output=True, text=True).stdout
+
+    def test_stray_files_stay_out_of_the_data_commit(self):
+        import json
+        import shutil
+        import tempfile
+        repo, dist = tempfile.mkdtemp(), tempfile.mkdtemp()
+        try:
+            self._git(repo, "init", "-q")
+            self._git(repo, "config", "user.email", "teste@example.invalid")
+            self._git(repo, "config", "user.name", "teste")
+            with open(os.path.join(repo, "LEIAME.md"), "w", encoding="utf-8") as f:
+                f.write("x")
+            self._git(repo, "add", "-A")
+            self._git(repo, "commit", "-q", "-m", "inicial")
+            # pendências que NÃO podem entrar no commit de dados
+            os.makedirs(os.path.join(repo, "gerador"))
+            with open(os.path.join(repo, "gerador", "codigo_novo.py"), "w", encoding="utf-8") as f:
+                f.write("print(1)\n")
+            with open(os.path.join(repo, "solto.txt"), "w", encoding="utf-8") as f:
+                f.write("pessoal\n")
+            with open(os.path.join(repo, "LEIAME.md"), "w", encoding="utf-8") as f:
+                f.write("editado\n")
+            # um build mínimo em dist
+            with open(os.path.join(dist, "radares_GO.csv"), "w", encoding="utf-8") as f:
+                f.write("lat,lng\n-16,-49\n")
+            with open(os.path.join(dist, "catalog.json"), "w", encoding="utf-8") as f:
+                json.dump({"built_at": "2026-09-30T00:00:00Z", "ufs": {"GO": {"counts": {"cameras": 1}}}}, f)
+            self.assertEqual(pub.main(["--repo", repo, "--dist", dist, "--commit"]), 0)
+            committed = set(self._git(repo, "show", "--name-only", "--pretty=format:", "HEAD").split())
+            self.assertEqual(committed, {"catalog.json", "estados/GO/radares.csv"})
+            pending = self._git(repo, "status", "--porcelain")
+            self.assertIn("solto.txt", pending)
+            self.assertIn("gerador/", pending)
+            self.assertIn("LEIAME.md", pending)
+        finally:
+            shutil.rmtree(repo, ignore_errors=True)
+            shutil.rmtree(dist, ignore_errors=True)
+
+
+class BuildEmAndamento(unittest.TestCase):
+    """Enquanto o build roda (ou se ele caiu no meio), data/dist tem pacotes de dois builds
+    misturados: o publicar.py não monta nada."""
+
+    def _dist(self, tmp):
+        import json
+        dist = os.path.join(tmp, "dist")
+        os.makedirs(dist)
+        with open(os.path.join(dist, "catalog.json"), "w", encoding="utf-8") as f:
+            json.dump({"ufs": {}}, f)
+        return dist
+
+    def test_publicar_refuses_while_the_marker_exists(self):
+        import tempfile
+        from datakit import build
+        with tempfile.TemporaryDirectory() as tmp:
+            dist, repo = self._dist(tmp), os.path.join(tmp, "repo")
+            os.makedirs(repo)
+            with open(os.path.join(dist, build.MARCA_EM_ANDAMENTO), "w", encoding="utf-8") as f:
+                f.write("2026-09-30T00:00:00Z\n")
+            with self.assertRaises(SystemExit) as cm:
+                pub.main(["--repo", repo, "--dist", dist, "--aceitar-falhas", "--aceitar-queda"])
+            self.assertIn("andamento", str(cm.exception.code))
+            self.assertEqual(os.listdir(repo), [])
+
+    def _run_build(self, tmp, catalog_fails=False):
+        import json
+        from unittest import mock
+        from datakit import build
+        dist = os.path.join(tmp, "dist")
+        seen = []
+
+        def fake_one(uf, ctx, packs_dir, split):
+            seen.append(os.path.exists(os.path.join(dist, build.MARCA_EM_ANDAMENTO)))
+
+        def fake_catalog(packs, d):
+            if catalog_fails:
+                raise RuntimeError("disco cheio")
+            with open(os.path.join(d, "catalog.json"), "w", encoding="utf-8") as f:
+                json.dump({"ufs": {}}, f)
+            return {"ufs": {}}
+
+        with mock.patch.object(build, "build_one", fake_one), \
+                mock.patch.object(build, "build_catalog", fake_catalog):
+            try:
+                build.main(["--uf", "GO", "--no-polygon", "--dist", dist, "--packs", os.path.join(tmp, "p")])
+            except RuntimeError:
+                pass
+        return seen, os.path.exists(os.path.join(dist, build.MARCA_EM_ANDAMENTO))
+
+    def test_build_marks_while_running_and_clears_at_the_end(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self._run_build(tmp), ([True], False))
+
+    def test_marker_stays_when_the_build_dies(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self._run_build(tmp, catalog_fails=True), ([True], True))
+
+
+class SessaoHttp(unittest.TestCase):
+    """Uma sessão HTTP para o build inteiro: as requisições ao mesmo servidor (27 UFs do Inmetro,
+    páginas do ArcGIS) reusam a conexão. Mesmos cabeçalhos e tempos de antes."""
+
+    def test_one_shared_session(self):
+        self.assertIs(_http.session(), _http.session())
+        self.assertIsInstance(_http.session(), requests.Session)
+
+    def test_get_goes_through_the_session_with_the_same_arguments(self):
+        from unittest import mock
+
+        class Resp:
+            content, text = b"x", "x"
+
+            def raise_for_status(self):
+                pass
+
+            def json(self):
+                return {"ok": 1}
+
+        with mock.patch.object(_http.session(), "get", return_value=Resp()) as get:
+            self.assertEqual(_http.get_json("https://x.gov.br/a", params={"q": 1}), {"ok": 1})
+            self.assertEqual(_http.get_bytes("https://x.gov.br/b", headers={"A": "b"}, timeout=5), b"x")
+        self.assertEqual(get.call_args_list[0], mock.call(
+            "https://x.gov.br/a", headers=_http.UA, timeout=(_http.CONNECT_TIMEOUT, _http.HTTP_TIMEOUT),
+            params={"q": 1}))
+        self.assertEqual(get.call_args_list[1], mock.call(
+            "https://x.gov.br/b", headers={"A": "b"}, timeout=(_http.CONNECT_TIMEOUT, 5), params=None))

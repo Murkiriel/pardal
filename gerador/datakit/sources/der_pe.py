@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 from typing import List, Optional, Tuple
 
+from datakit.contexto import Carga, Contexto
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.sources._http import get_bytes, in_br, to_float
 
@@ -30,3 +31,8 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None
             continue
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, None, "DER-PE", True))
     return out, []
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py)."""
+    return Carga(*load(ctx.raw_dir))

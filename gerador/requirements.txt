@@ -3,6 +3,7 @@
 requests==2.32.5
 osmium==4.3.1      # pyosmium: filtro do extrato .pbf da Geofabrik (dispensa o binário osmium)
 openpyxl==3.1.5    # leitura dos XLSX do DNIT / Artesp / DER-SP
-shapely==2.1.2     # recorte por polígono do IBGE (opcional — sem ele, recorte por bbox)
+shapely==2.1.2     # UF de cada ponto pelo polígono do IBGE (opcional — sem ele, recorte por bbox)
+numpy==2.4.2       # deduplicação do arquivo do Brasil sem carregar as linhas (e dependência do shapely)
 pyshp==3.1.6       # shapefiles do SNV (DNIT)
 pypdf==6.14.2      # lista de radares do Rio (PDF)

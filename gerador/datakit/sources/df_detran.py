@@ -9,8 +9,10 @@ from __future__ import annotations
 import re
 from typing import List, Optional
 
+from datakit.contexto import Carga, Contexto
 from datakit.common.model import Camera, CameraKind
-from datakit.sources._http import get_json, in_br
+from datakit.sources._arcgis import query_all
+from datakit.sources._http import in_br
 
 BASE = "https://services.arcgis.com/4CZwpdWHGNPLU7QQ/arcgis/rest/services/Base_DETRAN/FeatureServer"
 LAYERS = (1, 2)  # 1 = radares, 2 = lombadas eletrônicas
@@ -37,7 +39,11 @@ def parse(features: list) -> List[Camera]:
 def load(raw_dir: str, bbox=None):
     out: List[Camera] = []
     for layer in LAYERS:
-        j = get_json(f"{BASE}/{layer}/query", params={
-            "where": "1=1", "outFields": "Velocidade", "outSR": 4326, "f": "json", "resultRecordCount": 5000})
-        out.extend(parse(j.get("features", [])))
+        out.extend(parse(query_all(f"{BASE}/{layer}/query",
+                                   {"where": "1=1", "outFields": "Velocidade", "outSR": 4326})))
     return out, []
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py)."""
+    return Carga(*load(ctx.raw_dir))

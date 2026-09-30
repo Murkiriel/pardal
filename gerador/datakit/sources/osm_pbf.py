@@ -29,7 +29,9 @@ import osmium.filter
 from datakit.common.geo import angle_diff, bearing_deg
 from datakit.common.infer import class_limit, is_yes, zone_limit
 from datakit.common.lrs import _proj_seg
+from datakit.common.model import to_dir
 from datakit.common.sentido import orient_to_hint
+from datakit.common.spatial import lat_span_deg, lng_span_deg
 from datakit.sources._http import HTTP_TIMEOUT, UA, com_retentativa
 from datakit.common import (
     Camera, CameraKind, Limit, Struct,
@@ -55,10 +57,16 @@ ESTIMATE_STEP_M = 500.0
 URBAN_CELL_DEG = 0.002
 URBAN_THRESHOLD = 8
 
-# Sentido dos radares que só têm o sentido nominal (heading_hint): a via da rede principal mais
-# perto, a até PROBE_M, cuja orientação combina com o nominal (ver common/sentido.py).
+# Sentido dos radares que só têm o sentido nominal (heading_hint) ou nenhum ("*"): pela posição
+# do radar sobre uma pista de mão única do OSM (ver resolve_probes).
 PROBE_M = 40.0
 _PROBE_CELL = 0.002
+CONFLICT_M = 6.0
+# True: só publica o sentido confirmado pela posição (radar claramente sobre pista de mão única).
+# O sentido nominal de SP erra em ~13% dos casos que a posição consegue conferir, e em via de
+# mão dupla nada confere; sentido errado faz o radar sumir para quem passa, sentido vazio só
+# avisa nos dois sentidos. False volta a aceitar o nominal em via de mão dupla.
+POSITION_CONFIRMS = True
 
 # O `direction` dos radares do OSM NÃO entra no Pardal: medido nas BRs (radar a > 15 m do eixo
 # do SNV), o lado da pista confirma o sentido em só 38% dos 88 casos (DNIT 97%, ANTT 89%), e a
@@ -122,7 +130,7 @@ def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None
     """probes: radares de outras fontes com heading_hint; para cada um que casar com uma via,
     probe_out[(lat, lng, hint)] = rumo do trânsito (graus)."""
     probe_grid = _probe_grid(probes or [])
-    probe_best: Dict[Tuple[float, float, str], Tuple[float, float]] = {}
+    probe_found: Dict[Tuple[float, float, str], List[Tuple[float, float, bool]]] = {}
     fb: Dict[int, Tuple[int, bool]] = {}   # nid do radar 'forward'/'backward' -> (índice, forward?)
     cams: List[Camera] = []
     lims: List[Limit] = []
@@ -171,9 +179,9 @@ def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None
             if probe_grid and hw in _INFER_CLASSES:
                 ow = tags.get("oneway", "")
                 if ow == "-1":
-                    _probe_way(probe_grid, pts[::-1], True, probe_best)
+                    _probe_way(probe_grid, pts[::-1], True, probe_found)
                 else:
-                    _probe_way(probe_grid, pts, ow in ("yes", "true", "1"), probe_best)
+                    _probe_way(probe_grid, pts, ow in ("yes", "true", "1"), probe_found)
             verts = rdp(pts, RDP_EPSILON_M)
 
             # ponte / túnel (aviso de viaduto/subpassagem, agora offline)
@@ -189,8 +197,18 @@ def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None
                     urban[cell] = urban.get(cell, 0) + w
 
             lim = parse_maxspeed(tags.get("maxspeed")) if "maxspeed" in tags else None
-            if lim is not None:
-                _emit(lims, verts, bbox, Limit(0, 0, lim, "OSM"))
+            fw, bw = _side_limit(tags, "forward", lim), _side_limit(tags, "backward", lim)
+            if fw != bw:
+                # limite diferente em cada sentido (maxspeed:forward/backward): um ponto por
+                # sentido, com o rumo do trânsito. Com um sentido só sinalizado e sem maxspeed,
+                # o outro fica com a estimativa de sempre (abaixo).
+                for kmh, reverse in ((fw, False), (bw, True)):
+                    if kmh is not None:
+                        _emit_directed(lims, verts, bbox, kmh, reverse)
+                if fw is not None and bw is not None:
+                    continue
+            elif fw is not None:
+                _emit(lims, verts, bbox, Limit(0, 0, fw, "OSM"))
                 continue
             zone = _zone_limit(tags)
             if zone is not None:
@@ -200,7 +218,8 @@ def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None
                     pending_main.append((hw, verts, pts))   # urbano ou rural: decide no fim
                 else:
                     est = class_limit(hw, is_yes(tags.get("lit")))
-                    _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:classe", True, est[1]))
+                    if est is not None:
+                        _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:classe", True, est[1]))
         elif o.is_relation():
             if tags.get("type") != "enforcement":
                 continue
@@ -233,18 +252,20 @@ def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None
     # KeyFilter. Resolve as coordenadas que faltam por id.
     for hw, verts, pts in pending_main:
         est = class_limit(hw, _is_urban(pts, urban))
-        _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:classe", True, est[1]))
+        if est is not None:
+            _emit(lims, verts, bbox, Limit(0, 0, est[0], "OSM:classe", True, est[1]))
 
     missing = wanted - node_pt.keys()
     if missing:
-        idf = osmium.filter.IdFilter(missing).enable_for(osmium.osm.osm_entity_bits.NODE)
+        idf = osmium.filter.IdFilter(missing)
+        idf.enable_for(osmium.osm.osm_entity_bits.NODE)
         for o in osmium.FileProcessor(pbf_path).with_filter(idf):
             if o.is_node() and o.location.valid():
                 node_pt[o.id] = (o.location.lat, o.location.lon)
 
     _apply_enforcement_relations(enf_rels, node_pt, cam_idx_by_nid, cams, bbox)
     if probe_out is not None:
-        probe_out.update({k: b for k, (_, b) in probe_best.items()})
+        probe_out.update(resolve_probes(probe_found))
     return cams, lims, structs
 
 
@@ -257,26 +278,57 @@ def _probe_grid(probes: List[Camera]) -> Dict[Tuple[int, int], List[Tuple[float,
     return grid
 
 
-def _probe_way(grid, pts, oneway: bool, best) -> None:
-    """Para cada radar-sonda a até PROBE_M de um trecho do way, guarda o rumo orientado pelo
-    sentido nominal (o trecho mais perto que combine vence)."""
-    m = PROBE_M / 100_000.0
+def _probe_way(grid, pts, oneway: bool, found) -> None:
+    """Guarda, para cada radar-sonda, os trechos de via a até PROBE_M:
+    found[(lat, lng, hint)] += (distância, rumo do trecho, mão única?)."""
+    my = lat_span_deg(PROBE_M)
     for a, b in zip(pts, pts[1:]):
-        y0, y1 = int((min(a[0], b[0]) - m) // _PROBE_CELL), int((max(a[0], b[0]) + m) // _PROBE_CELL)
-        x0, x1 = int((min(a[1], b[1]) - m) // _PROBE_CELL), int((max(a[1], b[1]) + m) // _PROBE_CELL)
+        mx = lng_span_deg(PROBE_M, max(abs(a[0]), abs(b[0])))
+        y0, y1 = int((min(a[0], b[0]) - my) // _PROBE_CELL), int((max(a[0], b[0]) + my) // _PROBE_CELL)
+        x0, x1 = int((min(a[1], b[1]) - mx) // _PROBE_CELL), int((max(a[1], b[1]) + mx) // _PROBE_CELL)
         brg = None
         for cy in range(y0, y1 + 1):
             for cx in range(x0, x1 + 1):
                 for lat, lng, hint in grid.get((cy, cx), ()):
                     _, d = _proj_seg((lat, lng), a, b)
-                    key = (lat, lng, hint)
-                    if d > PROBE_M or (key in best and best[key][0] <= d):
+                    if d > PROBE_M:
                         continue
                     if brg is None:
                         brg = bearing_deg(a, b)
-                    oriented = orient_to_hint(brg, oneway, hint)
-                    if oriented is not None:
-                        best[key] = (d, oriented)
+                    found.setdefault((lat, lng, hint), []).append((d, brg, oneway))
+
+
+def resolve_probes(found, position_confirms: bool = POSITION_CONFIRMS) -> Dict[Tuple[float, float, str], float]:
+    """Rumo de cada sonda.
+
+    Radar claramente sobre uma pista de mão única (a mais perto é de mão única e a do sentido
+    oposto fica CONFLICT_M ou mais longe): o sentido é o da pista. Com sentido nominal, só se
+    não contrariar; se contrariar, fica sem sentido (não dá para saber se erra a posição ou o
+    nominal). Com hint "*" (fonte sem sentido, ex. CET com par de lugares), vale a pista.
+    Medido em SP: 87% (DER-SP/Artesp) e 93% (CET) dos radares sobre pista de mão única
+    inequívoca concordavam com o nominal.
+
+    Em via de mão dupla ou com as duas pistas coladas, só com position_confirms=False: a
+    orientação da via mais perto que combine com o nominal."""
+    out = {}
+    for key, segs in found.items():
+        hint = key[2]
+        segs = sorted(segs)
+        d0, b0, ow0 = segs[0]
+        if ow0:
+            opposite = [s for s in segs[1:] if s[2] and angle_diff(s[1], b0) > 120]
+            if not opposite or opposite[0][0] - d0 >= CONFLICT_M:
+                if hint == "*" or orient_to_hint(b0, True, hint) is not None:
+                    out[key] = b0
+                continue
+        if hint == "*" or position_confirms:
+            continue
+        for _d, b, ow in segs:
+            oriented = orient_to_hint(b, ow, hint)
+            if oriented is not None:
+                out[key] = oriented
+                break
+    return out
 
 
 def _apply_way_direction(way, fb, cams) -> None:
@@ -303,6 +355,23 @@ def _emit(lims, verts, bbox, proto: Limit) -> None:
     for lat, lng in pts:
         if in_bbox(bbox, lat, lng):
             lims.append(Limit(lat, lng, proto.limit_kmh, proto.source, proto.estimated, proto.low_kmh))
+
+
+def _side_limit(tags, side: str, default: Optional[int]) -> Optional[int]:
+    """maxspeed:<side> (forward = sentido do desenho do way); sem a tag, o maxspeed da via."""
+    v = parse_maxspeed(tags.get(f"maxspeed:{side}")) if f"maxspeed:{side}" in tags else None
+    return v if v is not None else default
+
+
+def _emit_directed(lims, verts, bbox, kmh: int, reverse: bool) -> None:
+    """Pontos de limite de um sentido só (placa de um lado da via): direction_deg = rumo de cada
+    trecho do way (o contrário, se reverse). Mesmos pontos de _limit_points."""
+    for i, (a, b) in enumerate(zip(verts, verts[1:])):
+        d = to_dir(bearing_deg(a, b) + (180.0 if reverse else 0.0))
+        pts = _limit_points([a, b], LIMIT_MAX_GAP_M)
+        for lat, lng in (pts if i == 0 else pts[1:]):   # o vértice a já saiu no trecho anterior
+            if in_bbox(bbox, lat, lng):
+                lims.append(Limit(lat, lng, kmh, "OSM", direction_deg=d))
 
 
 def _cell(lat: float, lng: float) -> int:
@@ -363,9 +432,8 @@ def _apply_enforcement_relations(rels, node_pt, cam_idx_by_nid, cams, bbox) -> N
         idx = cam_idx_by_nid.get(anchor)
         if idx is not None:
             c = cams[idx]
-            cams[idx] = Camera(
-                lat=c.lat, lng=c.lng, kind=kind or c.kind,
-                limit_kmh=c.limit_kmh or lim, source="OSM", active=c.active,
+            cams[idx] = replace(   # mantém o resto (sentido, dica de sentido)
+                c, kind=kind or c.kind, limit_kmh=c.limit_kmh or lim, source="OSM",
                 end_lat=end[0] if end else c.end_lat, end_lng=end[1] if end else c.end_lng,
             )
         elif kind is not None:
@@ -444,8 +512,8 @@ def needs_update(stored: str, remote: str) -> bool:
 
 
 def _remote_last_modified(url: str) -> str:
-    import requests
-    r = requests.head(url, headers=UA, timeout=HTTP_TIMEOUT, allow_redirects=True)
+    from datakit.sources._http import session
+    r = session().head(url, headers=UA, timeout=HTTP_TIMEOUT, allow_redirects=True)
     r.raise_for_status()
     return r.headers.get("Last-Modified", "")
 

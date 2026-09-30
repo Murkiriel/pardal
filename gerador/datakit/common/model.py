@@ -145,6 +145,208 @@ def _better_cam(new: Camera, cur: Camera) -> bool:
     return nw > cw
 
 
+def source_parts(source: str) -> List[str]:
+    """'DNIT+OSM' -> ['DNIT', 'OSM']: a coluna source junta com '+' as fontes do mesmo radar."""
+    return [p for p in (source or "").split("+") if p]
+
+
+def join_sources(*sources: str) -> str:
+    """Junta fontes sem repetir, oficiais antes do OSM: ('DNIT', 'OSM') -> 'DNIT+OSM'."""
+    parts: List[str] = []
+    for s in sources:
+        for p in source_parts(s):
+            if p not in parts:
+                parts.append(p)
+    return "+".join(sorted(parts, key=lambda p: (p == "OSM", parts.index(p))))
+
+
+def _grid(cams: List[Camera], radius_m: float):
+    """Índice dos radares por posição (item = posição na lista)."""
+    from datakit.common.spatial import Grid
+    return Grid(radius_m, ((c.lat, c.lng, i) for i, c in enumerate(cams)))
+
+
+def _near(g, c: Camera):
+    """Índices dos radares nas células que cobrem o raio em volta de c (quem chama mede)."""
+    for _, _, i in g.candidates(c.lat, c.lng):
+        yield i
+
+
+def _fold(keep: Camera, other: Camera, source: str) -> Camera:
+    """keep absorve other: herda o limite que falte e o fim do trecho (se other é de trecho)."""
+    from dataclasses import replace
+    section = other.kind == CameraKind.SECTION and keep.kind == CameraKind.FIXED and other.end_lat is not None
+    return replace(
+        keep,
+        source=source,
+        limit_kmh=keep.limit_kmh if keep.limit_kmh is not None else other.limit_kmh,
+        kind=CameraKind.SECTION if section else keep.kind,
+        end_lat=other.end_lat if section else keep.end_lat,
+        end_lng=other.end_lng if section else keep.end_lng,
+        direction_deg=keep.direction_deg if keep.direction_deg is not None else other.direction_deg,
+    )
+
+
+# Dois órgãos publicando o mesmo radar (ex. Detran-DF e DNIT numa BR dentro do DF): a até 30 m e
+# compatíveis, vira um só. Medido: 11 pares. Radares do mesmo órgão nunca se juntam (o órgão lista
+# cada equipamento: um por pista, por faixa ou por aproximação de cruzamento).
+def _audit_row(rule: str, a: Camera, b: Camera, dist: float) -> dict:
+    """Uma junção, para a auditoria (data/audit/juncoes_<UF>.csv; não é publicada)."""
+    return {"regra": rule, "fonte_a": a.source, "fonte_b": b.source, "dist_m": round(dist, 1),
+            "tipo_a": a.kind.value, "tipo_b": b.kind.value,
+            "limite_a": "" if a.limit_kmh is None else a.limit_kmh, "limite_b": "" if b.limit_kmh is None else b.limit_kmh,
+            "sentido_a": "" if a.direction_deg is None else a.direction_deg,
+            "sentido_b": "" if b.direction_deg is None else b.direction_deg,
+            "ativo_a": int(a.active), "ativo_b": int(b.active), "lat": a.lat, "lng": a.lng}
+
+
+AUDIT_HEADER = ("regra", "fonte_a", "fonte_b", "dist_m", "tipo_a", "tipo_b", "limite_a", "limite_b",
+                "sentido_a", "sentido_b", "ativo_a", "ativo_b", "lat", "lng")
+
+
+def merge_cross_agency(official: List[Camera], radius_m: float = 30.0,
+                       audit: Optional[List[dict]] = None) -> Tuple[List[Camera], int]:
+    """Fica a posição de quem tem sentido (senão, a do primeiro); fontes juntadas com '+';
+    ativo se algum dos dois disser que está ativo (na dúvida, avisa)."""
+    from dataclasses import replace
+    from datakit.common.geo import haversine_m
+
+    cams = list(official)
+    g = _grid(cams, radius_m)
+    gone = set()
+    n = 0
+    for i, c in enumerate(cams):
+        if i in gone:
+            continue
+        for j in _near(g, c):
+            o = cams[j]
+            if j <= i or j in gone or set(source_parts(c.source)) & set(source_parts(o.source)):
+                continue
+            dist = haversine_m((c.lat, c.lng), (o.lat, o.lng))
+            if not _absorbs(c, o) or dist > radius_m:
+                continue
+            if audit is not None:
+                audit.append(_audit_row("entre_orgaos", c, o, dist))
+            keep, other = (o, c) if (c.direction_deg is None and o.direction_deg is not None) else (c, o)
+            c = replace(_fold(keep, other, join_sources(c.source, o.source)), active=c.active or o.active)
+            cams[i] = c
+            gone.add(j)
+            n += 1
+    return [c for k, c in enumerate(cams) if k not in gone], n
+
+
+# Dois radares do OSM a até isto são o mesmo ponto de fiscalização (faixas lado a lado do mesmo
+# pórtico, ou o mesmo radar marcado duas vezes). Medido: 278 pares a < 8 m; de 8 a 30 m (~1.550)
+# são quase sempre um equipamento por pista ou por aproximação de cruzamento, e ficam.
+OSM_SAME_POINT_M = 8.0
+
+
+def collapse_osm(osm: List[Camera], radius_m: float = OSM_SAME_POINT_M,
+                 audit: Optional[List[dict]] = None) -> Tuple[List[Camera], int]:
+    """Junta radares do OSM a até radius_m (avanço de sinal nunca com radar de velocidade); fica o
+    de tipo mais específico/com limite (mesma preferência de merge_cameras)."""
+    from datakit.common.geo import haversine_m
+
+    cams = list(osm)
+    g = _grid(cams, radius_m)
+    gone = set()
+    n = 0
+    for i, c in enumerate(cams):
+        if i in gone:
+            continue
+        for j in _near(g, c):
+            o = cams[j]
+            if j <= i or j in gone or not _absorbs(c, o):
+                continue
+            dist = haversine_m((c.lat, c.lng), (o.lat, o.lng))
+            if dist > radius_m:
+                continue
+            if audit is not None:
+                audit.append(_audit_row("osm_osm", c, o, dist))
+            keep, other = (o, c) if _better_cam(o, c) else (c, o)
+            c = _fold(keep, other, c.source)
+            cams[i] = c
+            gone.add(j)
+            n += 1
+    return [c for k, c in enumerate(cams) if k not in gone], n
+
+
+# Radar do OSM a até isto de um oficial compatível é o mesmo equipamento mapeado de novo (as
+# coordenadas das fontes oficiais e do OSM costumam diferir em 5-20 m). Medido: 2.502 dos 10.420
+# radares do OSM ficavam a <= 30 m de um oficial e saíam em dobro nos arquivos (dois alertas no GPS).
+ABSORB_M = 30.0
+
+
+def _absorbs(off: Camera, osm: Camera) -> bool:
+    """O oficial pode ser o mesmo equipamento do radar do OSM? Avanço de sinal só com avanço de
+    sinal (ao lado de um radar de velocidade é outro equipamento); sentidos conhecidos opostos, não."""
+    from datakit.common.geo import angle_diff
+
+    if (off.kind == CameraKind.RED_LIGHT) != (osm.kind == CameraKind.RED_LIGHT):
+        return False
+    if off.direction_deg is not None and osm.direction_deg is not None:
+        return angle_diff(off.direction_deg, osm.direction_deg) <= 90
+    return True
+
+
+def absorb_osm(official: List[Camera], osm: List[Camera], radius_m: float = ABSORB_M,
+               audit: Optional[List[dict]] = None) -> Tuple[List[Camera], List[Camera], int]:
+    """Junta cada radar do OSM ao oficial compatível mais perto (a até radius_m, ativo antes de
+    inativo). Fica o oficial: posição, sentido e situação (medido: a posição oficial acerta mais o
+    lado da pista, ver FONTES.md); do OSM ele herda o limite quando não tem e o fim do trecho
+    quando o OSM sabe que é radar de trecho, e a fonte vira '<oficial>+OSM' (confirmado por duas
+    fontes). Oficiais não se juntam aqui (ver merge_cross_agency). Devolve (oficiais, OSM que
+    sobraram, quantos juntados)."""
+    from dataclasses import replace
+    from datakit.common.geo import haversine_m
+
+    official = list(official)
+    grid = _grid(official, radius_m)
+    rest: List[Camera] = []
+    joined = 0
+    for c in osm:
+        best = None
+        for i in _near(grid, c):
+            o = official[i]
+            if not _absorbs(o, c):
+                continue
+            d = haversine_m((c.lat, c.lng), (o.lat, o.lng))
+            if d <= radius_m and (best is None or (not o.active, d) < best[0]):
+                best = ((not o.active, d), i)
+        if best is None:
+            rest.append(c)
+            continue
+        i = best[1]
+        o = official[i]
+        if audit is not None:
+            audit.append(_audit_row("osm_oficial", o, c, best[0][1]))
+        official[i] = replace(_fold(o, replace(c, direction_deg=None), join_sources(o.source, "OSM")),
+                              direction_deg=o.direction_deg)
+        joined += 1
+    return official, rest, joined
+
+
+def deactivate_near(cams: List[Camera], dead: List[Tuple[float, float]], alive: List[Camera],
+                    dead_m: float = 20.0, alive_m: float = ABSORB_M) -> Tuple[List[Camera], int]:
+    """Marca inativo o radar que está num local que o órgão desativou (a até dead_m) e não tem
+    nenhum radar oficial ativo por perto (a até alive_m): o mapeamento ficou velho."""
+    from dataclasses import replace
+    from datakit.common.spatial import Grid
+
+    if not dead:
+        return cams, 0
+
+    gd = Grid(dead_m, ((lat, lng, None) for lat, lng in dead))
+    ga = Grid(alive_m, ((a.lat, a.lng, None) for a in alive if a.active))
+    out, n = [], 0
+    for c in cams:
+        if c.active and any(gd.within(c.lat, c.lng)) and not any(ga.within(c.lat, c.lng)):
+            c = replace(c, active=False)
+            n += 1
+        out.append(c)
+    return out, n
+
+
 def merge_limits(*groups: Iterable[Limit]) -> List[Limit]:
     """Último vence (grupos em ordem de prioridade), mas um valor sinalizado nunca é trocado
     por um estimado no mesmo ponto. Pontos de sentidos diferentes no mesmo lugar são
@@ -168,25 +370,19 @@ def override_limits(official: List[Limit], osm: List[Limit], radius_m: float = 5
     Um oficial com sentido só cobre aquele sentido: o ponto do OSM sai quando há ali um oficial
     sem sentido, ou oficiais dos dois sentidos; com placa de um sentido só, o OSM fica para o
     outro."""
-    from datakit.common.geo import angle_diff, haversine_m
+    from datakit.common.geo import angle_diff
+    from datakit.common.spatial import Grid
 
-    cell = radius_m / 111_000.0
-    grid: Dict[Tuple[int, int], List[Limit]] = {}
-    for o in official:
-        grid.setdefault((int(o.lat // cell), int(o.lng // cell)), []).append(o)
+    grid = Grid(radius_m, ((o.lat, o.lng, o) for o in official))
 
     def near(p: Limit) -> bool:
-        gy, gx = int(p.lat // cell), int(p.lng // cell)
         seen: List[int] = []
-        for dy in (-1, 0, 1):
-            for dx in (-1, 0, 1):
-                for o in grid.get((gy + dy, gx + dx), ()):
-                    if haversine_m((p.lat, p.lng), (o.lat, o.lng)) <= radius_m:
-                        if o.direction_deg is None:
-                            return True
-                        if any(angle_diff(o.direction_deg, d) > 90 for d in seen):
-                            return True
-                        seen.append(o.direction_deg)
+        for _, o in grid.within(p.lat, p.lng):
+            if o.direction_deg is None:
+                return True
+            if any(angle_diff(o.direction_deg, d) > 90 for d in seen):
+                return True
+            seen.append(o.direction_deg)
         return False
 
     return list(official) + [p for p in osm if not near(p)]

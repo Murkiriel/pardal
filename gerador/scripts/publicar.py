@@ -38,6 +38,11 @@ _MANAGED = ("brasil", "estados")
 # publicado — queda de mais de MAX_QUEDA e de pelo menos MIN_QUEDA itens (radares, limites,
 # estimados ou estruturas). A CET-SP fora do ar tirou 9% dos limites de SP; o OSM de um mês
 # para o outro varia bem menos que isso.
+# O build grava esta marca em data/dist ao começar e apaga ao terminar (datakit/build.py,
+# MARCA_EM_ANDAMENTO): se ela está lá, o build ainda roda ou caiu no meio.
+MARCA_EM_ANDAMENTO = "BUILD_EM_ANDAMENTO"
+# O GitHub recusa arquivo acima de 100 MB (o build já registra como falha; aqui é a última trava).
+MAX_FILE_BYTES = 95_000_000
 MAX_QUEDA = 0.05
 MIN_QUEDA = 50
 _CONTAGENS = (("cameras", "radares"), ("limits", "limites"), ("limits_estimated", "limites estimados"),
@@ -84,6 +89,7 @@ def rewrite_catalog(cat: dict) -> dict:
     """Mesmo catálogo, com cada `file` trocado pelo caminho dentro das pastas."""
     out = json.loads(json.dumps(cat))
     out.pop("falhas", None)   # só serve para barrar a publicação; não vai para o repositório
+    out.pop("avisos", None)
     for entry in out["ufs"].values():
         for key in ("radares", "limites", "limites_estimados", "estruturas"):
             meta = entry.get(key)
@@ -92,7 +98,7 @@ def rewrite_catalog(cat: dict) -> dict:
     return out
 
 
-def main() -> int:
+def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", default=REPO, help="raiz do repositório (padrão: pasta acima de gerador/)")
     ap.add_argument("--dist", default=os.path.join(GERADOR, "data", "dist"))
@@ -102,15 +108,30 @@ def main() -> int:
                     help=f"monta mesmo se alguma contagem cair mais de {MAX_QUEDA:.0%} em relação ao publicado")
     ap.add_argument("--aceitar-falhas", action="store_true",
                     help="monta mesmo se alguma fonte falhou no build (campo falhas do catálogo)")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
-    cat = json.load(open(os.path.join(args.dist, "catalog.json"), encoding="utf-8"))
+    marca = os.path.join(args.dist, MARCA_EM_ANDAMENTO)
+    if os.path.exists(marca):
+        with open(marca, encoding="utf-8") as f:
+            desde = f.read().strip()
+        sys.exit(f"build em andamento ou interrompido ({marca}: {desde}); espere terminar ou rode o build de novo")
+
+    grandes = [f"{n} ({os.path.getsize(os.path.join(args.dist, n)) / 1e6:.1f} MB)"
+               for n in sorted(os.listdir(args.dist))
+               if dest_for(n) and os.path.getsize(os.path.join(args.dist, n)) > MAX_FILE_BYTES]
+    if grandes:
+        sys.exit(f"arquivo acima de {MAX_FILE_BYTES / 1e6:.0f} MB (o GitHub recusa):\n  " + "\n  ".join(grandes))
+
+    with open(os.path.join(args.dist, "catalog.json"), encoding="utf-8") as f:
+        cat = json.load(f)
     for uf, entry in cat["ufs"].items():
         for key in ("radares", "limites", "limites_estimados", "estruturas"):
             meta = entry.get(key)
             if meta and meta.get("sha256") and _sha(os.path.join(args.dist, meta["file"])) != meta["sha256"]:
                 sys.exit(f"sha256 não confere: {meta['file']} ({uf})")
 
+    for aviso in cat.get("avisos") or []:
+        print(f"aviso (não bloqueia): {aviso}")
     if cat.get("falhas") and not args.aceitar_falhas:
         sys.exit("fontes falharam no build; rode de novo ou use --aceitar-falhas:\n  " + "\n  ".join(cat["falhas"]))
 
@@ -132,10 +153,10 @@ def main() -> int:
             wanted[rel] = os.path.join(args.dist, name)
     for top in _MANAGED:
         for dirpath, _, files in os.walk(os.path.join(args.repo, top)):
-            for f in files:
-                rel = os.path.relpath(os.path.join(dirpath, f), args.repo).replace(os.sep, "/")
+            for fname in files:
+                rel = os.path.relpath(os.path.join(dirpath, fname), args.repo).replace(os.sep, "/")
                 if rel not in wanted:
-                    os.remove(os.path.join(dirpath, f))
+                    os.remove(os.path.join(dirpath, fname))
     for rel, src in sorted(wanted.items()):
         dst = os.path.join(args.repo, *rel.split("/"))
         os.makedirs(os.path.dirname(dst), exist_ok=True)
@@ -146,8 +167,16 @@ def main() -> int:
 
     if not args.commit:
         return 0
-    git = lambda *a: subprocess.run(["git", "-C", args.repo, *a], check=True)
-    git("add", "-A")
+    def git(*a: str) -> None:
+        subprocess.run(["git", "-C", args.repo, *a], check=True)
+
+    # Só os dados: o commit nunca leva o que mais estiver pendente no repositório (código do
+    # gerador ainda não revisado, arquivos soltos). Inclui caminhos que só existem no índice
+    # (pasta apagada por inteiro), para a remoção também entrar.
+    paths = [p for p in (*_MANAGED, "catalog.json")
+             if os.path.exists(os.path.join(args.repo, p)) or subprocess.run(
+                 ["git", "-C", args.repo, "ls-files", "--", p], capture_output=True, text=True).stdout.strip()]
+    git("add", "-A", "--", *paths)
     if subprocess.run(["git", "-C", args.repo, "diff", "--cached", "--quiet"]).returncode == 0:
         print("nada mudou")
         return 0

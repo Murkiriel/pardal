@@ -1,13 +1,15 @@
-"""Orquestra a fase de construção: fontes -> merge -> tiles -> pacote(s) de UF -> catálogo.
+"""Orquestra a fase de construção: fontes -> merge -> pacote(s) de UF -> catálogo.
 
     python -m datakit.build --uf GO
+    python -m datakit.build --uf GO,RJ,SC         # algumas UFs num build só
     python -m datakit.build --all                 # 27 UFs, 5 macrorregiões Geofabrik
 
 Fontes ligadas: OSM (extrato Geofabrik) + DNIT + ANTT + DERs + capitais (JP, Fortaleza,
 Recife, BH, Rio) + Detran-DF; limites oficiais das placas da ANTT e dos trechos do Rio (têm
 prioridade sobre o OSM no mesmo lugar); situação ativo/inativo pelo Inmetro nas BRs (SNV).
-Fonte que falha (rede/portal) é tratada como ausente. Recorte por polígono do IBGE quando `shapely` +
-a malha estiverem disponíveis; senão, por bbox.
+Fonte que falha (rede/portal) é tratada como ausente. Cada ponto vai para exatamente uma UF pelo
+polígono do IBGE (ou o mais perto a até 5 km: pontes, orla, ilhas — common/ufassign.py) quando
+`shapely` + a malha estiverem disponíveis; senão, recorte por bbox.
 """
 from __future__ import annotations
 
@@ -17,39 +19,27 @@ import sys
 
 from datakit.build_catalog import build as build_catalog
 from datakit.build_pack import build as build_pack
-from datakit.build_tiles import write_tiles
 from datakit import falhas, inmetro_status
 from datakit.common import merge_cameras, merge_limits
-from datakit.common.lrs import SnvRoutes, load_concessions
-from datakit.common.model import override_limits
-from datakit.common.ufpoly import polygons as uf_polygons
+from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, merge_cross_agency,
+                                  override_limits)
+from datakit.common.geo import in_bbox
+from datakit.common.ufassign import UfAssigner
 from datakit.common.ufs import UF_BBOX, geofabrik_region, uf_bbox
-from datakit.sources import osm_pbf
-from datakit.sources import dnit, antt, der_go, der_sp, der_pe, municipal, bh, df_detran, rio
-from datakit.sources import antt_placas, cet_sp, inmetro, snv
+from datakit.contexto import Contexto
+from datakit.sources import dnit, antt, der_go, der_sp, der_pe, municipal, bh, df_detran, rio, cet_sp
 
+# Fontes oficiais de radares, na ordem do manifest. Cada módulo expõe carregar(ctx) -> Carga
+# (datakit/contexto.py).
 OFFICIAL = {
     "DNIT": dnit, "ANTT": antt,
     "DER-GO": der_go, "DER-SP": der_sp, "DER-PE": der_pe,
-    "capitais": municipal, "BHTRANS": bh, "DETRAN-DF": df_detran, "RIO": rio,
+    "capitais": municipal, "BHTRANS": bh, "DETRAN-DF": df_detran, "RIO": rio, "CET-SP": cet_sp,
 }
 
-_OSM_CACHE: dict = {}       # region -> (extract, osm_cams, osm_lims, osm_structs, probe_dirs)
-_OFFICIAL_CACHE: dict = {}  # name -> list[Camera]  (carga nacional, bbox=None)
-
-
-def _osm_for_region(region: str, raw_dir: str, probes=None, refresh: bool = True):
-    """probes: radares oficiais com sentido nominal (heading_hint), resolvidos contra as vias."""
-    if region not in _OSM_CACHE:
-        _OSM_CACHE.clear()  # as UFs saem agrupadas por região: a anterior não volta a ser usada
-        ex = osm_pbf.ensure_extract(region, raw_dir, refresh=refresh)
-        print(f"[build] extrato {os.path.basename(ex.path)}  {ex.bytes/1e6:.1f} MB  ({ex.file_date})")
-        probe_dirs: dict = {}
-        cams, lims, structs = osm_pbf.load(ex.path, bbox=None, probes=probes, probe_out=probe_dirs)
-        print(f"[build] OSM/{region}: {len(cams)} radares, {len(lims)} limites, "
-              f"{len(structs)} pontes/túneis, {len(probe_dirs)} sentidos nominais resolvidos")
-        _OSM_CACHE[region] = (ex, cams, lims, structs, probe_dirs)
-    return _OSM_CACHE[region]
+# Gravado em data/dist no início do build e apagado só no fim: enquanto existir (build rodando,
+# ou interrompido no meio), data/dist mistura pacotes de dois builds e o publicar.py não monta.
+MARCA_EM_ANDAMENTO = "BUILD_EM_ANDAMENTO"
 
 
 def _resolve_hints(cams, probe_dirs):
@@ -65,112 +55,102 @@ def _resolve_hints(cams, probe_dirs):
     return out
 
 
-def _official_national(raw_dir: str):
-    for name, mod in OFFICIAL.items():
-        if name in _OFFICIAL_CACHE:
-            continue
-        try:
-            c, _ = mod.load(raw_dir, bbox=None)
-            _OFFICIAL_CACHE[name] = c
-            print(f"[build] {name}: {len(c)} radares (nacional)")
-        except NotImplementedError as e:
-            _OFFICIAL_CACHE[name] = []
-            print(f"[build] {name}: pulado ({e})")
-        except Exception as e:  # noqa: BLE001
-            _OFFICIAL_CACHE[name] = []
-            falhas.registrar(name, e)
-    return _OFFICIAL_CACHE
+class _Split:
+    """Quais itens de uma lista ficam com a UF. Com polígonos, cada ponto tem exatamente uma UF
+    (common/ufassign.py), calculada uma vez por lista e guardada (a mesma lista serve às várias
+    UFs da região); sem polígonos (fallback), toda UF cuja bbox contém o ponto."""
+
+    def __init__(self, assigner: "UfAssigner | None" = None):
+        self.assigner = assigner
+        self._memo: dict = {}   # chave -> (lista, UFs); trocar a lista da chave libera a anterior
+
+    def _ufs(self, key, items, pos):
+        got = self._memo.get(key)
+        if got is None or got[0] is not items:
+            pts = [pos(x) for x in items]
+            got = (items, self.assigner.assign([p[0] for p in pts], [p[1] for p in pts]))
+            self._memo[key] = got
+        return got[1]
+
+    def points(self, uf: str, key, items: list) -> list:
+        if self.assigner is None:
+            bbox = uf_bbox(uf)
+            return [x for x in items if in_bbox(bbox, x.lat, x.lng)]
+        return [x for x, u in zip(items, self._ufs(key, items, lambda x: (x.lat, x.lng))) if u == uf]
+
+    def structs(self, uf: str, key, items: list) -> list:
+        """Ponte/túnel fica com a UF de qualquer uma das duas pontas (a divisa às vezes é o rio)."""
+        if self.assigner is None:
+            bbox = uf_bbox(uf)
+            return [s for s in items if in_bbox(bbox, s.lat1, s.lng1) or in_bbox(bbox, s.lat2, s.lng2)]
+        u1 = self._ufs((key, 1), items, lambda s: (s.lat1, s.lng1))
+        u2 = self._ufs((key, 2), items, lambda s: (s.lat2, s.lng2))
+        return [s for s, a, b in zip(items, u1, u2) if uf in (a, b)]
 
 
-_NATIONAL: dict = {}  # snv, concessions, snv_version, meters_idx, official_limits
-
-
-def _try(label: str, fn, default):
-    try:
-        return fn()
-    except Exception as e:  # noqa: BLE001
-        falhas.registrar(label, e)
-        return default
-
-
-def _national(raw_dir: str) -> dict:
-    """Bases nacionais carregadas uma vez: SNV (rotas + concessões), Inmetro e os limites
-    oficiais. Cada uma que falhar fica vazia — o pacote sai só sem aquela parte."""
-    if _NATIONAL:
-        return _NATIONAL
-    paths = _try("SNV", lambda: snv.ensure(raw_dir), None)
-    routes = snv.routes(raw_dir) if paths else None
-    conc = _try("SNV concessões", lambda: load_concessions(paths[1]), {}) if paths else {}
-    meters = _try("Inmetro", lambda: inmetro.load(raw_dir), [])
-    print(f"[build] Inmetro: {len(meters)} medidores; SNV {paths[2] if paths else '—'}")
-    antt_l = _try("ANTT placas", lambda: antt_placas.load(raw_dir, routes), []) if routes else []
-    rio_l = _try("Rio trechos", rio.load_limits, [])
-    cet_l = _try("CET-SP", cet_sp.load_limits, [])
-    print(f"[build] limites oficiais: ANTT {len(antt_l)}, Rio {len(rio_l)}, CET-SP {len(cet_l)} pontos")
-    _NATIONAL.update(snv=routes, concessions=conc, snv_version=paths[2] if paths else None,
-                     meters=inmetro_status.index_meters(meters), n_meters=len(meters),
-                     official_limits={"ANTT": antt_l, "RIO": rio_l, "CET-SP": cet_l})
-    return _NATIONAL
-
-
-def build_one(uf: str, args, poly=None) -> dict:
+def build_one(uf: str, ctx: Contexto, packs_dir: str, split: "_Split | None" = None) -> dict:
     uf = uf.upper()
+    split = split or _Split()
     region = geofabrik_region(uf)
-    official = _official_national(args.raw)
-    probes = [c for src in official.values() for c in src if c.heading_hint]
-    ex, osm_cams, osm_lims, osm_structs, probe_dirs = _osm_for_region(
-        region, args.raw, probes, refresh=not getattr(args, "osm_local", False))
-    nat = _national(args.raw)
+    official = ctx.oficiais()
+    probes = [c for carga in official.values() for c in carga.radares if c.heading_hint]
+    ex, osm_cams, osm_lims, osm_structs, probe_dirs = ctx.osm(region, probes)
+    nat = ctx.nacional()
 
-    bbox = uf_bbox(uf)
-    keep = _keeper(bbox, poly.get(uf) if poly else None)
-    osm_c = [c for c in osm_cams if keep(c.lat, c.lng)]
-    osm_l = [x for x in osm_lims if keep(x.lat, x.lng)]
-    structs = [x for x in osm_structs if keep(x.lat1, x.lng1) or keep(x.lat2, x.lng2)]
-    off_c = _resolve_hints([c for src in official.values() for c in src if keep(c.lat, c.lng)], probe_dirs)
+    osm_c = split.points(uf, "osm-radares", osm_cams)
+    osm_l = split.points(uf, "osm-limites", osm_lims)
+    structs = split.structs(uf, "osm-estruturas", osm_structs)
+    off_c = _resolve_hints([c for name, carga in official.items()
+                            for c in split.points(uf, ("oficial", name), carga.radares)], probe_dirs)
 
+    # mesmo radar em dois órgãos, no oficial e no OSM, ou duas vezes no OSM: um só (common/model.py)
+    audit: list = []
+    off_c, n_cross = merge_cross_agency(off_c, audit=audit)
+    off_c, osm_c, n_joined = absorb_osm(off_c, osm_c, audit=audit)
+    osm_c, n_osm = collapse_osm(osm_c, audit=audit)
+    _write_audit(ctx.raw_dir, uf, audit)
+    # radar do OSM num local que o órgão desativou (a CET), sem local ativo por perto: inativo
+    dead = [p for carga in official.values() for p in carga.desativados]
+    osm_c, n_dead = deactivate_near(osm_c, dead, off_c)
+    print(f"[build] {uf}: juntados {n_cross} entre órgãos, {n_joined} OSM a oficiais, {n_osm} OSM a OSM; "
+          f"{n_dead} marcados inativos (CET)")
     cams = merge_cameras(off_c, osm_c)   # oficiais primeiro -> ganham empate
-    status = {}
+    status: dict = {}
     if nat["snv"] is not None and nat["meters"]:
         cams, status = inmetro_status.apply(cams, uf, nat["meters"], nat["snv"], nat["concessions"])
-    off_l = [x for src in nat["official_limits"].values() for x in src if keep(x.lat, x.lng)]
+    off_by_src = {n: split.points(uf, ("limites", n), pts) for n, pts in nat["official_limits"].items()}
+    off_l = [x for pts in off_by_src.values() for x in pts]
     lims = merge_limits(override_limits(off_l, osm_l))
 
     sources = [{"name": f"OSM/Geofabrik {region}", "file_date": ex.file_date,
                 "sha256": ex.sha256, "bytes": ex.bytes}]
-    sources += [{"name": n, "count": len(official.get(n, []))} for n in OFFICIAL]
-    sources += [{"name": f"{n} (limites)", "count": sum(1 for x in pts if keep(x.lat, x.lng))}
-                for n, pts in nat["official_limits"].items()]
+    sources += [{"name": n, "count": len(official[n].radares) if n in official else 0} for n in ctx.fontes]
+    sources += [{"name": f"{n} (limites)", "count": len(pts)} for n, pts in off_by_src.items()]
     if status:
         sources.append({"name": "Inmetro (situação)", "snv": nat["snv_version"], **status})
 
-    index = write_tiles(
-        cams, lims, args.tiles, sources=sources, sample_m=int(osm_pbf.LIMIT_MAX_GAP_M),
-        ufs={uf: {"bbox": list(bbox), "cameras": len(cams), "limits": len(lims)}},
-        structs=structs,
-    )
-    manifest = build_pack(uf, args.tiles, args.packs, index, poly=poly.get(uf) if poly else None)
+    manifest = build_pack(uf, packs_dir, cams, lims, structs, sources)
     print(f"[build] pacote {uf}: {manifest['counts']}")
     return manifest
 
 
-def _keeper(bbox, poly):
-    if poly is None:
-        from datakit.common import in_bbox
-        return lambda lat, lng: in_bbox(bbox, lat, lng)
-    from datakit.common import in_bbox
-    from shapely.geometry import Point
-    from shapely.prepared import prep
-    pg = prep(poly)
-    return lambda lat, lng: in_bbox(bbox, lat, lng) and pg.contains(Point(lng, lat))
+def _write_audit(raw_dir: str, uf: str, rows: list) -> None:
+    """data/audit/juncoes_<UF>.csv: cada junção de radares deste build (não é publicado)."""
+    import csv
+    from datakit.common.model import AUDIT_HEADER
+    d = os.path.join(os.path.dirname(os.path.abspath(raw_dir)), "audit")
+    os.makedirs(d, exist_ok=True)
+    with open(os.path.join(d, f"juncoes_{uf}.csv"), "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=AUDIT_HEADER)
+        w.writeheader()
+        w.writerows(rows)
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="datakit.build")
-    ap.add_argument("--uf", help="UF alvo, ex.: GO")
+    ap.add_argument("--uf", help="UF alvo, ex.: GO (ou várias: GO,RJ,SC)")
     ap.add_argument("--all", action="store_true", help="todas as 27 UFs")
     ap.add_argument("--raw", default="data/raw")
-    ap.add_argument("--tiles", default="data/tiles")
     ap.add_argument("--packs", default="data/packs")
     ap.add_argument("--dist", default="data/dist")
     ap.add_argument("--no-polygon", action="store_true", help="recorte só por bbox (ignora IBGE)")
@@ -181,15 +161,26 @@ def main(argv=None) -> int:
     if not args.all and not args.uf:
         ap.error("informe --uf <UF> ou --all")
 
-    poly = {} if args.no_polygon else uf_polygons(args.raw)
-    targets = sorted(UF_BBOX) if args.all else [args.uf.upper()]
+    marca = os.path.join(args.dist, MARCA_EM_ANDAMENTO)
+    os.makedirs(args.dist, exist_ok=True)
+    with open(marca, "w", encoding="utf-8") as f:
+        from datetime import datetime, timezone
+        f.write(f"{datetime.now(timezone.utc):%Y-%m-%dT%H:%M:%SZ} {' '.join(argv or sys.argv[1:])}\n")
+
+    ctx = Contexto(args.raw, refresh_osm=not args.osm_local, fontes=OFFICIAL)
+    poly = {} if args.no_polygon else ctx.polygons()
+    split = _Split(UfAssigner(poly) if poly else None)
+    targets = sorted(UF_BBOX) if args.all else [u.strip().upper() for u in args.uf.split(",") if u.strip()]
+    unknown = [u for u in targets if u not in UF_BBOX]
+    if unknown:
+        ap.error(f"UF desconhecida: {', '.join(unknown)}")
 
     # agrupa por região só pra ordem de download previsível
     targets.sort(key=lambda u: (geofabrik_region(u), u))
     ok = 0
     for uf in targets:
         try:
-            build_one(uf, args, poly=poly or None)
+            build_one(uf, ctx, args.packs, split)
             ok += 1
         except Exception as e:  # noqa: BLE001
             falhas.registrar(f"pacote {uf}", e)
@@ -204,7 +195,13 @@ def main(argv=None) -> int:
         from datakit.build_formats import build as build_formats
         print(f"[build] formatos extras (GeoJSON/KML/GPX): {build_formats(args.dist)}")
 
+    from datakit.build_brasil import MAX_FILE_BYTES, oversized
+    for name, size in oversized(args.dist):
+        falhas.registrar(f"tamanho {name}", ValueError(
+            f"{size / 1e6:.1f} MB passa do teto de {MAX_FILE_BYTES / 1e6:.0f} MB por arquivo"))
+
     _record_failures(args.dist)
+    os.remove(marca)
     return 0 if ok else 1
 
 
@@ -215,8 +212,11 @@ def _record_failures(dist_dir: str) -> None:
     with open(path, encoding="utf-8") as f:
         cat = json.load(f)
     cat["falhas"] = falhas.lista()
+    cat["avisos"] = falhas.avisos()
     with open(path, "w", encoding="utf-8") as f:
         json.dump(cat, f, ensure_ascii=False, indent=2)
+    for x in cat["avisos"]:
+        print(f"[build] aviso: {x}")
     if cat["falhas"]:
         print("[build] ATENÇÃO — fontes que falharam (o publicar.py não monta sem --aceitar-falhas):")
         for x in cat["falhas"]:

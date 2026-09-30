@@ -6,7 +6,7 @@ import unittest
 
 from datakit.common import Camera, CameraKind, Limit, merge_cameras, merge_limits
 from datakit.common.geo import haversine_m, parse_maxspeed, rdp, sample_polyline
-from datakit.build_tiles import tile_of, tile_bbox
+from datakit.build_pack import tile_of, tile_bbox
 from datakit.sources.osm_pbf import (
     _apply_enforcement_relations, _kind, _limit_points, _zone_limit, _struct_kind,
 )
@@ -69,6 +69,44 @@ class Tiles(unittest.TestCase):
         self.assertTrue(mnla <= -16.68 <= mxla and mnlo <= -49.25 <= mxlo)
 
 
+class Pack(unittest.TestCase):
+    """O pacote sai direto das listas da UF: nada gravado fora de packs/<UF>/, mesmo formato."""
+
+    def test_pack_from_memory(self):
+        import csv
+        import json
+        import os
+        import tempfile
+        from datakit.build_pack import build as build_pack
+        from datakit.common import Struct
+
+        cams = [Camera(-16.0, -49.0, CameraKind.FIXED, 60, "DER-GO", True, direction_deg=90),
+                Camera(-16.0, -49.0, CameraKind.FIXED, None, "OSM", True),       # mesmo ponto: um só
+                Camera(-16.1, -49.1, CameraKind.SECTION, 80, "OSM", True, end_lat=-16.2, end_lng=-49.1)]
+        lims = [Limit(-16.0, -49.0, 60, "OSM"), Limit(-16.3, -49.3, 40, "OSM", True, 30)]
+        structs = [Struct(-16.0, -49.0, -16.001, -49.0, "BRIDGE")] * 2
+        with tempfile.TemporaryDirectory() as d:
+            m = build_pack("GO", d, cams, lims, structs, sources=[{"name": "teste"}],
+                           built_at="2026-09-30T00:00:00Z")
+            self.assertEqual(os.listdir(d), ["GO"])
+            self.assertEqual(sorted(os.listdir(os.path.join(d, "GO"))),
+                             ["cameras.csv", "limits.csv", "manifest.json", "structs.csv"])
+            with open(os.path.join(d, "GO", "cameras.csv"), encoding="utf-8") as f:
+                rows = list(csv.DictReader(f))
+            with open(os.path.join(d, "GO", "manifest.json"), encoding="utf-8") as f:
+                on_disk = json.load(f)
+        self.assertEqual(on_disk, m)
+        self.assertEqual([(r["source"], r["direction_deg"]) for r in rows], [("OSM", ""), ("DER-GO", "90")])
+        self.assertEqual(set(m), {"schema", "uf", "bbox", "built_at", "artifact_built_at", "sources",
+                                  "tiles", "counts", "files"})
+        self.assertEqual(m["counts"], {"cameras": 2, "cameras_with_limit": 2, "cameras_inactive": 0,
+                                       "sections": 1, "red_lights": 0, "limits": 2, "structs": 1})
+        self.assertEqual((m["schema"], m["artifact_built_at"], m["sources"]), (2, "2026-09-30T00:00:00Z",
+                                                                             [{"name": "teste"}]))
+        want = {tile_of(-16.0, -49.0), tile_of(-16.1, -49.1), tile_of(-16.3, -49.3)}
+        self.assertEqual(m["tiles"], [list(t) for t in sorted(want)])
+
+
 class Relations(unittest.TestCase):
     def test_kind_from_enforcement(self):
         self.assertEqual(_kind({"enforcement": "average_speed"}), CameraKind.SECTION)
@@ -97,6 +135,13 @@ class Relations(unittest.TestCase):
         self.assertEqual(cams[0].kind, CameraKind.SECTION)
         self.assertAlmostEqual(cams[0].end_lat, -16.05)
         self.assertEqual(len(cams), 1)  # promovido, não duplicado
+
+    def test_relation_keeps_direction_and_hint(self):
+        cams = [Camera(-16.0, -49.0, CameraKind.FIXED, 80, "OSM", True, direction_deg=180, heading_hint="S")]
+        node_pt = {1: (-16.0, -49.0), 2: (-16.05, -49.0)}
+        _apply_enforcement_relations([("maxspeed", 1, 2, None, 80)], node_pt, {1: 0}, cams, None)
+        self.assertEqual(cams[0].kind, CameraKind.SECTION)
+        self.assertEqual((cams[0].direction_deg, cams[0].heading_hint), (180, "S"))
 
     def test_section_appends_when_from_not_emitted(self):
         cams = []

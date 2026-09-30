@@ -3,7 +3,6 @@ número com vírgula e filtro de coordenada dentro do Brasil.
 """
 from __future__ import annotations
 
-import io
 import re
 import time
 from datetime import datetime
@@ -22,8 +21,26 @@ BR_BBOX = (-34.0, -74.5, 6.0, -32.0)
 # que não passa com nova tentativa (404, 403, formato mudou) sobe na hora.
 TENTATIVAS = 3
 ESPERA_S = 5.0
+# Abrir a conexão demora no máximo isto; o download em si pode levar HTTP_TIMEOUT. Um servidor que
+# não aceita conexão (fora do ar, ou bloqueando o lugar de onde se roda — o DNIT e o Inmetro não
+# respondem fora do Brasil) custa segundos, não 3 × 120 s por requisição.
+CONNECT_TIMEOUT = 20
+# Servidor que não abriu conexão nem depois das novas tentativas: as próximas requisições a ele
+# nesta execução falham na hora (as 27 UFs do Inmetro custavam ~6 min cada fora do Brasil).
+_DEAD_HOSTS: set = set()
+_SESSION: Optional[requests.Session] = None
 
 T = TypeVar("T")
+
+
+def session() -> requests.Session:
+    """Sessão HTTP do build inteiro: requisições ao mesmo servidor reusam a conexão (as 27 UFs do
+    Inmetro, as páginas do ArcGIS, o Power BI). Sem cabeçalhos próprios: cada chamada passa os
+    seus, como antes com requests.get."""
+    global _SESSION
+    if _SESSION is None:
+        _SESSION = requests.Session()
+    return _SESSION
 
 
 def transitorio(e: BaseException) -> bool:
@@ -39,7 +56,7 @@ def transitorio(e: BaseException) -> bool:
 
 
 def com_retentativa(fn: Callable[[], T], rotulo: str = "", tentativas: int = TENTATIVAS,
-                    espera_s: float = ESPERA_S, dormir: Callable[[float], None] = time.sleep) -> T:
+                    espera_s: float = ESPERA_S, dormir: Optional[Callable[[float], None]] = None) -> T:
     for i in range(1, tentativas + 1):
         try:
             return fn()
@@ -47,8 +64,28 @@ def com_retentativa(fn: Callable[[], T], rotulo: str = "", tentativas: int = TEN
             if i == tentativas or not transitorio(e):
                 raise
             print(f"[http] {rotulo or 'requisição'}: {type(e).__name__}; nova tentativa em {espera_s * i:.0f} s")
-            dormir(espera_s * i)
+            (dormir or time.sleep)(espera_s * i)
     raise AssertionError("inalcançável")
+
+
+def _host(url: str) -> str:
+    from urllib.parse import urlparse
+    return urlparse(url).netloc.lower()
+
+
+def guarded(url: str, fn: Callable[[], T]) -> T:
+    """com_retentativa + desistência por servidor: se o servidor de `url` já não abriu conexão
+    nesta execução, falha na hora; se não abrir agora (depois das tentativas), fica marcado."""
+    host = _host(url)
+    if host in _DEAD_HOSTS:
+        raise ConnectionError(f"{host} não abriu conexão antes nesta execução")
+    try:
+        return com_retentativa(fn, url)
+    except (requests.ConnectionError, requests.Timeout) as e:
+        if isinstance(e, (requests.ConnectTimeout, requests.exceptions.ConnectionError)) and \
+                not isinstance(e, requests.exceptions.ChunkedEncodingError):
+            _DEAD_HOSTS.add(host)
+        raise
 
 
 def get_bytes_curl(url: str) -> bytes:
@@ -56,27 +93,28 @@ def get_bytes_curl(url: str) -> bytes:
     qualquer que seja o User-Agent, mas deixam o curl passar."""
     import subprocess
     return com_retentativa(lambda: subprocess.run(
-        ["curl", "-sSL", "--fail", "-m", str(HTTP_TIMEOUT), "-A", "Mozilla/5.0", url],
+        ["curl", "-sSL", "--fail", "--connect-timeout", str(CONNECT_TIMEOUT), "-m", str(HTTP_TIMEOUT),
+         "-A", "Mozilla/5.0", url],
         capture_output=True, check=True).stdout, url)
 
 
 def _get(url: str, headers: Optional[dict], params: Optional[dict], timeout: float) -> requests.Response:
-    r = requests.get(url, headers=headers or UA, timeout=timeout, params=params)
+    r = session().get(url, headers=headers or UA, timeout=(CONNECT_TIMEOUT, timeout), params=params)
     r.raise_for_status()
     return r
 
 
 def get_bytes(url: str, headers: Optional[dict] = None, timeout: float = HTTP_TIMEOUT) -> bytes:
-    return com_retentativa(lambda: _get(url, headers, None, timeout).content, url)
+    return guarded(url, lambda: _get(url, headers, None, timeout).content)
 
 
 def get_text(url: str, headers: Optional[dict] = None, timeout: float = HTTP_TIMEOUT) -> str:
-    return com_retentativa(lambda: _get(url, headers, None, timeout).text, url)
+    return guarded(url, lambda: _get(url, headers, None, timeout).text)
 
 
 def get_json(url: str, params: Optional[dict] = None, headers: Optional[dict] = None,
              timeout: float = HTTP_TIMEOUT) -> dict:
-    return com_retentativa(lambda: _get(url, headers, params, timeout).json(), url)
+    return guarded(url, lambda: _get(url, headers, params, timeout).json())
 
 
 def ckan_resources(api_url: str, headers: Optional[dict] = None) -> List[dict]:

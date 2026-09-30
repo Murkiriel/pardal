@@ -66,7 +66,7 @@ def _point(r: Dict[str, str]) -> dict:
 def to_geojson(rows: List[Dict[str, str]]) -> dict:
     feats = []
     for r in rows:
-        props = {
+        props: dict = {
             "kind": r["kind"],
             "limit_kmh": int(r["limit_kmh"]) if r.get("limit_kmh") else None,
             "source": r.get("source") or None,

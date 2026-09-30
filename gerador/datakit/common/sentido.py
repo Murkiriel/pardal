@@ -39,12 +39,24 @@ def hint_from_text(text: Optional[str]) -> Optional[str]:
     return t if t in CARDINAL else None
 
 
+def hint_target(hint: str) -> float:
+    """Rumo nominal de um heading_hint: ponto cardeal ('N', 'S', 'L', 'O') ou '@<graus>'
+    (rumo já calculado pela fonte, ex. centro->bairro da CET)."""
+    if hint in CARDINAL:
+        return CARDINAL[hint]
+    if hint.startswith("@"):
+        return float(hint[1:]) % 360.0
+    if hint == "*":
+        raise ValueError("'*' não tem rumo nominal: o sentido vem só da posição (osm_pbf.resolve_probes)")
+    raise ValueError(f"heading_hint inválido: {hint!r}")
+
+
 def orient_to_hint(bearing: float, oneway: bool, hint: str) -> Optional[float]:
     """Rumo do trânsito, a partir do rumo de um trecho de via e do sentido nominal. Mão única:
     o próprio rumo, se não contrariar o nominal. Mão dupla: a orientação mais perto do nominal."""
     from datakit.common.geo import angle_diff
 
-    target = CARDINAL[hint]
+    target = hint_target(hint)
     if oneway:
         return bearing if angle_diff(bearing, target) <= 90.0 else None
     best = min((bearing, (bearing + 180.0) % 360.0), key=lambda b: angle_diff(b, target))

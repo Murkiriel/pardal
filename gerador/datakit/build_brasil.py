@@ -9,6 +9,10 @@ Os limites estimados (estimated=1) saem em limites_estimados_BR.csv, separados d
 sinalizados: juntos passariam dos 100 MB por arquivo que o GitHub aceita. Se o arquivo dos
 estimados passar de MAX_FILE_BYTES sozinho, sai compactado (.csv.gz). Nos pacotes por estado
 os dois continuam no mesmo arquivo, com a coluna `estimated`.
+
+Em fluxo: as linhas são lidas dos pacotes e escritas direto no arquivo do Brasil; para a
+deduplicação fica em memória só um hash de 128 bits da chave de cada linha e a posição dela (o
+país inteiro são ~3 milhões de linhas de limite: guardar as linhas passava de alguns GB).
 """
 from __future__ import annotations
 
@@ -18,11 +22,26 @@ import gzip
 import hashlib
 import json
 import os
+import re
 import sys
+from array import array
 from datetime import datetime, timezone
+from typing import Dict, Iterator, List, Sequence, Tuple
 
 
+# Teto por arquivo publicado: o GitHub recusa arquivos acima de 100 MB.
 MAX_FILE_BYTES = 95_000_000
+_PUBLISHED = re.compile(r"^(radares|limites_estimados|limites|estruturas)_([A-Z]{2})\.(csv\.gz|csv|geojson|kml|gpx)$")
+
+
+def oversized(dist_dir: str, limit: int = MAX_FILE_BYTES) -> List[Tuple[str, int]]:
+    """(nome, bytes) de cada arquivo que vai ser publicado e passa do teto."""
+    out = []
+    for name in sorted(os.listdir(dist_dir)):
+        path = os.path.join(dist_dir, name)
+        if _PUBLISHED.match(name) and os.path.getsize(path) > limit:
+            out.append((name, os.path.getsize(path)))
+    return out
 
 
 def split_estimated(rows):
@@ -32,29 +51,86 @@ def split_estimated(rows):
     return signed, est
 
 
-def _dedupe(rows, keycols):
-    best = {}
-    for r in rows:
-        k = tuple(round(float(r[c]), 5) if c in ("lat", "lng") else r.get(c, "") for c in keycols)
-        best[k] = r
-    return list(best.values())
+def _key(r: Dict[str, str], keycols: Sequence[str]) -> Tuple[int, int]:
+    """Hash de 128 bits da chave de deduplicação (a coordenada a 5 casas, ~1 m)."""
+    k = tuple(round(float(r[c]), 5) if c in ("lat", "lng") else r.get(c, "") for c in keycols)
+    d = hashlib.blake2b(repr(k).encode("utf-8"), digest_size=16).digest()
+    return int.from_bytes(d[:8], "little"), int.from_bytes(d[8:], "little")
 
 
-def _read(path):
-    if not os.path.exists(path):
-        return [], []
-    with open(path, newline="", encoding="utf-8") as f:
-        rd = csv.reader(f)
-        header = next(rd, [])
-        return header, [dict(zip(header, row)) for row in rd if row]
+def _rows(paths: List[str]) -> Iterator[Dict[str, str]]:
+    for path in paths:
+        if not os.path.exists(path):
+            continue
+        with open(path, newline="", encoding="utf-8") as f:
+            rd = csv.reader(f)
+            header = next(rd, [])
+            for row in rd:
+                if row:
+                    yield dict(zip(header, row))
 
 
-def _write(path, header, rows):
-    with open(path, "w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f, lineterminator="\n")
+def _header(paths: List[str]) -> List[str]:
+    for path in paths:
+        if os.path.exists(path):
+            with open(path, newline="", encoding="utf-8") as f:
+                header = next(csv.reader(f), [])
+            if header:
+                return header
+    return []
+
+
+def _winners(paths: List[str], keycols: Sequence[str]):
+    """Para cada linha, na ordem de leitura: a posição da linha cujo conteúdo vai para a saída
+    naquele lugar, ou -1 se ela sai (repetida). Fica o lugar da primeira ocorrência da chave e o
+    conteúdo da última — o mesmo que um dict {chave: linha} preenchido em ordem."""
+    import numpy as np
+
+    hi, lo = array("Q"), array("Q")
+    for r in _rows(paths):
+        a, b = _key(r, keycols)
+        hi.append(a)
+        lo.append(b)
+    n = len(hi)
+    win = np.full(n, -1, dtype=np.int64)
+    if not n:
+        return win
+    h1, h2 = np.frombuffer(hi, dtype=np.uint64), np.frombuffer(lo, dtype=np.uint64)
+    order = np.lexsort((h2, h1))                     # estável: dentro da chave, na ordem de leitura
+    hs, ls = h1[order], h2[order]
+    starts = np.concatenate(([True], (hs[1:] != hs[:-1]) | (ls[1:] != ls[:-1])))
+    first = order[starts]
+    last = order[np.concatenate((np.nonzero(starts)[0][1:] - 1, [n - 1]))]
+    win[first] = last
+    return win
+
+
+def _write_merged(paths, header, keycols, dst, est_dst=None) -> Tuple[int, int]:
+    """Escreve as linhas sem repetição em dst (e as estimadas em est_dst, se dado).
+    Devolve (linhas em dst, linhas em est_dst)."""
+    win = _winners(paths, keycols)
+    ahead = {int(w) for g, w in enumerate(win) if w >= 0 and w != g}   # conteúdo que vem depois
+    fetched: Dict[int, Dict[str, str]] = {}
+    if ahead:
+        for g, r in enumerate(_rows(paths)):
+            if g in ahead:
+                fetched[g] = r
+    counts = [0, 0]
+    with open(dst, "w", newline="", encoding="utf-8") as f, \
+            (open(est_dst, "w", newline="", encoding="utf-8") if est_dst else open(os.devnull, "w")) as fe:
+        w, we = csv.writer(f, lineterminator="\n"), csv.writer(fe, lineterminator="\n")
         w.writerow(header)
-        for r in rows:
-            w.writerow([r.get(h, "") for h in header])
+        if est_dst:
+            we.writerow(header)
+        for g, r in enumerate(_rows(paths)):
+            src = int(win[g])
+            if src < 0:
+                continue
+            row = r if src == g else fetched[src]
+            is_est = est_dst is not None and row.get("estimated") == "1"
+            (we if is_est else w).writerow([row.get(h, "") for h in header])
+            counts[1 if is_est else 0] += 1
+    return counts[0], counts[1]
 
 
 def _sha256(path):
@@ -72,14 +148,6 @@ def build(packs_dir: str, dist_dir: str) -> dict:
     if not ufs:
         raise RuntimeError(f"nenhum pacote em {packs_dir} — rode `datakit.build --all` antes")
 
-    agg = {n: ([], None) for n in ("cameras.csv", "limits.csv", "structs.csv")}
-    for uf in ufs:
-        for fname in agg:
-            header, rows = _read(os.path.join(packs_dir, uf, fname))
-            cur_rows, cur_hdr = agg[fname]
-            cur_rows.extend(rows)
-            agg[fname] = (cur_rows, cur_hdr or header)
-
     out = {
         "cameras.csv": ("radares_BR.csv", ("lat", "lng", "kind", "source", "direction_deg"), "cameras"),
         "limits.csv": ("limites_BR.csv", ("lat", "lng", "limit_kmh", "source", "direction_deg"), "limits"),
@@ -88,22 +156,20 @@ def build(packs_dir: str, dist_dir: str) -> dict:
     files_meta = {}
     counts = {}
     for src, (dst_name, keycols, count_key) in out.items():
-        rows, header = agg[src]
+        paths = [os.path.join(packs_dir, uf, src) for uf in ufs]
+        header = _header(paths)
         if not header:
             continue
-        rows = _dedupe(rows, keycols)
-        est = []
-        if src == "limits.csv":
-            rows, est = split_estimated(rows)
         dst = os.path.join(dist_dir, dst_name)
-        _write(dst, header, rows)
+        name = "limites_estimados_BR.csv"
+        path = os.path.join(dist_dir, name)
+        n, n_est = _write_merged(paths, header, keycols, dst, path if src == "limits.csv" else None)
         files_meta[dst_name] = {"file": dst_name, "bytes": os.path.getsize(dst),
-                                "sha256": _sha256(dst), "count": len(rows)}
-        counts[count_key] = len(rows)
-        if est:
-            name = "limites_estimados_BR.csv"
-            path = os.path.join(dist_dir, name)
-            _write(path, header, est)
+                                "sha256": _sha256(dst), "count": n}
+        counts[count_key] = n
+        if src == "limits.csv" and not n_est:
+            os.remove(path)
+        if n_est:
             stale = path + ".gz"
             if os.path.getsize(path) > MAX_FILE_BYTES:
                 with open(path, "rb") as fi, gzip.open(stale, "wb", compresslevel=9) as fo:
@@ -113,12 +179,15 @@ def build(packs_dir: str, dist_dir: str) -> dict:
             elif os.path.exists(stale):
                 os.remove(stale)
             files_meta[name] = {"file": name, "bytes": os.path.getsize(path),
-                                "sha256": _sha256(path), "count": len(est)}
-            counts["limits_estimated"] = len(est)
+                                "sha256": _sha256(path), "count": n_est}
+            counts["limits_estimated"] = n_est
 
     # acrescenta "BR" ao catalog.json
     cat_path = os.path.join(dist_dir, "catalog.json")
-    catalog = json.load(open(cat_path, encoding="utf-8")) if os.path.exists(cat_path) else {"schema": 1, "ufs": {}}
+    catalog: dict = {"schema": 1, "ufs": {}}
+    if os.path.exists(cat_path):
+        with open(cat_path, encoding="utf-8") as f:
+            catalog = json.load(f)
     catalog["ufs"]["BR"] = {
         "nome": "Brasil (tudo)",
         "bbox": [-34.0, -74.5, 6.0, -32.0],

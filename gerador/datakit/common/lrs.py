@@ -58,9 +58,12 @@ class MeasuredLine:
         lngs = [p[1] for p in self.pts]
         self.bbox = (min(lats), min(lngs), max(lats), max(lngs))
 
-    def near_bbox(self, p: Point, margin_deg: float) -> bool:
+    def near_bbox(self, p: Point, max_m: float) -> bool:
+        """p está a até max_m (metros) da caixa da linha?"""
+        from datakit.common.spatial import lat_span_deg, lng_span_deg
         b = self.bbox
-        return b[0] - margin_deg <= p[0] <= b[2] + margin_deg and b[1] - margin_deg <= p[1] <= b[3] + margin_deg
+        my, mx = lat_span_deg(max_m), lng_span_deg(max_m, p[0])
+        return b[0] - my <= p[0] <= b[2] + my and b[1] - mx <= p[1] <= b[3] + mx
 
     @property
     def m_min(self) -> float:
@@ -87,12 +90,14 @@ class MeasuredLine:
         """(km do ponto mais próximo sobre a linha, distância em metros). Com max_m, pula
         segmentos cuja caixa já está mais longe que isso (bem mais rápido em rota longa)."""
         best = (math.inf, 0.0)
-        margin = max_m / 100_000.0 if max_m != math.inf else None
+        from datakit.common.spatial import lat_span_deg, lng_span_deg
+        bounded = max_m != math.inf
+        my, mx = (lat_span_deg(max_m), lng_span_deg(max_m, p[0])) if bounded else (0.0, 0.0)
         for i in range(1, len(self.pts)):
             a, b = self.pts[i - 1], self.pts[i]
-            if margin is not None and not (
-                min(a[0], b[0]) - margin <= p[0] <= max(a[0], b[0]) + margin
-                and min(a[1], b[1]) - margin <= p[1] <= max(a[1], b[1]) + margin
+            if bounded and not (
+                min(a[0], b[0]) - my <= p[0] <= max(a[0], b[0]) + my
+                and min(a[1], b[1]) - mx <= p[1] <= max(a[1], b[1]) + mx
             ):
                 continue
             t, d = _proj_seg(p, a, b)
@@ -192,7 +197,7 @@ class SnvRoutes:
         """(linha, km, distância) da rota (br, uf) mais perto de p, se a menos de max_m."""
         best = None
         for line in self.lines.get((br, uf.upper()), []):
-            if not line.near_bbox(p, max_m / 100_000.0):
+            if not line.near_bbox(p, max_m):
                 continue
             km, d = line.project(p, max_m)
             if d <= max_m and (best is None or d < best[2]):
@@ -208,7 +213,7 @@ class SnvRoutes:
             if u != uf:
                 continue
             for line in lines:
-                if not line.near_bbox(p, max_m / 100_000.0):
+                if not line.near_bbox(p, max_m):
                     continue
                 km, d = line.project(p, max_m)
                 if d <= max_m and (best is None or d < best[3]):

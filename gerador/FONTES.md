@@ -96,7 +96,7 @@ redistribuição), bases comerciais, Waze/Google (sem API, termos proíbem).
 | Rio — trechos | `sources/rio.py`: vértices + preenchimento a 150 m | 208.986 pontos |
 | Rio — radares | PDF da SMTR + geocodificador de número de porta da prefeitura (score ≥ 95) | 1.083 itens (599 velocidade, 484 avanço de sinal), 615 geocodificados |
 | BH / DF | `sources/bh.py` (UTM 23S, via curl: o WAF da PBH barra o TLS do Python), `sources/df_detran.py` | 396 / 2.355 |
-| Inmetro | `inmetro_status.py`: casa por km na mesma BR/UF fora de concessão; só mexe em OSM, DNIT, DER-GO, Detran-DF | GO: 66 confirmados / 4 desativados; MG: 129 / 21 |
+| Inmetro | `inmetro_status.py`: casa por km na mesma BR/UF fora de concessão; só mexe em OSM, DNIT, DER-GO, Detran-DF — num radar juntado, só se todas as fontes oficiais dele forem dessas (`ANTT+OSM` fica com a situação da ANTT; antes bastava uma parte, e 1.393 radares publicados entravam indevidamente na regra) | GO: 66 confirmados / 4 desativados; MG: 129 / 21 |
 | Limites oficiais x OSM | `model.override_limits`: pontos do OSM a < 50 m de um oficial saem, para o valor não alternar entre as duas fontes no mesmo trecho | — |
 
 **Descartado depois de medir:** criar radar novo a partir de "rodovia + km".
@@ -114,8 +114,9 @@ vazio = os dois sentidos ou desconhecido. Como cada fonte informa o sentido e co
 | ANTT — Radar | `sentido` Crescente/Decrescente (+ `rodovia`, `uf`) | Rota do SNV da BR: direção em que o km cresce no ponto (±50 m), +180° no decrescente | km da ANTT cresce no mesmo sentido do SNV em todas as concessões; lado da pista confirma o sentido em 96% dos radares a 25-80 m do eixo |
 | DNIT — PNCV | `Faixas` (`P-C-n` crescente, `P-D-n` decrescente) | Idem, SNV | 927 de 1.774 com um sentido só; lado da pista confirma em 95-100% a > 15 m do eixo |
 | DER-GO | `SENTIDO`, `SRE`, `COMPLEMENT` (km) | Malha estadual da Goinfra (`MalhaEstadual_gdb`): trechos por SRE com km inicial/final, km de cada vértice pelo comprimento | Trecho desenhado do km inicial ao final em 1.002 de 1.010 radares; km do radar a 4 m da posição (mediana); lado da pista confirma em 94-100% a > 15 m |
-| Artesp (concessões SP) | `Sentido` Norte/Sul/Leste/Oeste (nominal da rodovia) | Via do OSM mais perto (≤ 40 m, rede principal): mão única no sentido nominal, ou a orientação da via mais perto do ponto cardeal (≤ 60°) | Via quase perpendicular ao nominal fica vazia |
-| DER-SP (rede própria) | `Faixas` (`N-1`, `S-1`, `L-1`, `O-1`) | Idem Artesp; "N-1, S-1" = os dois sentidos | — |
+| Artesp (concessões SP) | `Sentido` Norte/Sul/Leste/Oeste (nominal da rodovia) | Só com o radar claramente sobre uma pista de mão única do OSM (a pista do outro sentido 6 m ou mais além), e o nominal não pode contrariar essa pista; em via de mão dupla, vazio (ver a conferência abaixo) | — |
+| DER-SP (rede própria) | `Faixas` (`N-1`, `S-1`, `L-1`, `O-1`) | Idem Artesp; "N-1, S-1" = os dois sentidos | Ver "Conferência do sentido em SP" abaixo |
+| CET-SP (radares da capital) | Descrição "(CENTRO/BAIRRO)" ou "(BAIRRO/CENTRO)"; pares de lugares ("RAPOSO/MARGINAL") sem sentido utilizável | Mesma regra da Artesp: sentido da pista de mão única em que o radar está; centro/bairro (rumo que se afasta ou se aproxima do marco zero) só confere. Com par de lugares, vale a pista sozinha | Ver a conferência abaixo |
 | OpenStreetMap | `direction` do radar | **Não usado** (`osm_pbf.USE_OSM_DIRECTION = False`). Código pronto: graus e pontos cardeais direto; `forward`/`backward` pela direção do way no nó | 1.587 dos 9.888 radares do OSM têm `direction`. Nas BRs (radar a > 15 m do eixo) o lado da pista confirma o sentido em só 38% dos 88 casos (DNIT 97%, ANTT 89%, DER-GO 90%, DER-SP 78%); a < 40 m de um radar oficial com sentido, 1 em cada 3 aponta o contrário. Muitos mapeadores marcam para onde a câmera olha |
 | ANTT — Sinalização (placas) | `sentido` Crescente/Decrescente | SNV, como os radares | Por km de rodovia: 4.845 km com o mesmo limite nos dois sentidos (ponto sem sentido), 3.690 km com limites diferentes (antes descartados; agora um ponto por sentido), 1.871 km com placa de um sentido só (antes valia para os dois; agora só para o sentido dela) |
 
@@ -124,6 +125,157 @@ o radar do sentido crescente fica à direita do eixo (olhando para onde o km cre
 eixo (< 15 m) o próprio eixo do SNV/Goinfra é impreciso e a concordância cai para 63-86%; com o
 radar claramente numa das pistas ela sobe para 94-100%, o que mostra que o erro está no eixo,
 não no sentido informado. O rumo em si vem da tangente da via e não depende desse deslocamento.
+
+### Conferência do sentido em SP (2026-09-29)
+
+Artesp, DER-SP e CET dão só o sentido nominal, então a conferência usou a posição do radar,
+sem olhar o sentido: com o radar claramente sobre uma pista de mão única do OSM (a pista do
+outro sentido a 6 m ou mais além), o sentido daquela pista é a referência.
+
+| Fonte | Concordância (radar sobre pista de mão única inequívoca) |
+|---|---|
+| DER-SP / Artesp | 609 de 701 = 87% |
+| CET-SP | 297 de 319 = 93% |
+
+Nos casos em que discordam, a coordenada põe o radar numa pista e o sentido nominal manda para
+a outra, e não há como saber qual dos dois erra. Regra adotada (`osm_pbf.resolve_probes`): nesses
+casos o radar fica sem sentido (vale para os dois). Depois da regra, a mesma conferência dá
+625 de 626 (DER-SP/Artesp) e 295 de 296 (CET) = 100%, com 849 e 373 radares com sentido (75 e 23
+ficaram sem sentido pela regra).
+
+Tentativa de conferir o nominal em via de mão dupla pela quilometragem: malha do DER-SP (KMZ do
+"Sistema Rodoviário Estadual", trechos com km inicial/final, orientados pela ligação com o trecho
+seguinte; o km calculado bate com o impresso no radar em 708 de 738) mais a planilha "Malha
+Rodoviária" da Artesp (qual sentido nominal é o crescente em cada trecho). Resultado: 81% de
+concordância com a posição em pista de mão única, pior que os 87% do método pela via do OSM;
+a geometria está certa, o que erra é o próprio sentido nominal em ~13-19% dos radares. Sem
+referência independente para a via de mão dupla, a regra final (`osm_pbf.POSITION_CONFIRMS`)
+só publica o sentido confirmado pela posição: sentido errado faz o radar sumir para quem passa,
+sentido vazio só avisa nos dois sentidos. Em via de mão dupla não há referência
+independente: o lado da via não serve, porque as coordenadas ficam a poucos metros do eixo
+(concordância de 46-82%, casos demais perto do eixo para concluir).
+
+### CET-SP — radares da capital (2026-09-29)
+
+Fonte: "Locais fiscalizados" da página Fiscalização Eletrônica do Trânsito da CET
+(cetsp.com.br), um relatório Power BI público atualizado todo dia, lido pela API pública do
+relatório (`sources/_powerbi.py`, tabela `tblFiscalizacaoEletronica`: código do local,
+coordenada, descrição, enquadramentos, velocidade, ativação/desativação). 2.125 locais, 931
+ativos; 905 fiscalizam velocidade (V, 867, com limite) ou avanço de sinal (A, 38). 627 já
+estavam no pacote pelo OSM (a < 30 m), 278 são novos. Os locais só de rodízio, faixa
+exclusiva, conversão proibida etc. ficam de fora. Alternativa descartada: o pacote `radarsp` (ciclocidade),
+que tem um dicionário de locais de 2024 montado a partir de pedido por LAI; a fonte da CET é
+a original e está atualizada.
+
+### Auditoria das junções (2026-09-30)
+
+Simulada com os dados de antes das junções (sem a CET), com `data/audit/juncoes_<UF>.csv`:
+
+| Junção | Pares | Distância mediana / p90 | Limites diferentes | Outros |
+|---|---|---|---|---|
+| Entre órgãos | 11 | 18 / 28 m | 0 | — |
+| OSM + OSM (≤ 8 m) | 141 | 6 / 8 m | 1 (1%) | 14 com um lado radar de trecho (vira trecho) |
+| OSM + oficial (≤ 30 m) | 1.692 | 14 / 26 m | 61 de 686 (9%; ANTT 23, Detran-DF 13, Rio 8) | 22 pontual x trecho (vira trecho); 15 com situação diferente (oficial inativo: DER-SP cancelado 7, DNIT com aferição vencida 7) |
+
+Os pares com limite diferente estão à mesma distância que os outros (mediana 18 m): é o mesmo
+equipamento com limite divergente entre as fontes; vale o oficial. Situação diferente: vale o
+oficial (mesma lógica dos desativados da CET). As regras ficam como estão.
+
+Busca de vizinhos (2026-09-30): as junções usavam uma grade de células quadradas em graus e só
+olhavam as 8 células em volta; como o grau de longitude encolhe com a latitude, pares a
+leste-oeste perto do raio escapavam (em teste sintético com o ponto na borda da célula, desde
+23° S). Agora `datakit/common/spatial.py` abre as células que cobrem o raio nos dois eixos; o
+mesmo valeu para a margem da sonda de sentido no OSM e para a caixa das linhas com km (SNV, malha
+do DER-GO). Refeitas as junções sobre os radares já publicados, apareceram só 4 pares a mais
+(OSM + oficial em DF, PI e SP; OSM + OSM no RS): o efeito era raro, mas não mais.
+
+### Em que UF fica cada ponto (2026-09-30)
+
+Antes cada UF recortava as listas pelo próprio polígono (malha simplificada do IBGE): o que caía
+fora de todos sumia de todos os pacotes — ponte, orla, ilha (os 12 radares da ANTT na Ponte
+Rio-Niterói, a até ~2,8 km do polígono do RJ) — e o que caía em dois polígonos sobrepostos saía
+nos dois. Agora `datakit/common/ufassign.py` decide uma vez por ponto: o polígono que contém; se
+nenhum, a UF mais perto a até 5 km; se nada a 5 km, nenhuma. Ponte/túnel fica com a UF de
+qualquer uma das pontas. Sobre a linha de base (2,86 milhões de pontos, 0,9 s): só 24 pontos de
+limite mudam, os que saíam em PE e PB ao mesmo tempo (ficam na PB). Os pontos que estavam fora
+de todos os polígonos só aparecem no próximo build.
+
+Build de conferência (GO, RJ e SC, mesmos extratos do OSM) contra o build anterior: GO sai com
+os mesmos radares e estruturas; o RJ ganha os 12 radares da ponte (9 posições; 4 juntados ao OSM)
+e 6 radares do OSM na orla, 1.731 pontos de limite fora de todo polígono (Rio 1.365, ANTT 86 na
+ponte, OSM no resto) e 88 pontes/túneis; SC ganha 175 limites e 3 estruturas na orla/ilha. Saem
+7 limites do OSM no RJ e 3 em SC, agora cobertos por um limite oficial a até 50 m. Os pacotes
+passaram a sair direto da memória (sem os tiles intermediários); a volta pelos tiles arredondava
+as coordenadas e juntava por acaso alguns pontos de limite a ~1 m um do outro (10 nos 3 estados),
+que agora ficam os dois.
+
+### Build depois da revisão do gerador (2026-09-30)
+
+Build completo (27 UFs, mesmos extratos do OSM) contra o anterior: 0 falhas; radares 17.748 →
+17.798, limites 2.844.362 → 2.861.115, estruturas 127.107 → 127.467; nenhuma UF caiu mais de 5%.
+Diferenças: pontos na ponte/orla/ilha fora do polígono antigo que antes sumiam (47 radares, 8.491
+limites, 342 estruturas); troca de UF na divisa pela malha oficial do IBGE (7 radares, 1.826
+limites, 100 estruturas, quase todos a < 5 km da divisa); limites do OSM com sentido (3.524
+pontos); radares com a situação do próprio órgão em vez da do Inmetro (BHTRANS+OSM,
+DNIT+ANTT); um radar do OSM a 29,7 m de um oficial, antes não achado, juntado; e pares de pontos
+a ~1 m que o arredondamento intermediário juntava por acaso. Junções auditadas: OSM + oficial
+2.460 (mediana 13 m, 76 com limite diferente), OSM + OSM 150, entre órgãos 42.
+
+### Limite por sentido no OSM (2026-09-30)
+
+Vias com `maxspeed:forward` / `maxspeed:backward` (placa diferente em cada sentido), medidas nos 5
+extratos: 2.218 ways (814 km), quase tudo no Sul (1.854 ways, 618 km). 1.958 deles (689 km) não
+têm `maxspeed` — saíam com o limite estimado pela classe (670 km) ou sem limite (19 km); em 1.523
+os dois sentidos têm valores diferentes. Outros 223 (85 km) têm `maxspeed` e um sentido diferente.
+Agora saem pontos com `direction_deg` pelo rumo do way (forward = sentido do desenho, backward =
+o contrário; o lado sem tag própria fica com o `maxspeed`). Mesmo valor nos dois sentidos = limite
+comum, sem sentido. Um sentido só sinalizado e sem `maxspeed`: o outro continua com a estimativa.
+
+### Malha das UFs: a oficial do IBGE (2026-09-30)
+
+A malha vinha de um espelho no GitHub (geodata-br-states). Comparada com a API de malhas do IBGE
+(v3, `intrarregiao=UF`):
+
+| Malha | Tamanho | Vértices | Sobreposição entre UFs | Radares ANTT fora de todo polígono | Radares de órgão estadual/municipal fora da UF do órgão (6.981) |
+|---|---|---|---|---|---|
+| Espelho (antiga) | 5,6 MB | 137.335 | PE × PB | 12 | 5 |
+| IBGE intermediária | 0,25 MB | 12.933 | nenhuma | 13 | 7 |
+| **IBGE máxima** (adotada) | 1,0 MB | 51.981 | nenhuma | 8 | 4 |
+
+Os 3 radares do DER-SP que caem em SC, PR e MG estão fora de SP em qualquer malha (coordenada da
+fonte). Com a máxima, 1.878 dos 2,86 milhões de pontos publicados mudam de UF, todos na divisa
+(PR/SC, PE/PB, BA/TO, MG/ES, MT/RO, DF/GO…); a área de cada UF muda menos de 0,7%.
+
+### Radar repetido entre OSM e fonte oficial (2026-09-29)
+
+A mescla por coordenada (5 casas, ~1 m) deixava passar o mesmo radar mapeado no OSM e publicado
+por um órgão: 2.502 dos 10.420 radares do OSM ficavam a até 30 m de um oficial (CET-SP 812,
+DNIT 488, DER-SP 451, ANTT 336, Fortaleza 243, BH 211...) e saíam em dobro no CSV/GPX/KML.
+`model.absorb_osm` junta cada um ao oficial compatível mais perto (ativo antes de inativo; avanço
+de sinal só com avanço de sinal; sentidos opostos não), herdando do OSM só o limite que falte e
+o fim do trecho. Oficiais não se juntam entre si (radares de um e de outro sentido no mesmo km).
+
+Outras junções (`model.merge_cross_agency`, `model.collapse_osm`): o mesmo radar publicado por
+dois órgãos (11 pares a <= 30 m: Detran-DF/DNIT 10, ANTT/DNIT 1) vira um, com a posição de quem
+tem sentido; dois radares do OSM a <= 8 m (278 pares) viram um. De 8 a 30 m, os ~1.550 pares do
+OSM e os ~560 do mesmo órgão ficam: são quase sempre um equipamento por pista, por faixa ou por
+aproximação de cruzamento. A coluna `source` junta as fontes com `+` (ex. `DNIT+OSM`).
+
+Qual posição fica (medido nos 1.695 pares, contra o eixo das malhas oficiais com km: SNV,
+Goinfra, DER-SP): ao longo da via as duas diferem pouco (mediana 9-13 m, p75 ~20 m; irrelevante
+para o aviso, que começa centenas de metros antes). Para o lado da pista, a oficial é melhor: cerca
+de metade dos radares do OSM está desenhada sobre a própria via (< 4 m do eixo: DNIT 53%, ANTT 47%,
+DER-GO 55%, contra 23-32% dos oficiais), e, com sentido conhecido, a posição oficial fica do lado
+certo da pista em 64% (DNIT, ANTT) e 59% (DER-GO), com 11-14% do lado errado; o OSM, 36-44%. No
+DER-SP as duas empatam (54% x 50%). Por isso fica a posição oficial.
+
+Limites do DER-DF (`Rodovias_2025`, campo `velocidade_max`, DERGeo): não usados. É um valor por
+trecho inteiro de rodovia (geralmente o limite geral da via); onde já havia limite sinalizado a até
+30 m, concorda em só 311 de 876 pontos (35%).
+
+A CET também lista os locais desativados: radar do OSM a até 20 m de um deles, sem local ativo
+a 30 m, fica `active=0` (`model.deactivate_near`); medido: 13 a 22 casos, quase todos
+desativados em 2023-2024.
 
 Sem sentido publicado: Rio (SMTR), BH, Detran-DF, DER-PE, Fortaleza, Recife, João Pessoa e os
 limites do Rio e da CET-SP (trechos de rua, valem para os dois sentidos).

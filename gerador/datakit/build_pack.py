@@ -1,52 +1,47 @@
-"""tiles -> pacote por UF (a unidade que se baixa por estado).
+"""Listas da UF -> pacote por UF (a unidade que se baixa por estado).
 
-Lê os tiles que tocam a bbox da UF, recorta na bbox, deduplica de novo (um radar na
-divisa pode cair em dois tiles) e escreve data/packs/<UF>/ com manifest.json.
+Recebe os radares, limites e estruturas já atribuídos à UF (build.py, common/ufassign.py),
+deduplica de novo por segurança e escreve data/packs/<UF>/ com manifest.json. Antes passava por
+tiles gravados em data/tiles e relidos; os tiles de um build antigo que o novo não reescrevia
+ficavam lá e voltavam para o pacote.
 """
 from __future__ import annotations
 
 import csv
 import hashlib
 import json
+import math
 import os
 from datetime import datetime, timezone
-from typing import List, Tuple
+from typing import Iterable, List, Optional, Tuple
 
-from datakit.build_tiles import TILE_DEG, tile_of
-from datakit.common import Camera, CameraKind, Limit, Struct, in_bbox, merge_cameras, merge_limits
-from datakit.common.model import parse_dir
+from datakit.common import Camera, CameraKind, Limit, Struct, merge_cameras, merge_limits
 from datakit.common.ufs import uf_bbox
 
+SCHEMA = 2  # 1 = base (cameras+limits); 2 = + structs.csv (ponte/túnel). Leitor tolera ausência.
+TILE_DEG = 0.25  # só para o campo "tiles" do manifest (quadrículas de 0,25° com dados)
 
-def build(uf: str, tiles_dir: str, packs_dir: str, index: dict, poly=None) -> dict:
-    """`poly` (shapely geometry, opcional): recorte exato por polígono da UF. Sem ele,
-    só a bbox — some radar de UF vizinha que cai no retângulo."""
+
+def tile_of(lat: float, lng: float) -> Tuple[int, int]:
+    return int(math.floor((lat + 90.0) / TILE_DEG)), int(math.floor((lng + 180.0) / TILE_DEG))
+
+
+def tile_bbox(row: int, col: int) -> Tuple[float, float, float, float]:
+    min_lat = row * TILE_DEG - 90.0
+    min_lng = col * TILE_DEG - 180.0
+    return (min_lat, min_lng, min_lat + TILE_DEG, min_lng + TILE_DEG)
+
+
+def build(uf: str, packs_dir: str, cams: Iterable[Camera], lims: Iterable[Limit],
+          structs: Iterable[Struct], sources: List[dict], built_at: Optional[str] = None) -> dict:
+    """`built_at`: quando as listas foram montadas (vai como `artifact_built_at`)."""
     uf = uf.upper()
-    bbox = uf_bbox(uf)
-    (mnla, mnlo, mxla, mxlo) = bbox
-    r0, c0 = tile_of(mnla, mnlo)
-    r1, c1 = tile_of(mxla, mxlo)
-
-    keep = _make_keep(bbox, poly)
-
-    cams: List[Camera] = []
-    lims: List[Limit] = []
-    structs: List[Struct] = []
-    tiles_used: List[List[int]] = []
-    for row in range(min(r0, r1), max(r0, r1) + 1):
-        for col in range(min(c0, c1), max(c0, c1) + 1):
-            tdir = os.path.join(tiles_dir, str(row), str(col))
-            if not os.path.isdir(tdir):
-                continue
-            tiles_used.append([row, col])
-            cams += [c for c in _read_cameras(os.path.join(tdir, "cameras.csv")) if keep(c.lat, c.lng)]
-            lims += [x for x in _read_limits(os.path.join(tdir, "limits.csv")) if keep(x.lat, x.lng)]
-            structs += [x for x in _read_structs(os.path.join(tdir, "structs.csv"))
-                        if keep(x.lat1, x.lng1) or keep(x.lat2, x.lng2)]
-
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     cams = merge_cameras(cams)
     lims = merge_limits(lims)
-    structs = _dedupe_structs(structs)
+    structs = _dedupe_structs(list(structs))
+    tiles = sorted({tile_of(c.lat, c.lng) for c in cams} | {tile_of(x.lat, x.lng) for x in lims}
+                   | {tile_of(s.lat1, s.lng1) for s in structs})
 
     out = os.path.join(packs_dir, uf)
     os.makedirs(out, exist_ok=True)
@@ -57,14 +52,14 @@ def build(uf: str, tiles_dir: str, packs_dir: str, index: dict, poly=None) -> di
     _write_csv(lfile, Limit.HEADER, (x.row() for x in lims))
     _write_csv(sfile, Struct.HEADER, (x.row() for x in structs))
 
-    manifest = {
-        "schema": index.get("schema", 1),
+    manifest: dict = {
+        "schema": SCHEMA,
         "uf": uf,
-        "bbox": list(bbox),
-        "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "artifact_built_at": index.get("built_at"),
-        "sources": index.get("sources", []),
-        "tiles": tiles_used,
+        "bbox": list(uf_bbox(uf)),
+        "built_at": now,
+        "artifact_built_at": built_at or now,
+        "sources": sources,
+        "tiles": [list(t) for t in tiles],
         "counts": {
             "cameras": len(cams),
             "cameras_with_limit": sum(1 for c in cams if c.limit_kmh is not None),
@@ -83,58 +78,6 @@ def build(uf: str, tiles_dir: str, packs_dir: str, index: dict, poly=None) -> di
     with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     return manifest
-
-
-def _make_keep(bbox, poly):
-    """Filtro ponto-a-ponto: bbox sempre; polígono também se disponível (usa prepared
-    geometry pra ficar rápido)."""
-    if poly is None:
-        return lambda lat, lng: in_bbox(bbox, lat, lng)
-    try:
-        from shapely.geometry import Point
-        from shapely.prepared import prep
-        pg = prep(poly)
-        return lambda lat, lng: in_bbox(bbox, lat, lng) and pg.contains(Point(lng, lat))
-    except Exception:  # noqa: BLE001
-        return lambda lat, lng: in_bbox(bbox, lat, lng)
-
-
-def _read_cameras(path: str) -> List[Camera]:
-    if not os.path.exists(path):
-        return []
-    out = []
-    with open(path, newline="", encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            out.append(Camera(
-                lat=float(r["lat"]), lng=float(r["lng"]),
-                kind=CameraKind(r["kind"]),
-                limit_kmh=int(r["limit_kmh"]) if r.get("limit_kmh") else None,
-                source=r["source"], active=r.get("active", "1") != "0",
-                end_lat=float(r["end_lat"]) if r.get("end_lat") else None,
-                end_lng=float(r["end_lng"]) if r.get("end_lng") else None,
-                direction_deg=parse_dir(r.get("direction_deg")),
-            ))
-    return out
-
-
-def _read_limits(path: str) -> List[Limit]:
-    if not os.path.exists(path):
-        return []
-    out = []
-    with open(path, newline="", encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            out.append(Limit.from_row(r))
-    return out
-
-
-def _read_structs(path: str) -> List[Struct]:
-    if not os.path.exists(path):
-        return []
-    out = []
-    with open(path, newline="", encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            out.append(Struct(float(r["lat1"]), float(r["lng1"]), float(r["lat2"]), float(r["lng2"]), r["kind"]))
-    return out
 
 
 def _dedupe_structs(structs: List[Struct]) -> List[Struct]:

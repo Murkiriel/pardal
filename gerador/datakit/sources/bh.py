@@ -13,6 +13,7 @@ import json
 import re
 from typing import List, Optional
 
+from datakit.contexto import Carga, Contexto
 from datakit.common.geo import utm_to_latlng
 from datakit.common.model import Camera, CameraKind
 
@@ -51,3 +52,8 @@ def load(raw_dir: str, bbox=None):
     resources = json.loads(get_bytes_curl(CKAN))["result"]["resources"]
     res = newest(resources, "CSV", "fiscalizacao_eletronica")
     return parse(get_bytes_curl(res["url"]).decode("utf-8", "replace")), []
+
+
+def carregar(ctx: Contexto) -> Carga:
+    """Contrato das fontes (datakit/contexto.py)."""
+    return Carga(*load(ctx.raw_dir))

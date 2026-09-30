@@ -16,7 +16,6 @@ import bisect
 import io
 import re
 import zipfile
-from collections import defaultdict
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -119,7 +118,9 @@ def limits_from_signs(signs: List[Sign], snv: SnvRoutes) -> List[Limit]:
                     out.append(Limit(lat, lng, vu, "ANTT"))
                 else:
                     for v, increasing in ((vu, True), (vd, False)):
-                        d = direction_on(line, k, increasing) if v is not None else None
+                        if v is None:
+                            continue
+                        d = direction_on(line, k, increasing)
                         if d is not None:
                             out.append(Limit(lat, lng, v, "ANTT", direction_deg=d))
             k += STEP_KM
