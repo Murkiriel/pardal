@@ -53,12 +53,12 @@ class Assets(unittest.TestCase):
             for f in ("radares.csv", "radares.kml", "limites.csv", "limites_estimados.csv", "estruturas.csv"):
                 with open(os.path.join(repo, "brasil", f), "w") as fh:
                     fh.write("x")
-            with open(os.path.join(repo, "catalog.json"), "w") as fh:
+            with open(os.path.join(repo, "catalogo.json"), "w") as fh:
                 json.dump(_cat("2026-10-01T06:40:00Z"), fh)
             out = os.path.join(repo, "_out")
             assets = [os.path.basename(a) for a in rel.build_assets(repo, out)]
             self.assertEqual(assets, ["pardal-GO.zip", "pardal-SP.zip", "pardal-brasil.zip",
-                                      "pardal-brasil-radares.zip", "catalog.json", "SHA256SUMS.txt"])
+                                      "pardal-brasil-radares.zip", "catalogo.json", "SHA256SUMS.txt"])
             with zipfile.ZipFile(os.path.join(out, "pardal-GO.zip")) as z:
                 self.assertEqual(sorted(z.namelist()),
                                  ["GO/estruturas.csv", "GO/limites.csv", "GO/radares.csv", "GO/radares.gpx"])

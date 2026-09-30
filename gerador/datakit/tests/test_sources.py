@@ -590,7 +590,7 @@ class Estimated(unittest.TestCase):
         from publish import published_files
         with tempfile.TemporaryDirectory() as d:
             for rel in ("brasil/limites_estimados.csv.gz", "brasil/radares.kml", "estados/GO/limites.csv",
-                        "estados/GO/rascunho.txt", "catalog.json", "BUILD_EM_ANDAMENTO"):
+                        "estados/GO/rascunho.txt", "catalogo.json", "BUILD_EM_ANDAMENTO"):
                 os.makedirs(os.path.dirname(os.path.join(d, rel)) or d, exist_ok=True)
                 with open(os.path.join(d, rel), "w") as f:
                     f.write("x")

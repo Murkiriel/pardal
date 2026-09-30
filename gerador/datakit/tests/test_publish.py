@@ -198,7 +198,7 @@ class Resilience(unittest.TestCase):
 
 
 class CommitDataOnly(unittest.TestCase):
-    """publish.py --commit só leva brasil/, estados/ e catalog.json — nunca o que mais estiver
+    """publish.py --commit só leva brasil/, estados/ e catalogo.json — nunca o que mais estiver
     pendente no repositório (código do gerador não revisado, arquivos soltos)."""
 
     def _git(self, repo, *a):
@@ -229,11 +229,11 @@ class CommitDataOnly(unittest.TestCase):
             os.makedirs(os.path.join(dist, "estados", "GO"))
             with open(os.path.join(dist, "estados", "GO", "radares.csv"), "w", encoding="utf-8") as f:
                 f.write("lat,lng\n-16,-49\n")
-            with open(os.path.join(dist, "catalog.json"), "w", encoding="utf-8") as f:
+            with open(os.path.join(dist, "catalogo.json"), "w", encoding="utf-8") as f:
                 json.dump({"built_at": "2026-09-30T00:00:00Z", "ufs": {"GO": {"counts": {"cameras": 1}}}}, f)
             self.assertEqual(pub.main(["--repo", repo, "--dist", dist, "--commit"]), 0)
             committed = set(self._git(repo, "show", "--name-only", "--pretty=format:", "HEAD").split())
-            self.assertEqual(committed, {"catalog.json", "estados/GO/radares.csv"})
+            self.assertEqual(committed, {"catalogo.json", "catalog.json", "estados/GO/radares.csv"})
             pending = self._git(repo, "status", "--porcelain")
             self.assertIn("solto.txt", pending)
             self.assertIn("gerador/", pending)
@@ -251,7 +251,7 @@ class BuildInProgress(unittest.TestCase):
         import json
         dist = os.path.join(tmp, "dist")
         os.makedirs(dist)
-        with open(os.path.join(dist, "catalog.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(dist, "catalogo.json"), "w", encoding="utf-8") as f:
             json.dump({"ufs": {}}, f)
         return dist
 
@@ -281,7 +281,7 @@ class BuildInProgress(unittest.TestCase):
         def fake_catalog(packs, d):
             if catalog_fails:
                 raise RuntimeError("disco cheio")
-            with open(os.path.join(d, "catalog.json"), "w", encoding="utf-8") as f:
+            with open(os.path.join(d, "catalogo.json"), "w", encoding="utf-8") as f:
                 json.dump({"ufs": {}}, f)
             return {"ufs": {}}
 

@@ -125,7 +125,7 @@ def _write_text(path: str, text: str) -> None:
 
 
 def build(dist_dir: str) -> Dict[str, int]:
-    stats = {"radares": 0}
+    stats = {"cameras": 0}
     states = os.path.join(dist_dir, "estados")
     areas = [(uf, os.path.join(states, uf)) for uf in sorted(os.listdir(states))] if os.path.isdir(states) else []
     areas.append(("Brasil", os.path.join(dist_dir, "brasil")))
@@ -138,7 +138,7 @@ def build(dist_dir: str) -> Dict[str, int]:
         _write_json(base + ".geojson", to_geojson(rows))
         _write_text(base + ".kml", to_kml(rows, title))
         _write_text(base + ".gpx", to_gpx(rows, title))
-        stats["radares"] += 1
+        stats["cameras"] += 1
     return stats
 
 

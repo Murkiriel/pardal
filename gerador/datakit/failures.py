@@ -1,7 +1,7 @@
 """Fontes que falharam nesta execução do build.
 
 Uma fonte fora do ar é pulada e o resto do build segue; o que foi pulado fica registrado aqui,
-vai para o campo `failures` do data/dist/catalog.json e o scripts/publish.py se recusa a montar
+vai para o campo `failures` do data/dist/catalogo.json e o scripts/publish.py se recusa a montar
 os arquivos enquanto a lista não estiver vazia (ou com --accept-failures).
 
 Avisos são o caso mais brando: a fonte falhou, mas havia uma cópia anterior guardada em data/raw/

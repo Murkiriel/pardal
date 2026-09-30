@@ -3,7 +3,7 @@
     python -m datakit.build_brazil            # depois de datakit.build --all
 
 Gera data/dist/brasil/radares.csv, limites.csv, estruturas.csv e acrescenta a
-entrada "BR" ao catalog.json ("Brasil (tudo)"). Dedupe nas divisas (coordenada a ~1 m).
+entrada "BR" ao catalogo.json ("Brasil (tudo)"). Dedupe nas divisas (coordenada a ~1 m).
 
 Os limites estimados (estimated=1) saem em brasil/limites_estimados.csv, separados dos
 sinalizados: juntos passariam dos 100 MB por arquivo que o GitHub aceita. Se o arquivo dos
@@ -196,25 +196,26 @@ def build(packs_dir: str, dist_dir: str) -> dict:
                                 "sha256": _sha256(path), "count": n_est}
             counts["limits_estimated"] = n_est
 
-    # acrescenta "BR" ao catalog.json
-    cat_path = os.path.join(dist_dir, "catalog.json")
+    # acrescenta "BR" ao catalogo.json
+    cat_path = os.path.join(dist_dir, "catalogo.json")
     catalog: dict = {"schema": 1, "ufs": {}}
     if os.path.exists(cat_path):
         with open(cat_path, encoding="utf-8") as f:
             catalog = json.load(f)
-    catalog["ufs"]["BR"] = {
-        "nome": "Brasil (tudo)",
+    from datakit.build_catalog import with_legacy_keys
+    catalog["ufs"]["BR"] = with_legacy_keys({
+        "name": "Brasil (tudo)",
         "bbox": [-34.0, -74.5, 6.0, -32.0],
         "built_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "cobertura": {"nivel": "bundle", "fontes": ["+".join(sorted(ufs))]},
-        "radares": files_meta.get("radares.csv"),
-        "limites": files_meta.get("limites.csv"),
-        "limites_estimados": files_meta.get("limites_estimados.csv")
+        "coverage": {"level": "bundle", "sources": ["+".join(sorted(ufs))]},
+        "cameras": files_meta.get("radares.csv"),
+        "limits": files_meta.get("limites.csv"),
+        "limits_estimated": files_meta.get("limites_estimados.csv")
         or files_meta.get("limites_estimados.csv.gz"),
-        "estruturas": files_meta.get("estruturas.csv"),
+        "structs": files_meta.get("estruturas.csv"),
         "counts": counts,
-        "ufs_incluidas": ufs,
-    }
+        "included_ufs": ufs,
+    })
     with open(cat_path, "w", encoding="utf-8") as f:
         json.dump(catalog, f, ensure_ascii=False, indent=2)
     return catalog["ufs"]["BR"]

@@ -33,8 +33,9 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
   radares.csv  radares.gpx  radares.kml  radares.geojson
   limites.csv           limites sinalizados e estimados (coluna `estimated`)
   estruturas.csv
-catalog.json            índice dos pacotes por estado: arquivos, tamanho, sha256,
+catalogo.json           índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
+catalog.json            o mesmo índice com o nome antigo (sai numa próxima versão)
 scripts/to_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
 gerador/                código que baixa as fontes e gera todos os arquivos acima
 ```
@@ -188,7 +189,7 @@ O **código** (pasta `gerador/` e `scripts/`) é MIT ([`gerador/LICENSE`](gerado
 ## Atualização
 
 O conjunto é gerado de novo periodicamente, porque as fontes oficiais mudam todo mês.
-A data de cada pacote está no campo `built_at` do `catalog.json`.
+A data de cada pacote está no campo `built_at` do `catalogo.json`.
 
 ## English
 

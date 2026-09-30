@@ -1,9 +1,9 @@
 name: Gerar dados
 
-# Gera brasil/, estados/ e catalog.json do zero (fontes oficiais + OpenStreetMap) e publica.
+# Gera brasil/, estados/ e catalogo.json do zero (fontes oficiais + OpenStreetMap) e publica.
 #
 # A cada 29 dias: todo dia, às 03:00 em Brasília, o job "interval" lê a data de geração dos
-# dados publicados (built_at do catalog.json) e só segue para o build se tiverem 29 dias ou mais.
+# dados publicados (built_at do catalogo.json) e só segue para o build se tiverem 29 dias ou mais.
 # Se o build falhar, no dia seguinte tenta de novo (os dados publicados continuam velhos).
 # Também pode ser disparado à mão (Actions → Gerar dados → Run workflow), a qualquer momento; à
 # mão, só publica se "publish" for marcado; sem isso, gera e confere (o log e a auditoria ficam
@@ -58,8 +58,11 @@ jobs:
           if [ "$EVENT" != "schedule" ]; then
             echo "disparado à mão: gera"; echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
-          built=$(curl -sf https://raw.githubusercontent.com/Murkiriel/pardal/main/catalog.json \
-                  | python3 -c 'import json,sys; print(json.load(sys.stdin)["built_at"])') || built=""
+          built=""
+          for name in catalogo.json catalog.json; do   # catalog.json: nome antigo, enquanto existir
+            built=$(curl -sf "https://raw.githubusercontent.com/Murkiriel/pardal/main/$name" \
+                    | python3 -c 'import json,sys; print(json.load(sys.stdin)["built_at"])' 2>/dev/null) && break || built=""
+          done
           if [ -z "$built" ]; then
             echo "sem a data dos dados publicados: gera"; echo "run=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
@@ -151,7 +154,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp ../catalog.json "$RUNNER_TEMP/catalogo_anterior.json"
+          cp ../catalogo.json "$RUNNER_TEMP/catalogo_anterior.json" 2>/dev/null \
+            || cp ../catalog.json "$RUNNER_TEMP/catalogo_anterior.json"
           if [ "$PUBLISH" = "true" ] && [ "$GITHUB_REPOSITORY" = "Murkiriel/pardal" ]; then
             git -C .. config user.name "Murkiriel"
             git -C .. config user.email "14956419+Murkiriel@users.noreply.github.com"
@@ -159,13 +163,13 @@ jobs:
             python scripts/publish.py --commit --push
             if [ "$(git -C .. rev-parse HEAD)" != "$head_before" ]; then
               python scripts/release.py --previous "$RUNNER_TEMP/catalogo_anterior.json" \
-                --warnings data/dist/catalog.json --create
+                --warnings data/dist/catalogo.json --create
             else
               echo "Nada mudou nos dados: sem commit e sem release."
             fi
           else
             python scripts/publish.py
-            python scripts/release.py --previous "$RUNNER_TEMP/catalogo_anterior.json" --warnings data/dist/catalog.json
+            python scripts/release.py --previous "$RUNNER_TEMP/catalogo_anterior.json" --warnings data/dist/catalogo.json
             echo "Conferido e montado; sem publicar (publish=$PUBLISH, repositório=$GITHUB_REPOSITORY)."
           fi
 
@@ -181,7 +185,7 @@ jobs:
           path: |
             pardal/gerador/data/build.log
             pardal/gerador/data/audit/
-            pardal/gerador/data/dist/catalog.json
+            pardal/gerador/data/dist/catalogo.json
             pardal/gerador/data/release/NOTAS.md
           if-no-files-found: ignore
           retention-days: 30

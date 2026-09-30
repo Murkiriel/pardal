@@ -101,7 +101,7 @@ class EndToEnd(unittest.TestCase):
                 structs = list(csv.DictReader(f))
             with open(os.path.join(pack, "manifesto.json"), encoding="utf-8") as f:
                 manifest = json.load(f)
-            with open(os.path.join(tmp, "dist", "catalog.json"), encoding="utf-8") as f:
+            with open(os.path.join(tmp, "dist", "catalogo.json"), encoding="utf-8") as f:
                 catalog = json.load(f)
             marker = os.path.exists(os.path.join(tmp, "dist", build.IN_PROGRESS_MARKER))
             with open(os.path.join(tmp, "audit", "juncoes_RJ.csv"), encoding="utf-8") as f:

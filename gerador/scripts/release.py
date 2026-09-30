@@ -4,14 +4,14 @@
     python scripts/release.py --previous catalogo_antes.json --create    # monta e cria a release (gh)
 
 Roda depois do publish.py --commit: os pacotes saem dos arquivos já publicados (brasil/,
-estados/, catalog.json na raiz do repositório). Uma release por geração, com a etiqueta
-dados-AAAA-MM-DD (data de geração do catalog.json, UTC) apontando para o commit dos dados.
+estados/, catalogo.json na raiz do repositório). Uma release por geração, com a etiqueta
+dados-AAAA-MM-DD (data de geração do catalogo.json, UTC) apontando para o commit dos dados.
 
 Anexos:
     pardal-<UF>.zip               um estado: radares (CSV, GeoJSON, KML, GPX), limites, estruturas
     pardal-brasil.zip             o Brasil inteiro (os mesmos arquivos de brasil/)
     pardal-brasil-radares.zip     só os radares do Brasil, nos quatro formatos (para GPS e apps)
-    catalog.json                  o índice dos pacotes
+    catalogo.json                  o índice dos pacotes
     SHA256SUMS.txt                sha256 de cada anexo
 """
 from __future__ import annotations
@@ -28,6 +28,12 @@ from typing import Dict, List, Optional
 GENERATOR_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 REPO = os.path.dirname(GENERATOR_DIR)
 CAMERA_FILES = ("radares.csv", "radares.geojson", "radares.kml", "radares.gpx")
+
+
+def _catalog_path(repo: str) -> str:
+    """O catálogo do repositório; o nome antigo (catalog.json) se o novo ainda não existir."""
+    path = os.path.join(repo, "catalogo.json")
+    return path if os.path.exists(path) else os.path.join(repo, "catalog.json")
 
 
 def _fmt(n: Optional[int]) -> str:
@@ -76,8 +82,8 @@ def build_assets(repo: str, out: str) -> List[str]:
     _zip(assets[-1], files, "brasil")
     assets.append(os.path.join(out, "pardal-brasil-radares.zip"))
     _zip(assets[-1], [f for f in files if os.path.basename(f) in CAMERA_FILES], "brasil")
-    cat = os.path.join(out, "catalog.json")
-    with open(os.path.join(repo, "catalog.json"), "rb") as fi, open(cat, "wb") as fo:
+    cat = os.path.join(out, "catalogo.json")
+    with open(_catalog_path(repo), "rb") as fi, open(cat, "wb") as fo:
         fo.write(fi.read())
     assets.append(cat)
     sums = os.path.join(out, "SHA256SUMS.txt")
@@ -100,7 +106,7 @@ def release_notes(cat: dict, previous: Optional[dict], warnings: List[str], repo
     br, br0 = _counts(cat, "BR"), _counts(previous, "BR")
     L = [f"Dados gerados em {data} ({d.replace('T', ' ').replace('Z', ' UTC')}) a partir das fontes "
          "oficiais e do OpenStreetMap. Os mesmos arquivos estão em `brasil/`, `estados/` e "
-         "`catalog.json` no commit desta versão.", "",
+         "`catalogo.json` no commit desta versão.", "",
          "## Brasil", "",
          "| | Nesta versão |", "|---|---|"]
     for k, rot in (("cameras", "Radares"), ("limits", "Pontos de limite sinalizado"),
@@ -110,7 +116,7 @@ def release_notes(cat: dict, previous: Optional[dict], warnings: List[str], repo
           "- `pardal-<UF>.zip` — um estado: radares (CSV, GeoJSON, KML, GPX), limites e estruturas",
           "- `pardal-brasil.zip` — o Brasil inteiro",
           "- `pardal-brasil-radares.zip` — só os radares do Brasil, nos quatro formatos (GPS e apps)",
-          "- `catalog.json` — índice dos pacotes; `SHA256SUMS.txt` — para conferir os arquivos",
+          "- `catalogo.json` — índice dos pacotes; `SHA256SUMS.txt` — para conferir os arquivos",
           "",
           f"Link fixo para a versão mais recente: `{repo_url}/releases/latest/download/pardal-SP.zip` "
           "(troque a sigla do estado, ou use `pardal-brasil.zip`).",
@@ -136,14 +142,14 @@ def release_notes(cat: dict, previous: Optional[dict], warnings: List[str], repo
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--repo", default=REPO)
-    ap.add_argument("--previous", help="catalog.json publicado antes desta geração (para as diferenças)")
-    ap.add_argument("--warnings", help="catalog.json do build (data/dist), com a lista de avisos")
+    ap.add_argument("--previous", help="catalogo.json publicado antes desta geração (para as diferenças)")
+    ap.add_argument("--warnings", help="catalogo.json do build (data/dist), com a lista de avisos")
     ap.add_argument("--out", default=os.path.join(GENERATOR_DIR, "data", "release"))
     ap.add_argument("--create", action="store_true", help="cria a release no GitHub (gh)")
     ap.add_argument("--repo-url", default="https://github.com/Murkiriel/pardal")
     args = ap.parse_args(argv)
 
-    with open(os.path.join(args.repo, "catalog.json"), encoding="utf-8") as f:
+    with open(_catalog_path(args.repo), encoding="utf-8") as f:
         cat = json.load(f)
     previous = None
     if args.previous and os.path.exists(args.previous):

@@ -7,6 +7,7 @@ Situação em 2026-09-30. O que não foi feito ainda e por quê.
 | Item | Situação |
 |---|---|
 | **Zerar o histórico do git de tempos em tempos** | Combinado. Cada geração acrescenta dezenas de MB ao histórico e só a versão mais recente interessa a quem baixa. Quando o repositório passar de ~1 GB: criar um branch órfão com o estado atual, forçar o push no `main` e apagar o branch antigo. |
+| **Tirar o nome e as etiquetas antigas do catálogo (schema 2)** | Desde 30/09/2026 o catálogo sai como `catalogo.json` com as etiquetas em inglês (`name`, `cameras`, `limits`, `structs`, `coverage`...); o `catalog.json` e as etiquetas em português (`nome`, `radares`, `limites`, `estruturas`, `cobertura`...) seguem publicados junto, iguais, para quem lê o catálogo migrar (o app já lê os novos, com os antigos de reserva). A partir da geração de 30/10/2026: tirar `LEGACY_CATALOG` (`scripts/publish.py`) e `with_legacy_keys` (`datakit/build_catalog.py`) e passar o `schema` para 2. |
 
 ## Melhorias de dados
 

@@ -1,6 +1,6 @@
 # Gerador do Pardal
 
-Código que gera os arquivos deste repositório (`brasil/`, `estados/` e `catalog.json`) a
+Código que gera os arquivos deste repositório (`brasil/`, `estados/` e `catalogo.json`) a
 partir das fontes abertas listadas no README principal.
 
 ## Requisitos
@@ -17,7 +17,7 @@ Da pasta `gerador/`:
 ```
 python run.py datakit.build --all        # baixa as fontes e gera data/dist/ (27 UFs + Brasil)
 python run.py datakit.build --uf GO      # só um estado
-python scripts/publish.py               # monta brasil/, estados/ e catalog.json na raiz do repositório
+python scripts/publish.py               # monta brasil/, estados/ e catalogo.json na raiz do repositório
 python -m unittest discover -s datakit/tests -t .
 ```
 
@@ -51,14 +51,14 @@ para repetir um build com os mesmos dados).
 | `datakit/common/direction.py` | Sentido dos radares e das placas: "crescente/decrescente" (ANTT, DNIT, DER-GO) vira rumo pela geometria com km; o sentido nominal de SP (Norte/Sul/Leste/Oeste) vira rumo pela via do OSM mais próxima |
 | `datakit/inmetro_status.py` | Radar ativo/inativo pela validade da aferição no Inmetro, nas BRs fora de concessão |
 | `datakit/build_formats.py` | Radares em GeoJSON, KML e GPX a partir dos CSVs |
-| `scripts/publish.py` | Confere falhas, quedas e tamanhos e copia `data/dist/` (que já tem a estrutura `brasil/`, `estados/`, `catalog.json`) para a raiz do repositório |
+| `scripts/publish.py` | Confere falhas, quedas e tamanhos e copia `data/dist/` (que já tem a estrutura `brasil/`, `estados/`, `catalogo.json`) para a raiz do repositório |
 | `datakit/failures.py` | Registro das fontes que falharam na execução |
 
 Cada download tenta 3 vezes quando a falha é passageira (conexão caiu, 5xx), com no máximo 20 s
 para abrir a conexão. Um servidor que não abre conexão nem assim é dado como fora do ar pelo resto
 da execução (as próximas requisições a ele falham na hora). Fonte que falha (portal fora do ar,
 mudança de formato) é pulada e o resto sai normalmente; o build lista as falhas no fim do log e no
-campo `failures` do `data/dist/catalog.json`. Quando havia uma cópia anterior em `data/raw/` (Inmetro
+campo `failures` do `data/dist/catalogo.json`. Quando havia uma cópia anterior em `data/raw/` (Inmetro
 por UF, radares da CET), ela é usada e vira **aviso** (`warnings`), que aparece no build e no
 `publish.py` mas não bloqueia a publicação.
 
@@ -69,7 +69,7 @@ dois lados — para conferir as junções.
 `python scripts/check_sources.py` testa, em segundos, se cada fonte responde de onde se está
 rodando (útil antes de um build em máquina nova ou na nuvem).
 
-Com `--commit`, o `publish.py` põe no commit só `brasil/`, `estados/` e `catalog.json` —
+Com `--commit`, o `publish.py` põe no commit só `brasil/`, `estados/` e `catalogo.json` —
 nunca outras mudanças pendentes no repositório.
 
 O `publish.py` não monta os arquivos se:
@@ -79,13 +79,13 @@ O `publish.py` não monta os arquivos se:
   isso como falha),
 - alguma fonte falhou no build (`--accept-failures` para montar assim mesmo), ou
 - algum estado perdeu mais de 5% (e pelo menos 50 itens) de radares, limites ou estruturas em
-  relação ao `catalog.json` já publicado (`--accept-drop`).
+  relação ao `catalogo.json` já publicado (`--accept-drop`).
 
 ## Publicação automática
 
 O workflow `.github/workflows/gerar-dados.yml` gera e publica os dados a cada 29 dias numa
 máquina do GitHub Actions: todo dia, às 03:00 em Brasília, confere a data de geração dos dados
-publicados (`built_at` do `catalog.json`) e só gera quando eles têm 29 dias ou mais — se o build
+publicados (`built_at` do `catalogo.json`) e só gera quando eles têm 29 dias ou mais — se o build
 falhar, tenta de novo no dia seguinte. Também pode ser disparado à mão (Actions → Gerar dados →
 Run workflow; só publica com "publish" marcado). Roda os testes, o build completo e o
 `publish.py --commit --push`, com as mesmas travas: fonte que falhou, estado que perdeu mais de
@@ -94,7 +94,7 @@ das junções e o catálogo ficam nos artefatos da execução por 30 dias.
 
 Cada publicação vira também uma **release** (`dados-AAAA-MM-DD`), com a nota das contagens por
 estado (e a diferença para a geração anterior) e os anexos `pardal-<UF>.zip`, `pardal-brasil.zip`,
-`pardal-brasil-radares.zip`, `catalog.json` e `SHA256SUMS.txt` (`scripts/release.py`; roda também
+`pardal-brasil-radares.zip`, `catalogo.json` e `SHA256SUMS.txt` (`scripts/release.py`; roda também
 à mão depois de um `publish.py --commit`). O link
 `https://github.com/Murkiriel/pardal/releases/latest/download/pardal-SP.zip` sempre aponta para a
 versão mais recente.
@@ -122,7 +122,7 @@ local.
 
 **Versão do formato (`schema`)**
 
-O `catalog.json` e o `manifesto.json` de cada pacote têm o campo `schema`, a versão do formato.
+O `catalogo.json` e o `manifesto.json` de cada pacote têm o campo `schema`, a versão do formato.
 Ela sobe quando muda algo que um leitor feito para a versão anterior não entenderia: uma chave
 ou coluna renomeada ou removida, um nome ou caminho de arquivo que muda, um valor que muda de
 significado. Não sobe quando só entram dados novos, ou chaves e colunas novas que um leitor

@@ -50,9 +50,11 @@ class Brazil(unittest.TestCase):
             self.assertEqual(_rows(os.path.join(dist, "brasil", "limites_estimados.csv")),
                              [("-15.8", "-47.8", "40", "OSM:class", "1", "30", "")])
             self.assertEqual(len(_rows(os.path.join(dist, "brasil", "estruturas.csv"))), 2)
-            self.assertEqual(br["radares"]["file"], "brasil/radares.csv")
+            self.assertEqual(br["cameras"]["file"], "brasil/radares.csv")
+            self.assertEqual(br["radares"], br["cameras"])             # etiqueta antiga, até o schema 2
+            self.assertEqual(br["ufs_incluidas"], br["included_ufs"])
             self.assertEqual(br["counts"], {"cameras": 3, "limits": 2, "limits_estimated": 1, "structs": 2})
-            self.assertEqual(br["radares"]["count"], 3)
+            self.assertEqual(br["cameras"]["count"], 3)
 
     def test_estimated_over_the_cap_is_gzipped(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -60,8 +62,32 @@ class Brazil(unittest.TestCase):
             _pack(packs, "GO", [], [f"-16.{i:04d},-49.0,60,OSM:class,1,40," for i in range(200)], [])
             with mock.patch.object(build_brazil, "MAX_FILE_BYTES", 1000):
                 br = build_brazil.build(packs, dist)
-            self.assertEqual(br["limites_estimados"]["file"], "brasil/limites_estimados.csv.gz")
+            self.assertEqual(br["limits_estimated"]["file"], "brasil/limites_estimados.csv.gz")
             self.assertFalse(os.path.exists(os.path.join(dist, "brasil", "limites_estimados.csv")))
+
+
+class CatalogKeys(unittest.TestCase):
+    """Etiquetas em inglês no catalogo.json, com as antigas (português) ao lado até o schema 2."""
+
+    def test_state_entry_has_new_and_legacy_keys(self):
+        import json
+        from datakit import build_catalog
+        with tempfile.TemporaryDirectory() as tmp:
+            packs, dist = os.path.join(tmp, "p"), os.path.join(tmp, "d")
+            _pack(packs, "GO", ["-16.0,-49.0,FIXED,60,DER-GO+OSM,1,,,", "-16.1,-49.1,FIXED,80,DNIT,1,,,"],
+                  ["-16.0,-49.0,60,OSM,0,,"], ["-16.0,-49.0,-16.0,-49.01,BRIDGE"])
+            with open(os.path.join(packs, "GO", "manifesto.json"), "w", encoding="utf-8") as f:
+                json.dump({"bbox": [1, 2, 3, 4], "counts": {"cameras": 2, "limits": 1, "structs": 1}}, f)
+            go = build_catalog.build(packs, dist)["ufs"]["GO"]
+        self.assertEqual(go["name"], "Goiás")
+        self.assertEqual(go["cameras"]["file"], "estados/GO/radares.csv")
+        self.assertEqual(go["limits"]["file"], "estados/GO/limites.csv")
+        self.assertEqual(go["structs"]["file"], "estados/GO/estruturas.csv")
+        self.assertEqual(go["coverage"], {"level": "federal+state", "sources": ["DER-GO", "DNIT", "OSM"]})
+        # as antigas, iguais, até o schema 2
+        self.assertEqual((go["nome"], go["radares"], go["limites"], go["estruturas"]),
+                         (go["name"], go["cameras"], go["limits"], go["structs"]))
+        self.assertEqual(go["cobertura"], {"nivel": "federal+estadual", "fontes": ["DER-GO", "DNIT", "OSM"]})
 
 
 class FileSize(unittest.TestCase):
@@ -89,7 +115,7 @@ class FileSize(unittest.TestCase):
             dist, repo = os.path.join(tmp, "d"), os.path.join(tmp, "r")
             os.makedirs(dist)
             os.makedirs(repo)
-            with open(os.path.join(dist, "catalog.json"), "w", encoding="utf-8") as f:
+            with open(os.path.join(dist, "catalogo.json"), "w", encoding="utf-8") as f:
                 json.dump({"ufs": {}}, f)
             os.makedirs(os.path.join(dist, "estados", "SP"))
             with open(os.path.join(dist, "estados", "SP", "limites.csv"), "wb") as f:

@@ -1,4 +1,4 @@
-"""Organiza data/dist/ nas pastas do repositório (brasil/, estados/ e catalog.json).
+"""Organiza data/dist/ nas pastas do repositório (brasil/, estados/ e catalogo.json).
 
     python scripts/publish.py                     # só monta os arquivos na raiz do repositório
     python scripts/publish.py --commit            # monta e faz commit
@@ -7,7 +7,7 @@
     python scripts/publish.py --accept-failures   # monta mesmo com fonte que falhou no build
 
 Estrutura gerada (na raiz, um nível acima de gerador/):
-    catalog.json                 índice dos pacotes (caminhos já apontando para as pastas)
+    catalogo.json                 índice dos pacotes (caminhos já apontando para as pastas)
     brasil/radares.csv|gpx|kml|geojson, brasil/limites.csv, brasil/limites_estimados.csv[.gz],
     brasil/estruturas.csv
     estados/<UF>/radares.csv|gpx|kml|geojson, limites.csv, estruturas.csv
@@ -34,10 +34,14 @@ REPO = os.path.dirname(GENERATOR_DIR)
 # o datakit.
 _PUBLISHED_NAME = re.compile(r"^(radares|limites_estimados|limites|estruturas)\.(csv\.gz|csv|geojson|kml|gpx)$")
 _MANAGED = ("brasil", "estados")
+CATALOG = "catalogo.json"
+# O nome antigo do catálogo, publicado junto (conteúdo idêntico) enquanto quem lê migra para o novo
+# ("expandir e depois contrair"; ver Convenções no README do gerador). Sai numa próxima versão.
+LEGACY_CATALOG = "catalog.json"
 
 # Uma fonte que falha no build é pulada e o build termina bem; sem estas checagens, um portal fora
 # do ar publicaria um estado com menos dados sem ninguém notar. Duas travas: a lista `falhas`
-# que o build grava no catálogo (datakit/failures.py) e a comparação com o catalog.json já
+# que o build grava no catálogo (datakit/failures.py) e a comparação com o catalogo.json já
 # publicado — queda de mais de MAX_DROP e de pelo menos MIN_DROP itens (radares, limites,
 # estimados ou estruturas). A CET-SP fora do ar tirou 9% dos limites de SP; o OSM de um mês
 # para o outro varia bem menos que isso.
@@ -121,10 +125,10 @@ def main(argv=None) -> int:
     if large_files:
         sys.exit(f"arquivo acima de {MAX_FILE_BYTES / 1e6:.0f} MB (o GitHub recusa):\n  " + "\n  ".join(large_files))
 
-    with open(os.path.join(args.dist, "catalog.json"), encoding="utf-8") as f:
+    with open(os.path.join(args.dist, "catalogo.json"), encoding="utf-8") as f:
         cat = json.load(f)
     for uf, entry in cat["ufs"].items():
-        for key in ("radares", "limites", "limites_estimados", "estruturas"):
+        for key in ("cameras", "limits", "limits_estimated", "structs"):
             meta = entry.get(key)
             if meta and meta.get("sha256") and _sha(os.path.join(args.dist, meta["file"])) != meta["sha256"]:
                 sys.exit(f"sha256 não confere: {meta['file']} ({uf})")
@@ -134,7 +138,9 @@ def main(argv=None) -> int:
     if cat.get("failures") and not args.accept_failures:
         sys.exit("fontes falharam no build; rode de novo ou use --accept-failures:\n  " + "\n  ".join(cat["failures"]))
 
-    published = os.path.join(args.repo, "catalog.json")
+    published = os.path.join(args.repo, CATALOG)
+    if not os.path.exists(published):
+        published = os.path.join(args.repo, LEGACY_CATALOG)
     if os.path.exists(published):
         with open(published, encoding="utf-8") as f:
             problems = drops(json.load(f), cat)
@@ -156,8 +162,9 @@ def main(argv=None) -> int:
         dst = os.path.join(args.repo, *rel.split("/"))
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         shutil.copy2(src, dst)
-    with open(os.path.join(args.repo, "catalog.json"), "w", encoding="utf-8") as f:
-        json.dump(rewrite_catalog(cat), f, ensure_ascii=False, indent=1)
+    for name in (CATALOG, LEGACY_CATALOG):
+        with open(os.path.join(args.repo, name), "w", encoding="utf-8") as f:
+            json.dump(rewrite_catalog(cat), f, ensure_ascii=False, indent=1)
     print(f"{len(wanted)} arquivos montados em {args.repo}")
 
     if not args.commit:
@@ -168,7 +175,7 @@ def main(argv=None) -> int:
     # Só os dados: o commit nunca leva o que mais estiver pendente no repositório (código do
     # gerador ainda não revisado, arquivos soltos). Inclui caminhos que só existem no índice
     # (pasta apagada por inteiro), para a remoção também entrar.
-    paths = [p for p in (*_MANAGED, "catalog.json")
+    paths = [p for p in (*_MANAGED, CATALOG, LEGACY_CATALOG)
              if os.path.exists(os.path.join(args.repo, p)) or subprocess.run(
                  ["git", "-C", args.repo, "ls-files", "--", p], capture_output=True, text=True).stdout.strip()]
     git("add", "-A", "--", *paths)

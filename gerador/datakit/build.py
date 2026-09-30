@@ -206,9 +206,9 @@ def main(argv=None) -> int:
 
 
 def _record_failures(dist_dir: str) -> None:
-    """Grava as fontes que falharam no catalog.json de dist (o publish.py barra se houver)."""
+    """Grava as fontes que falharam no catalogo.json de dist (o publish.py barra se houver)."""
     import json
-    path = os.path.join(dist_dir, "catalog.json")
+    path = os.path.join(dist_dir, "catalogo.json")
     with open(path, encoding="utf-8") as f:
         cat = json.load(f)
     cat["failures"] = failures.recorded()
