@@ -14,6 +14,9 @@ name: Gerar dados
 # tráfego para esses servidores (e só para eles) sai por um túnel WireGuard com saída no Brasil,
 # configurado no segredo MULLVAD_WG_CONF (arquivo .conf da VPN, nunca impresso).
 #
+# Cada publicação vira também uma release (dados-AAAA-MM-DD) com um zip por estado, o Brasil
+# inteiro, só os radares do Brasil, o catálogo e os sha256 (scripts/release.py).
+#
 # O publicar.py não monta nada se alguma fonte falhou, se algum estado perdeu mais de 5% dos
 # dados em relação ao publicado ou se algum arquivo passa de 95 MB: nesses casos o job falha e o
 # GitHub avisa por e-mail; nada é publicado.
@@ -143,15 +146,26 @@ jobs:
           mkdir -p data
           python run.py datakit.build --all 2>&1 | tee data/build.log
 
-      - name: Confere e monta (publica se for o caso)
+      - name: Confere e monta (publica e cria a release se for o caso)
         working-directory: pardal/gerador
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          cp ../catalog.json "$RUNNER_TEMP/catalogo_anterior.json"
           if [ "$PUBLICAR" = "true" ] && [ "$GITHUB_REPOSITORY" = "Murkiriel/pardal" ]; then
             git -C .. config user.name "Murkiriel"
             git -C .. config user.email "14956419+Murkiriel@users.noreply.github.com"
+            antes=$(git -C .. rev-parse HEAD)
             python scripts/publicar.py --commit --push
+            if [ "$(git -C .. rev-parse HEAD)" != "$antes" ]; then
+              python scripts/release.py --anterior "$RUNNER_TEMP/catalogo_anterior.json" \
+                --avisos data/dist/catalog.json --criar
+            else
+              echo "Nada mudou nos dados: sem commit e sem release."
+            fi
           else
             python scripts/publicar.py
+            python scripts/release.py --anterior "$RUNNER_TEMP/catalogo_anterior.json" --avisos data/dist/catalog.json
             echo "Conferido e montado; sem publicar (publicar=$PUBLICAR, repositório=$GITHUB_REPOSITORY)."
           fi
 
@@ -168,5 +182,6 @@ jobs:
             pardal/gerador/data/build.log
             pardal/gerador/data/audit/
             pardal/gerador/data/dist/catalog.json
+            pardal/gerador/data/release/NOTAS.md
           if-no-files-found: ignore
           retention-days: 30

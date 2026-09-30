@@ -92,6 +92,13 @@ Run workflow; só publica com "publicar" marcado). Roda os testes, o build compl
 5% ou arquivo acima de 95 MB fazem o job falhar sem publicar nada. O log do build, a auditoria
 das junções e o catálogo ficam nos artefatos da execução por 30 dias.
 
+Cada publicação vira também uma **release** (`dados-AAAA-MM-DD`), com a nota das contagens por
+estado (e a diferença para a geração anterior) e os anexos `pardal-<UF>.zip`, `pardal-brasil.zip`,
+`pardal-brasil-radares.zip`, `catalog.json` e `SHA256SUMS.txt` (`scripts/release.py`; roda também
+à mão depois de um `publicar.py --commit`). O link
+`https://github.com/Murkiriel/pardal/releases/latest/download/pardal-SP.zip` sempre aponta para a
+versão mais recente.
+
 As máquinas do Actions ficam nos EUA, e o DNIT e o Inmetro não aceitam conexão de fora do Brasil
 (o portal da ANTT às vezes devolve uma página de bloqueio): o tráfego para esses três servidores,
 e só para eles, sai por um túnel WireGuard com saída no Brasil. A configuração do túnel fica no
