@@ -53,7 +53,7 @@ interesse, e o limite é um valor da via, não um lugar.
 |---|---|
 | `kind` | `FIXED` (radar de velocidade ou lombada eletrônica), `SECTION` (radar de trecho, com o fim em `end_lat,end_lng`), `RED_LIGHT` (avanço de sinal) |
 | `limit_kmh` | Limite fiscalizado, quando a fonte informa (veículo leve) |
-| `source` | De onde veio o ponto (`OSM`, `DNIT`, `ANTT`, `DER-SP`, `RIO`…) |
+| `source` | De onde veio o ponto (`OSM`, `DNIT`, `ANTT`, `DER-SP`, `RIO`…). Quando mais de uma fonte traz o mesmo radar, elas vêm juntas com `+` (ex.: `DNIT+OSM`, confirmado por duas fontes independentes) |
 | `active` | `0` quando o radar está desativado ou com a aferição do Inmetro vencida |
 | `direction_deg` | Sentido fiscalizado: rumo do trânsito que o radar fiscaliza, em graus a partir do norte (0 = norte, 90 = leste, 180 = sul, 270 = oeste). Vazio quando o radar fiscaliza os dois sentidos ou a fonte não informa |
 
@@ -70,7 +70,7 @@ Paulo), ele substitui o do OpenStreetMap naquele trecho.
 | `source` | `ANTT`, `RIO`, `CET-SP`, `OSM` (valor sinalizado no mapa), `OSM:zone` ou `OSM:classe` (estimados) |
 | `estimated` | `1` quando o valor **não é sinalizado**: foi estimado pela regra do Código de Trânsito para aquele tipo de via (rodovia, avenida, via local), porque a via não tem limite cadastrado. `0` para valor sinalizado ou oficial |
 | `limit_low_kmh` | Só nos estimados: a mesma estimativa pelo lado baixo da faixa legal, para quem prefere errar para o lado cauteloso (ex.: 80 onde o típico é 100) |
-| `direction_deg` | Preenchido quando a placa vale só para um sentido (rumo do trânsito em graus, como nos radares). Nas rodovias concedidas em que cada sentido tem um limite diferente, há um ponto para cada sentido no mesmo lugar. Vazio = vale para os dois sentidos |
+| `direction_deg` | Preenchido quando a placa vale só para um sentido (rumo do trânsito em graus, como nos radares). Nas rodovias concedidas em que cada sentido tem um limite diferente, e nas vias do OpenStreetMap marcadas com um limite por sentido (`maxspeed:forward`/`maxspeed:backward`), há um ponto para cada sentido no mesmo lugar. Vazio = vale para os dois sentidos |
 
 Os estimados cobrem só a rede principal (autoestradas, troncos, primárias, secundárias e
 terciárias). Estradas rurais sem classificação e ruas de bairro ficam sem estimativa.
@@ -124,14 +124,27 @@ com `estimated=1`. Pode estar errado. Para usar só limites sinalizados, descart
 fiscalizado, em graus (0 = norte, 90 = leste, 180 = sul, 270 = oeste). Para saber se um radar
 vale para quem passa, compare com o rumo do veículo: se a diferença for de até 90°, vale. O
 sentido vem das fontes oficiais que o informam ("crescente/decrescente" do km na ANTT e no
-DER-GO, Norte/Sul/Leste/Oeste na Artesp, faixas por sentido no DER-SP), convertido em rumo
+DER-GO, Norte/Sul/Leste/Oeste na Artesp, faixas por sentido no DER-SP, centro/bairro na CET de
+São Paulo), convertido em rumo
 pela geometria da rodovia (SNV do DNIT, malha estadual da Goinfra e OpenStreetMap). A tag
 `direction` dos radares do OpenStreetMap não é usada: medida contra as fontes oficiais, ela
 aponta o sentido contrário na maioria das rodovias (muitos mapeadores marcam para onde a câmera
 olha). Vazio quer dizer os dois sentidos ou sentido não informado.
 
 **Como sei se um radar ainda funciona?** A coluna `active` usa a situação informada pela
-ANTT e pelos DERs e, nas rodovias federais, a validade da aferição no Inmetro.
+ANTT e pelos DERs, nas rodovias federais a validade da aferição no Inmetro e, na cidade de São
+Paulo, os locais que a CET desativou.
+
+**O mesmo radar aparece duas vezes?** Não: quando o OpenStreetMap e uma fonte oficial trazem o
+mesmo radar (a até 30 m), ou dois órgãos publicam o mesmo radar, fica um ponto só, com a
+posição, o limite e o sentido da fonte oficial, e a coluna `source` lista as fontes que o
+confirmam. Pontos do OpenStreetMap a até 8 m um do outro também viram um só. Radares próximos
+do mesmo órgão continuam separados: são equipamentos diferentes (um por pista, por faixa ou por
+aproximação de cruzamento).
+
+**Em que estado fica um ponto na divisa ou numa ponte?** Em um só: no estado cujo contorno
+(malha oficial do IBGE) contém o ponto; ponte, orla e ilha que ficam fora do contorno vão para o
+estado mais perto, a até 5 km. Ponte ou túnel na divisa sai nos dois estados.
 
 **Posso usar no meu app ou projeto?** Pode, seguindo a licença ODbL (abaixo): citar as
 fontes e manter a mesma licença em bases derivadas.
@@ -148,8 +161,9 @@ fontes e manter a mesma licença em bases derivadas.
 | Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo) | Creative Commons |
 | DER-SP / Artesp, DER-GO (Goinfra), DER-PE | Radares das rodovias estaduais, com o sentido fiscalizado (SP e GO) | Dado aberto governamental |
 | Goinfra — malha rodoviária estadual | Quilometragem das rodovias de Goiás, para converter o sentido em rumo | Dado aberto governamental |
+| IBGE — malha das unidades da federação (API de malhas) | Contorno de cada estado, para decidir em que estado fica cada ponto | Dado aberto governamental |
 | Prefeitura do Rio de Janeiro (IPP, SMTR/CET-Rio) | Limite por trecho de rua e radares da cidade | CC-BY 4.0 |
-| Prefeitura de São Paulo (GeoSampa, CET) | Limite pela classificação viária (vias de trânsito rápido e arteriais) | Dado aberto municipal |
+| Prefeitura de São Paulo (GeoSampa, CET) | Limite pela classificação viária (vias de trânsito rápido e arteriais) e os radares ativos da cidade (locais fiscalizados da CET, com limite e sentido centro/bairro) | Dado aberto municipal |
 | BHTrans (Belo Horizonte) | Radares e detectores de avanço de sinal | CC-BY |
 | Detran-DF | Radares e lombadas eletrônicas | Dado aberto governamental |
 | Prefeituras de Fortaleza, Recife e João Pessoa | Radares urbanos | Dado aberto governamental |
