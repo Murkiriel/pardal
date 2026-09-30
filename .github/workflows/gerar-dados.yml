@@ -46,6 +46,10 @@ jobs:
         id: idade
         env:
           INTERVALO_DIAS: "29"
+          # Geração extra, fora do intervalo: a partir desta data (UTC), gera se os dados publicados
+          # forem mais antigos que ela (e tenta de novo nos dias seguintes se falhar). Depois de
+          # publicar, não tem mais efeito. Vazio = só o intervalo.
+          GERAR_A_PARTIR_DE: "2026-10-01"
           EVENTO: ${{ github.event_name }}
         run: |
           if [ "$EVENTO" != "schedule" ]; then
@@ -55,6 +59,11 @@ jobs:
                    | python3 -c 'import json,sys; print(json.load(sys.stdin)["built_at"])') || gerado=""
           if [ -z "$gerado" ]; then
             echo "sem a data dos dados publicados: gera"; echo "rodar=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          hoje=$(date -u +%F)
+          if [ -n "$GERAR_A_PARTIR_DE" ] && [ ! "$hoje" \< "$GERAR_A_PARTIR_DE" ] && [ "${gerado:0:10}" \< "$GERAR_A_PARTIR_DE" ]; then
+            echo "geração extra marcada para $GERAR_A_PARTIR_DE (dados publicados de ${gerado:0:10}): gera"
+            echo "rodar=true" >> "$GITHUB_OUTPUT"; exit 0
           fi
           # dias arredondados: o horário do build não empurra a geração para o dia seguinte
           dias=$(( ( $(date -u +%s) - $(date -u -d "$gerado" +%s) + 43200 ) / 86400 ))
