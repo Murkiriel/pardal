@@ -1,13 +1,11 @@
 # Pendências do Pardal
 
-Situação em 2026-09-29. O que não foi feito ainda e por quê.
+Situação em 2026-09-30. O que não foi feito ainda e por quê.
 
 ## Manutenção
 
 | Item | Situação |
 |---|---|
-| **Publicação automática (GitHub Actions)** | Testado em 2026-09-30 (máquina da Microsoft em Phoenix, EUA): 19 das 22 fontes respondem, mas **DNIT (PNCV e SNV) e Inmetro não abrem conexão fora do Brasil** — sem eles saem sem sentido os radares federais, sem limites as placas da ANTT e sem situação do Inmetro. A trava de falhas barraria a publicação. | Executor no Brasil: VPS brasileira ou o próprio PC como executor do Actions (self-hosted runner), ou o Actions com túnel para um IP brasileiro só para esses dois servidores (ex.: WireGuard de uma VPN com saída em São Paulo — testar antes se DNIT/Inmetro aceitam IP de VPN). |
-| **Gerar e publicar de novo todo mês** | Futuro. As fontes mudam todo mês (DNIT, ANTT, Inmetro, OpenStreetMap). Hoje é manual: `python run.py datakit.build --all` (baixa o OpenStreetMap de novo quando a Geofabrik tem versão mais nova), `python scripts/publicar.py --commit --push`. Leva ~1 h e ~2 GB de download. Automatizável com GitHub Actions (cabe no disco e no limite de tempo dos runners). |
 | **Zerar o histórico do git de tempos em tempos** | Combinado. Cada geração acrescenta dezenas de MB ao histórico e só a versão mais recente interessa a quem baixa. Quando o repositório passar de ~1 GB: criar um branch órfão com o estado atual, forçar o push no `main` e apagar o branch antigo. |
 
 ## Melhorias de dados

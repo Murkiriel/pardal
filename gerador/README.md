@@ -81,6 +81,22 @@ O `publicar.py` não monta os arquivos se:
 - algum estado perdeu mais de 5% (e pelo menos 50 itens) de radares, limites ou estruturas em
   relação ao `catalog.json` já publicado (`--aceitar-queda`).
 
+## Publicação automática
+
+O workflow `.github/workflows/gerar-dados.yml` gera e publica os dados todo dia 5 (03:00 em
+Brasília) numa máquina do GitHub Actions, e pode ser disparado à mão (Actions → Gerar dados →
+Run workflow; só publica com "publicar" marcado). Roda os testes, o build completo e o
+`publicar.py --commit --push`, com as mesmas travas: fonte que falhou, estado que perdeu mais de
+5% ou arquivo acima de 95 MB fazem o job falhar sem publicar nada. O log do build, a auditoria
+das junções e o catálogo ficam nos artefatos da execução por 30 dias.
+
+As máquinas do Actions ficam nos EUA, e o DNIT e o Inmetro não aceitam conexão de fora do Brasil
+(o portal da ANTT às vezes devolve uma página de bloqueio): o tráfego para esses três servidores,
+e só para eles, sai por um túnel WireGuard com saída no Brasil. A configuração do túnel fica no
+segredo `MULLVAD_WG_CONF` do repositório (Settings → Secrets and variables → Actions); sem ela o
+job para no começo. Testado em 2026-09-30: build completo em ~30 min, mesmos números do build
+local.
+
 ## Mais
 
 - `FONTES.md` — investigação das fontes: o que entrou, o que foi medido e descartado.

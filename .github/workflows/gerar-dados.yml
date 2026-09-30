@@ -1,0 +1,127 @@
+name: Gerar dados
+
+# Gera brasil/, estados/ e catalog.json do zero (fontes oficiais + OpenStreetMap) e publica.
+#
+# Todo dia 5, e quando disparado à mão (Actions → Gerar dados → Run workflow). À mão, só publica
+# se "publicar" for marcado; sem isso, gera e confere (o log e a auditoria ficam nos artefatos).
+#
+# O DNIT e o Inmetro não aceitam conexão de fora do Brasil, e o portal de dados da ANTT às vezes
+# devolve uma página de bloqueio em vez dos dados; as máquinas do Actions ficam nos EUA. O
+# tráfego para esses servidores (e só para eles) sai por um túnel WireGuard com saída no Brasil,
+# configurado no segredo MULLVAD_WG_CONF (arquivo .conf da VPN, nunca impresso).
+#
+# O publicar.py não monta nada se alguma fonte falhou, se algum estado perdeu mais de 5% dos
+# dados em relação ao publicado ou se algum arquivo passa de 95 MB: nesses casos o job falha e o
+# GitHub avisa por e-mail; nada é publicado.
+
+on:
+  schedule:
+    - cron: "0 6 5 * *"   # dia 5, 03:00 em Brasília
+  workflow_dispatch:
+    inputs:
+      publicar:
+        description: "Publicar os dados (commit no repositório). Sem marcar: só gera e confere."
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gerar-dados
+  cancel-in-progress: false
+
+jobs:
+  gerar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      PUBLICAR: ${{ github.event_name == 'schedule' || inputs.publicar == true }}
+      TUNEL_HOSTS: servicos.dnit.gov.br servicos.rbmlq.gov.br dados.antt.gov.br am.i.mullvad.net
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Código e dados publicados
+        uses: actions/checkout@v7
+        with:
+          repository: Murkiriel/pardal
+          path: pardal
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Dependências
+        run: pip install -q -r pardal/gerador/requirements.txt
+
+      - name: Testes do gerador
+        working-directory: pardal/gerador
+        run: python -m unittest discover -s datakit/tests -t .
+
+      - name: Cópias anteriores das fontes (data/raw, sem os extratos do OSM)
+        uses: actions/cache@v6
+        with:
+          path: |
+            pardal/gerador/data/raw
+            !pardal/gerador/data/raw/*.osm.pbf
+            !pardal/gerador/data/raw/*.part
+          key: pardal-raw-${{ github.run_id }}
+          restore-keys: pardal-raw-
+
+      - name: Memória extra (swap)
+        run: |
+          sudo fallocate -l 8G /mnt/swap-pardal && sudo chmod 600 /mnt/swap-pardal
+          sudo mkswap /mnt/swap-pardal >/dev/null && sudo swapon /mnt/swap-pardal
+          free -h
+
+      - name: Túnel para DNIT, Inmetro e ANTT (saída no Brasil)
+        env:
+          WG_CONF: ${{ secrets.MULLVAD_WG_CONF }}
+        run: |
+          if [ -z "$WG_CONF" ]; then echo "::error::segredo MULLVAD_WG_CONF não configurado"; exit 1; fi
+          sudo apt-get install -y -qq wireguard-tools >/dev/null
+          IPS=$(for h in $TUNEL_HOSTS; do getent ahostsv4 "$h" | awk '{print $1}'; done | sort -u | sed 's#$#/32#' | paste -sd, -)
+          echo "pelo túnel: $IPS"
+          printf '%s\n' "$WG_CONF" \
+            | sed -E '/^[[:space:]]*DNS[[:space:]]*=/d; s#^[[:space:]]*AllowedIPs[[:space:]]*=.*#AllowedIPs = '"$IPS"'#' \
+            | sudo tee /etc/wireguard/wg0.conf >/dev/null
+          sudo chmod 600 /etc/wireguard/wg0.conf
+          sudo wg-quick up wg0 >/dev/null 2>&1
+          saida=$(curl -s --max-time 20 https://am.i.mullvad.net/json)
+          echo "$saida" | python -c 'import json,sys; j=json.load(sys.stdin); print("saída:", j.get("country"), "/", j.get("city"), "| mullvad:", j.get("mullvad_exit_ip"))'
+          echo "$saida" | python -c 'import json,sys; j=json.load(sys.stdin); sys.exit(0 if j.get("mullvad_exit_ip") and j.get("country") == "Brazil" else 1)' \
+            || { echo "::error::o túnel não saiu pelo Brasil"; exit 1; }
+
+      - name: Build (27 estados + Brasil)
+        working-directory: pardal/gerador
+        run: |
+          set -o pipefail
+          mkdir -p data
+          python run.py datakit.build --all 2>&1 | tee data/build.log
+
+      - name: Confere e monta (publica se for o caso)
+        working-directory: pardal/gerador
+        run: |
+          if [ "$PUBLICAR" = "true" ] && [ "$GITHUB_REPOSITORY" = "Murkiriel/pardal" ]; then
+            git -C .. config user.name "Murkiriel"
+            git -C .. config user.email "14956419+Murkiriel@users.noreply.github.com"
+            python scripts/publicar.py --commit --push
+          else
+            python scripts/publicar.py
+            echo "Conferido e montado; sem publicar (publicar=$PUBLICAR, repositório=$GITHUB_REPOSITORY)."
+          fi
+
+      - name: Desliga o túnel
+        if: always()
+        run: sudo wg-quick down wg0 >/dev/null 2>&1 || true
+
+      - name: Log, auditoria e catálogo (artefatos)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-${{ github.run_number }}
+          path: |
+            pardal/gerador/data/build.log
+            pardal/gerador/data/audit/
+            pardal/gerador/data/dist/catalog.json
+          if-no-files-found: ignore
+          retention-days: 30
