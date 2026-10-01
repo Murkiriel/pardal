@@ -214,11 +214,14 @@ class OsmDatedFallback(unittest.TestCase):
         self.osm, self.mock = osm_pbf, mock
         self.raw = tempfile.mkdtemp()
         self.asked = []
-        self._sleep = mock.patch.object(_http.time, "sleep", lambda s: None)
+        self.waits = []
+        osm_pbf._LISTING = None          # a listagem fica guardada pela execução inteira
+        self._sleep = mock.patch.object(_http.time, "sleep", self.waits.append)
         self._sleep.start()
 
     def tearDown(self):
         self._sleep.stop()
+        self.osm._LISTING = None
 
     def _urlopen(self, latest_loops=True, dated_ok=True):
         """urlopen simulado: o -latest em laço (como o urllib relata) e o datado respondendo."""
@@ -315,6 +318,25 @@ class OsmDatedFallback(unittest.TestCase):
             ex = self.osm.ensure_extract("sudeste", self.raw)
         self.assertEqual(ex.bytes, 7)
         self.assertEqual(len(failures.recorded()), f0 + 1)
+
+    def test_listing_that_fails_for_a_while_is_waited_for(self):
+        # 01/10/2026: a listagem respondeu com erro por até 45 s; as esperas comuns (5 s, 10 s) não bastaram
+        resp = requests.Response()
+        resp.status_code = 502
+        down = requests.HTTPError("502 Server Error: Bad Gateway", response=resp)
+        with self.mock.patch.object(self.osm, "urlopen", self._urlopen()), \
+                self.mock.patch.object(self.osm, "get_text", side_effect=[down, down, self.LISTING]) as listing:
+            ex = self.osm.ensure_extract("sudeste", self.raw)
+        self.assertEqual((listing.call_count, ex.bytes), (3, 3))
+        self.assertEqual(self.waits[-2:], [self.osm.FALLBACK_WAIT_S, 2 * self.osm.FALLBACK_WAIT_S])
+
+    def test_listing_is_read_once_for_all_regions(self):
+        with self.mock.patch.object(self.osm, "urlopen", self._urlopen()), \
+                self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING) as listing:
+            self.osm.ensure_extract("sudeste", self.raw)
+            self.osm.ensure_extract("sul", self.raw)
+        self.assertEqual(listing.call_count, 1)
+        self.assertEqual(self.asked[-1], "sul-261001.osm.pbf")
 
     def test_newest_dated_file_of_the_region_only(self):
         with self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING):

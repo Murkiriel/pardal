@@ -42,6 +42,13 @@ from datakit.common import (
 T = TypeVar("T")
 
 GEOFABRIK_BASE = "https://download.geofabrik.de/south-america/brazil"
+# Contorno do -latest (ver _with_dated_fallback): a listagem e o arquivo datado são pedidos com
+# mais paciência que o resto (30 s, 60 s, 90 s entre as tentativas). Em 01/10/2026 a listagem
+# da Geofabrik respondeu com erro por até 45 s, duas vezes no mesmo build, e as tentativas
+# comuns (5 s e 10 s de espera) não bastaram.
+FALLBACK_ATTEMPTS = 4
+FALLBACK_WAIT_S = 30.0
+_LISTING: Optional[str] = None   # listagem da pasta, lida uma vez por execução
 SAMPLE_M = 0           # legado (sem reamostragem fixa; ver _limit_points). Mantido p/ index.sample_m
 RDP_EPSILON_M = 15.0    # simplifica a geometria do way (Douglas-Peucker)
 LIMIT_MAX_GAP_M = 1500.0  # só preenche vértices do RDP se ficarem mais longe que isso
@@ -146,12 +153,21 @@ def _with_dated_fallback(region: str, url: str, fn: Callable[[str], T]) -> Tuple
             raise e from listing_error
         from datakit import failures
         failures.warn(f"OSM {region}", f"-latest falhou ({type(e).__name__}); usado {dated.rsplit('/', 1)[-1]}")
-        return with_retries(lambda: fn(dated), dated), dated
+        return with_retries(lambda: fn(dated), dated, attempts=FALLBACK_ATTEMPTS, wait_s=FALLBACK_WAIT_S), dated
+
+
+def _listing() -> str:
+    """Listagem da pasta da Geofabrik. Uma leitura boa serve a todas as regiões do build."""
+    global _LISTING
+    if _LISTING is None:
+        url = f"{GEOFABRIK_BASE}/"
+        _LISTING = with_retries(lambda: get_text(url), url, attempts=FALLBACK_ATTEMPTS, wait_s=FALLBACK_WAIT_S)
+    return _LISTING
 
 
 def _dated_url(region: str) -> str:
     """URL do <region>-AAMMDD.osm.pbf mais recente na listagem da pasta da Geofabrik."""
-    listing = get_text(f"{GEOFABRIK_BASE}/")
+    listing = _listing()
     dates = re.findall(rf"(?<![\w-]){re.escape(region)}-(\d{{6}})\.osm\.pbf", listing)
     if not dates:
         raise RuntimeError(f"nenhum {region}-AAMMDD.osm.pbf na listagem da Geofabrik")
