@@ -12,6 +12,7 @@
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-40.534759,-9.378796,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-40.498895,-9.364473,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-40.503163,-9.360992,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-36.762409,-8.962761,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-36.725746,-8.960251,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-36.487414,-8.909055,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.150618,-8.896914,0</coordinates></Point></Placemark>
@@ -32,6 +33,7 @@
 <Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-36.021072,-8.697975,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-36.020811,-8.697643,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: DNIT+OSM</description><Point><coordinates>-36.022908,-8.693402,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 86° (leste)</description><Point><coordinates>-35.604084,-8.690543,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.157285,-8.665496,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-39.240546,-8.618966,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.110743,-8.599411,0</coordinates></Point></Placemark>
@@ -126,9 +128,11 @@
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.437014,-8.161803,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DER-PE</description><Point><coordinates>-35.466325,-8.161793,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-35.436540,-8.161732,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.940717,-8.158244,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-35.427523,-8.157047,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.959718,-8.154264,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.959400,-8.154170,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 40 km/h</name><description>Fonte: DNIT+OSM · sentido 158° (sul)</description><Point><coordinates>-34.942931,-8.151750,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.399509,-8.147263,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: DER-PE+OSM</description><Point><coordinates>-35.393553,-8.146071,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DER-PE</description><Point><coordinates>-35.393005,-8.145858,0</coordinates></Point></Placemark>
@@ -138,11 +142,14 @@
 <Placemark><name>Radar</name><description>Fonte: OSM</description><Point><coordinates>-35.382346,-8.141418,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: PCR</description><Point><coordinates>-34.903219,-8.140890,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.903072,-8.140588,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 40 km/h</name><description>Fonte: DNIT+OSM</description><Point><coordinates>-34.947099,-8.139768,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.946978,-8.139425,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: PCR</description><Point><coordinates>-34.903309,-8.136419,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: PCR</description><Point><coordinates>-34.903607,-8.136321,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.916209,-8.132622,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.916381,-8.132612,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: PCR</description><Point><coordinates>-34.916159,-8.131060,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 50 km/h</name><description>Fonte: DNIT+OSM · sentido 218° (sudoeste)</description><Point><coordinates>-34.945033,-8.130669,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: PCR+OSM</description><Point><coordinates>-34.915938,-8.130636,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.898947,-8.129922,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 60 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.915513,-8.128602,0</coordinates></Point></Placemark>
@@ -349,6 +356,8 @@
 <Placemark><name>Radar 80 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.983724,-7.596047,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT</description><Point><coordinates>-40.494341,-7.593422,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 40 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.008303,-7.565696,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 173° (sul)</description><Point><coordinates>-34.991005,-7.559362,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 80 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.990927,-7.558573,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT · sentido 187° (sul)</description><Point><coordinates>-34.985126,-7.500006,0</coordinates></Point></Placemark>
 </Folder>
 </Document></kml>

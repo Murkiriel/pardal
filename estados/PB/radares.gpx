@@ -2,6 +2,10 @@
 <gpx version="1.1" creator="Pardal" xmlns="http://www.topografix.com/GPX/1/1">
 <metadata><name>Pardal — radares — PB</name><desc>Pardal — © colaboradores do OpenStreetMap (ODbL 1.0) e fontes abertas listadas no README</desc></metadata>
 <wpt lat="-7.523291" lon="-35.991130"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
+<wpt lat="-7.500318" lon="-34.984908"><name>Radar 50 km/h</name><desc>Fonte: DNIT+OSM · sentido 5° (norte)</desc><type>FIXED</type></wpt>
+<wpt lat="-7.500021" lon="-34.985089"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
+<wpt lat="-7.499483" lon="-34.985087"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
+<wpt lat="-7.499378" lon="-34.984974"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-7.485109" lon="-34.981056"><name>Radar 100 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-7.455729" lon="-34.981179"><name>Radar</name><desc>Fonte: DNIT · sentido 191° (sul)</desc><type>FIXED</type></wpt>
 <wpt lat="-7.439334" lon="-34.977218"><name>Radar</name><desc>Fonte: DNIT · sentido 13° (norte)</desc><type>FIXED</type></wpt>
@@ -64,6 +68,8 @@
 <wpt lat="-7.181826" lon="-34.900881"><name>Radar 50 km/h</name><desc>Fonte: DNIT+OSM · sentido 15° (norte)</desc><type>FIXED</type></wpt>
 <wpt lat="-7.177568" lon="-34.899723"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-7.177282" lon="-34.899594"><name>Radar</name><desc>Fonte: DNIT · sentido 199° (sul)</desc><type>FIXED</type></wpt>
+<wpt lat="-7.173017" lon="-35.392812"><name>Radar</name><desc>Fonte: DNIT · sentido 81° (leste)</desc><type>FIXED</type></wpt>
+<wpt lat="-7.172889" lon="-35.392419"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-7.171213" lon="-35.339049"><name>Radar 50 km/h</name><desc>Fonte: DNIT+OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-7.170138" lon="-34.871678"><name>Radar</name><desc>Fonte: DNIT · sentido 288° (oeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-7.169525" lon="-34.877872"><name>Radar</name><desc>Fonte: DNIT · sentido 99° (leste)</desc><type>FIXED</type></wpt>

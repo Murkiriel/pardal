@@ -233,6 +233,7 @@
 <wpt lat="-17.582389" lon="-52.547171"><name>Radar 40 km/h</name><desc>Fonte: DER-GO · sentido 243° (sudoeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-17.579481" lon="-52.513913"><name>Radar 80 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-17.553689" lon="-48.721561"><name>Radar 80 km/h</name><desc>Fonte: DER-GO · sentido 9° (norte)</desc><type>FIXED</type></wpt>
+<wpt lat="-17.553422" lon="-52.528046"><name>Radar 40 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-17.544814" lon="-48.722413"><name>Radar 80 km/h</name><desc>Fonte: DER-GO</desc><type>FIXED</type></wpt>
 <wpt lat="-17.535282" lon="-48.725689"><name>Radar 80 km/h</name><desc>Fonte: DER-GO · sentido 342° (norte)</desc><type>FIXED</type></wpt>
 <wpt lat="-17.534209" lon="-48.726095"><name>Radar 80 km/h</name><desc>Fonte: DER-GO · sentido 162° (sul)</desc><type>FIXED</type></wpt>

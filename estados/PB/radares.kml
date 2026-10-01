@@ -4,6 +4,10 @@
 <description>Pardal — © colaboradores do OpenStreetMap (ODbL 1.0) e fontes abertas listadas no README</description>
 <Folder><name>Radares de velocidade</name>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.991130,-7.523291,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 50 km/h</name><description>Fonte: DNIT+OSM · sentido 5° (norte)</description><Point><coordinates>-34.984908,-7.500318,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 50 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.985089,-7.500021,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 50 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.985087,-7.499483,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 50 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.984974,-7.499378,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 100 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.981056,-7.485109,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT · sentido 191° (sul)</description><Point><coordinates>-34.981179,-7.455729,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT · sentido 13° (norte)</description><Point><coordinates>-34.977218,-7.439334,0</coordinates></Point></Placemark>
@@ -66,6 +70,8 @@
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DNIT+OSM · sentido 15° (norte)</description><Point><coordinates>-34.900881,-7.181826,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: OSM</description><Point><coordinates>-34.899723,-7.177568,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT · sentido 199° (sul)</description><Point><coordinates>-34.899594,-7.177282,0</coordinates></Point></Placemark>
+<Placemark><name>Radar</name><description>Fonte: DNIT · sentido 81° (leste)</description><Point><coordinates>-35.392812,-7.173017,0</coordinates></Point></Placemark>
+<Placemark><name>Radar 50 km/h</name><description>Fonte: OSM</description><Point><coordinates>-35.392419,-7.172889,0</coordinates></Point></Placemark>
 <Placemark><name>Radar 50 km/h</name><description>Fonte: DNIT+OSM</description><Point><coordinates>-35.339049,-7.171213,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT · sentido 288° (oeste)</description><Point><coordinates>-34.871678,-7.170138,0</coordinates></Point></Placemark>
 <Placemark><name>Radar</name><description>Fonte: DNIT · sentido 99° (leste)</description><Point><coordinates>-34.877872,-7.169525,0</coordinates></Point></Placemark>
