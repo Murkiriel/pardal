@@ -37,7 +37,9 @@ CSV; o `scripts/to_geojson.py` (na raiz do repositório) converte qualquer um pa
 
 Os extratos do OSM ficam em `data/raw/`. A cada build o gerador confere na Geofabrik se há
 versão mais nova e só então baixa de novo; `--osm-local` usa os guardados sem conferir (útil
-para repetir um build com os mesmos dados).
+para repetir um build com os mesmos dados). Se o link `<região>-latest.osm.pbf` falhar, o
+gerador usa o `<região>-AAMMDD.osm.pbf` mais recente da listagem da Geofabrik e registra um
+aviso (é o mesmo arquivo; não bloqueia a publicação).
 
 ## Como funciona
 

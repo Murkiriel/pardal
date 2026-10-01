@@ -197,6 +197,133 @@ class Resilience(unittest.TestCase):
         self.assertNotIn("warnings", pub.rewrite_catalog({"ufs": {}, "warnings": ["Inmetro DF: cópia"]}))
 
 
+class OsmDatedFallback(unittest.TestCase):
+    """O <região>-latest.osm.pbf da Geofabrik em laço de redirecionamento (301 para si mesmo)."""
+    BASE = "https://download.geofabrik.de/south-america/brazil"
+    LISTING = ('<a href="sudeste-260929.osm.pbf">sudeste-260929.osm.pbf</a>'
+               '<a href="sudeste-260930.osm.pbf">sudeste-260930.osm.pbf</a>'
+               '<a href="sudeste-260930.osm.pbf.md5">sudeste-260930.osm.pbf.md5</a>'
+               '<a href="sudeste-latest.osm.pbf">sudeste-latest.osm.pbf</a>'
+               '<a href="sul-261001.osm.pbf">sul-261001.osm.pbf</a>')
+    STAMP = "Wed, 30 Sep 2026 21:10:02 GMT"
+
+    def setUp(self):
+        import tempfile
+        from unittest import mock
+        from datakit.sources import osm_pbf
+        self.osm, self.mock = osm_pbf, mock
+        self.raw = tempfile.mkdtemp()
+        self.asked = []
+        self._sleep = mock.patch.object(_http.time, "sleep", lambda s: None)
+        self._sleep.start()
+
+    def tearDown(self):
+        self._sleep.stop()
+
+    def _urlopen(self, latest_loops=True, dated_ok=True):
+        """urlopen simulado: o -latest em laço (como o urllib relata) e o datado respondendo."""
+        import io
+        from urllib.error import HTTPError
+
+        class Resp(io.BytesIO):
+            headers = {"Last-Modified": self.STAMP}
+
+        def fake(req, timeout=None):
+            url = req.full_url
+            self.asked.append(url.rsplit("/", 1)[-1])
+            if url.endswith("-latest.osm.pbf") and latest_loops:
+                raise HTTPError(url, 301, "redirect error that would lead to an infinite loop", None, None)
+            if not dated_ok:
+                raise HTTPError(url, 404, "Not Found", None, None)
+            return Resp(b"pbf")
+        return fake
+
+    def _stored(self, stamp):
+        with open(os.path.join(self.raw, "sudeste-latest.osm.pbf"), "wb") as f:
+            f.write(b"stored!")
+        with open(os.path.join(self.raw, "sudeste.last-modified"), "w") as f:
+            f.write(stamp)
+
+    def test_download_falls_back_to_the_newest_dated_file_and_warns(self):
+        from datakit import failures
+        f0 = len(failures.recorded())
+        with self.mock.patch.object(self.osm, "urlopen", self._urlopen()), \
+                self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING) as listing:
+            ex = self.osm.ensure_extract("sudeste", self.raw)
+        listing.assert_called_once_with(self.BASE + "/")
+        self.assertEqual(self.asked, ["sudeste-latest.osm.pbf"] * _http.ATTEMPTS + ["sudeste-260930.osm.pbf"])
+        self.assertEqual((ex.bytes, ex.file_date), (3, self.STAMP))
+        self.assertTrue(ex.path.endswith("sudeste-latest.osm.pbf"))       # o nome guardado não muda
+        self.assertEqual(len(failures.recorded()), f0)                    # aviso, não falha
+        # (os avisos não se repetem na lista: outro teste pode já ter registrado este)
+        self.assertIn("OSM sudeste: -latest falhou (HTTPError); usado sudeste-260930.osm.pbf", failures.warnings())
+
+    def test_version_check_falls_back_and_the_download_goes_straight_to_the_dated_file(self):
+        self._stored("Tue, 29 Sep 2026 21:10:02 GMT")
+        heads = []
+
+        def head(url):
+            heads.append(url.rsplit("/", 1)[-1])
+            if url.endswith("-latest.osm.pbf"):
+                raise requests.TooManyRedirects("Exceeded 30 redirects.")
+            return self.STAMP
+        with self.mock.patch.object(self.osm, "_remote_last_modified", head), \
+                self.mock.patch.object(self.osm, "urlopen", self._urlopen()), \
+                self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING):
+            ex = self.osm.ensure_extract("sudeste", self.raw)
+        self.assertEqual(heads[-1], "sudeste-260930.osm.pbf")
+        self.assertEqual(self.asked, ["sudeste-260930.osm.pbf"])         # sem insistir no -latest
+        self.assertEqual((ex.bytes, ex.file_date), (3, self.STAMP))
+
+    def test_stored_extract_is_kept_when_the_dated_file_is_not_newer(self):
+        self._stored(self.STAMP)
+
+        def head(url):
+            if url.endswith("-latest.osm.pbf"):
+                raise requests.TooManyRedirects("Exceeded 30 redirects.")
+            return self.STAMP
+        with self.mock.patch.object(self.osm, "_remote_last_modified", head), \
+                self.mock.patch.object(self.osm, "urlopen", self._urlopen()), \
+                self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING):
+            ex = self.osm.ensure_extract("sudeste", self.raw)
+        self.assertEqual((self.asked, ex.bytes), ([], 7))   # nada baixado
+
+    def test_listing_down_raises_the_error_of_the_latest_link(self):
+        from urllib.error import HTTPError
+        with self.mock.patch.object(self.osm, "urlopen", self._urlopen()), \
+                self.mock.patch.object(self.osm, "get_text", side_effect=requests.ConnectionError("fora do ar")):
+            with self.assertRaises(HTTPError) as raised:
+                self.osm.ensure_extract("sudeste", self.raw)
+        self.assertEqual(raised.exception.code, 301)
+
+    def test_dated_file_down_too_raises_its_error(self):
+        from urllib.error import HTTPError
+        with self.mock.patch.object(self.osm, "urlopen", self._urlopen(dated_ok=False)), \
+                self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING):
+            with self.assertRaises(HTTPError) as raised:
+                self.osm.ensure_extract("sudeste", self.raw)
+        self.assertEqual(raised.exception.code, 404)
+        self.assertFalse(os.path.exists(os.path.join(self.raw, "sudeste-latest.osm.pbf")))
+
+    def test_version_check_with_latest_and_dated_down_keeps_the_stored_file_as_a_failure(self):
+        from datakit import failures
+        self._stored(self.STAMP)
+        f0 = len(failures.recorded())
+        with self.mock.patch.object(self.osm, "_remote_last_modified",
+                                    side_effect=requests.TooManyRedirects("Exceeded 30 redirects.")), \
+                self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING):
+            ex = self.osm.ensure_extract("sudeste", self.raw)
+        self.assertEqual(ex.bytes, 7)
+        self.assertEqual(len(failures.recorded()), f0 + 1)
+
+    def test_newest_dated_file_of_the_region_only(self):
+        with self.mock.patch.object(self.osm, "get_text", return_value=self.LISTING):
+            self.assertEqual(self.osm._dated_url("sudeste"), self.BASE + "/sudeste-260930.osm.pbf")
+            self.assertEqual(self.osm._dated_url("sul"), self.BASE + "/sul-261001.osm.pbf")
+            with self.assertRaises(RuntimeError):
+                self.osm._dated_url("norte")
+
+
 class CommitDataOnly(unittest.TestCase):
     """publish.py --commit só leva brasil/, estados/ e catalogo.json — nunca o que mais estiver
     pendente no repositório (código do gerador não revisado, arquivos soltos)."""

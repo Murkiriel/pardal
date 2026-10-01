@@ -19,8 +19,9 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 from dataclasses import dataclass, replace
-from typing import Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar
 from urllib.request import urlopen, Request
 
 import osmium
@@ -32,14 +33,16 @@ from datakit.common.lrs import _proj_seg
 from datakit.common.model import to_dir
 from datakit.common.direction import orient_to_hint
 from datakit.common.spatial import lat_span_deg, lng_span_deg
-from datakit.sources._http import HTTP_TIMEOUT, UA, with_retries
+from datakit.sources._http import HTTP_TIMEOUT, UA, get_text, with_retries
 from datakit.common import (
     Camera, CameraKind, Limit, Struct,
     parse_maxspeed, in_bbox, haversine_m, rdp, sample_polyline,
 )
 
+T = TypeVar("T")
+
 GEOFABRIK_BASE = "https://download.geofabrik.de/south-america/brazil"
-SAMPLE_M = 0            # legado (sem reamostragem fixa; ver _limit_points). Mantido p/ index.sample_m
+SAMPLE_M = 0           # legado (sem reamostragem fixa; ver _limit_points). Mantido p/ index.sample_m
 RDP_EPSILON_M = 15.0    # simplifica a geometria do way (Douglas-Peucker)
 LIMIT_MAX_GAP_M = 1500.0  # só preenche vértices do RDP se ficarem mais longe que isso
 
@@ -97,7 +100,8 @@ def ensure_extract(region: str, raw_dir: str, refresh: bool = True) -> Extract:
     """<region>-latest.osm.pbf em raw_dir, na versão atual da Geofabrik: com refresh, pergunta
     a data da versão publicada (HEAD) e baixa de novo se for mais nova que a guardada. Sem
     refresh (build --osm-local), usa o arquivo guardado se existir. Se a consulta falhar, usa
-    o guardado e registra a falha (o publish.py barra: os dados podem estar velhos)."""
+    o guardado e registra a falha (o publish.py barra: os dados podem estar velhos). Consulta e
+    download caem para o arquivo datado quando o -latest falha (ver _with_dated_fallback)."""
     os.makedirs(raw_dir, exist_ok=True)
     path = os.path.join(raw_dir, f"{region}-latest.osm.pbf")
     stamp = os.path.join(raw_dir, f"{region}.last-modified")
@@ -105,7 +109,7 @@ def ensure_extract(region: str, raw_dir: str, refresh: bool = True) -> Extract:
     download = not os.path.exists(path)
     if not download and refresh:
         try:
-            remote = with_retries(lambda: _remote_last_modified(url), url)
+            remote, url = _with_dated_fallback(region, url, _remote_last_modified)
             download = needs_update(_read_or(stamp, ""), remote)
             if not download:
                 print(f"[osm_pbf] {region}: versão guardada é a atual ({remote})")
@@ -114,7 +118,7 @@ def ensure_extract(region: str, raw_dir: str, refresh: bool = True) -> Extract:
             failures.record(f"OSM {region} (conferir versão; usado o arquivo guardado)", e)
     if download:
         print(f"[osm_pbf] baixando {url}")
-        last_mod = with_retries(lambda: _download(url, path), url)
+        last_mod, _ = _with_dated_fallback(region, url, lambda u: _download(u, path))
         with open(stamp, "w") as m:
             m.write(last_mod)
     last_mod = _read_or(stamp, "")
@@ -122,6 +126,36 @@ def ensure_extract(region: str, raw_dir: str, refresh: bool = True) -> Extract:
         path=path, region=region, file_date=last_mod,
         sha256=_sha256(path), bytes=os.path.getsize(path),
     )
+
+
+def _with_dated_fallback(region: str, url: str, fn: Callable[[str], T]) -> Tuple[T, str]:
+    """fn(url) e a URL que respondeu. O <region>-latest.osm.pbf é só um redirecionamento para o
+    <region>-AAMMDD.osm.pbf do dia, e já ficou em laço (301 para si mesmo, só no sudeste): se
+    ele falhar, tenta o datado mais recente da listagem da Geofabrik. É o mesmo arquivo, então
+    vira aviso e não falha. Sem listagem, sobe o erro do -latest; se o datado também falhar, o
+    dele."""
+    try:
+        return with_retries(lambda: fn(url), url), url
+    except Exception as e:  # noqa: BLE001 — decide abaixo se há por onde contornar
+        if not url.endswith("-latest.osm.pbf"):
+            raise
+        try:
+            dated = _dated_url(region)
+        except Exception as listing_error:  # noqa: BLE001
+            print(f"[osm_pbf] {region}: listagem da Geofabrik também falhou ({type(listing_error).__name__})")
+            raise e from listing_error
+        from datakit import failures
+        failures.warn(f"OSM {region}", f"-latest falhou ({type(e).__name__}); usado {dated.rsplit('/', 1)[-1]}")
+        return with_retries(lambda: fn(dated), dated), dated
+
+
+def _dated_url(region: str) -> str:
+    """URL do <region>-AAMMDD.osm.pbf mais recente na listagem da pasta da Geofabrik."""
+    listing = get_text(f"{GEOFABRIK_BASE}/")
+    dates = re.findall(rf"(?<![\w-]){re.escape(region)}-(\d{{6}})\.osm\.pbf", listing)
+    if not dates:
+        raise RuntimeError(f"nenhum {region}-AAMMDD.osm.pbf na listagem da Geofabrik")
+    return f"{GEOFABRIK_BASE}/{region}-{max(dates)}.osm.pbf"
 
 
 def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None,

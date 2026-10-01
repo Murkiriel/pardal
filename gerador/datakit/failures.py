@@ -5,7 +5,8 @@ vai para o campo `failures` do data/dist/catalogo.json e o scripts/publish.py se
 os arquivos enquanto a lista não estiver vazia (ou com --accept-failures).
 
 Avisos são o caso mais brando: a fonte falhou, mas havia uma cópia anterior guardada em data/raw/
-e ela foi usada (dado de um mês atrás, não dado faltando). Vão para o campo `warnings`, aparecem no
+e ela foi usada (dado de um mês atrás, não dado faltando), ou o dado veio por outro caminho (o
+extrato datado da Geofabrik, quando o -latest falha). Vão para o campo `warnings`, aparecem no
 fim do build e no publish.py, e não bloqueiam a publicação.
 """
 from __future__ import annotations
