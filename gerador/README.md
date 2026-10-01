@@ -30,6 +30,9 @@ python -m ruff check datakit scripts run.py
 python -m mypy datakit scripts
 ```
 
+Os testes e essas duas verificações rodam também no GitHub a cada push que mexe no código
+(`.github/workflows/testes.yml`).
+
 `build --all` já gera os radares em GeoJSON, KML e GPX; para gerá-los de novo sobre um
 `data/dist/` existente: `python run.py datakit.build_formats`. Limites e estruturas saem só em
 CSV; o `scripts/to_geojson.py` (na raiz do repositório) converte qualquer um para GeoJSON (testado em
@@ -86,9 +89,9 @@ O `publish.py` não monta os arquivos se:
 ## Publicação automática
 
 O workflow `.github/workflows/gerar-dados.yml` gera e publica os dados a cada 29 dias numa
-máquina do GitHub Actions: todo dia, às 03:17 em Brasília, confere a data de geração dos dados
-publicados (`built_at` do `catalogo.json`) e só gera quando eles têm 29 dias ou mais — se o build
-falhar, tenta de novo no dia seguinte. Também pode ser disparado à mão (Actions → Gerar dados →
+máquina do GitHub Actions: todo dia, às 03:17 e às 09:17 em Brasília, confere a data de geração
+dos dados publicados (`built_at` do `catalogo.json`) e só gera quando eles têm 29 dias ou mais —
+se o build falhar ou o GitHub pular um disparo, o seguinte tenta de novo. Também pode ser disparado à mão (Actions → Gerar dados →
 Run workflow; só publica com "publish" marcado). Roda os testes, o build completo e o
 `publish.py --commit --push`, com as mesmas travas: fonte que falhou, estado que perdeu mais de
 5% ou arquivo acima de 95 MB fazem o job falhar sem publicar nada. O log do build, a auditoria

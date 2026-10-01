@@ -2,11 +2,14 @@ name: Gerar dados
 
 # Gera brasil/, estados/ e catalogo.json do zero (fontes oficiais + OpenStreetMap) e publica.
 #
-# A cada 29 dias: todo dia, às 03:17 em Brasília, o job "interval" lê a data de geração dos
-# dados publicados (built_at do catalogo.json) e só segue para o build se tiverem 29 dias ou mais.
-# Se o build falhar, no dia seguinte tenta de novo (os dados publicados continuam velhos).
-# O horário fica fora da hora cheia de propósito: é quando o GitHub mais atrasa ou pula os
-# disparos agendados (o das 06:00 UTC de 01/10/2026 não aconteceu).
+# A cada 29 dias: todo dia, às 03:17 e às 09:17 em Brasília, o job "interval" lê a data de
+# geração dos dados publicados (built_at do catalogo.json) e só segue para o build se tiverem
+# 29 dias ou mais. Se o build falhar, o disparo seguinte tenta de novo (os dados publicados
+# continuam velhos).
+# Os horários ficam fora da hora cheia de propósito: é quando o GitHub mais atrasa ou pula os
+# disparos agendados (o das 06:00 UTC de 01/10/2026 não aconteceu). São dois por dia porque um
+# disparo pulado não avisa ninguém: o segundo cobre o primeiro e, se o primeiro já publicou, só
+# confere a data e para.
 # Também pode ser disparado à mão (Actions → Gerar dados → Run workflow), a qualquer momento; à
 # mão, só publica se "publish" for marcado; sem isso, gera e confere (o log e a auditoria ficam
 # nos artefatos).
@@ -25,7 +28,8 @@ name: Gerar dados
 
 on:
   schedule:
-    - cron: "17 6 * * *"   # todo dia, 03:17 em Brasília (o job "interval" decide se gera)
+    - cron: "17 6 * * *"    # todo dia, 03:17 em Brasília (o job "interval" decide se gera)
+    - cron: "17 12 * * *"   # e 09:17 em Brasília, caso o primeiro seja pulado ou falhe
   workflow_dispatch:
     inputs:
       publish:
