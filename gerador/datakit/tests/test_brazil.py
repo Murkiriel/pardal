@@ -89,6 +89,23 @@ class CatalogKeys(unittest.TestCase):
         for old in ("nome", "cobertura", "radares", "limites", "estruturas"):
             self.assertNotIn(old, go)
 
+    def test_coverage_level_counts_only_the_agencies_of_the_state_itself(self):
+        from datakit import build_catalog
+
+        def level(uf, *sources):
+            with tempfile.TemporaryDirectory() as tmp:
+                _pack(tmp, uf, [f"-16.0,-49.{i},FIXED,60,{s},1,,," for i, s in enumerate(sources)], [], [])
+                return build_catalog._coverage(os.path.join(tmp, uf, "radares.csv"), uf)
+
+        # o Detran-DF é o órgão do DF: conta como estadual (saía só "federal")
+        self.assertEqual(level("DF", "DETRAN-DF", "DNIT", "OSM")["level"], "federal+state")
+        # um radar do DER-SP na divisa não dá cobertura estadual ao PR nem a MG, mas segue na lista
+        pr = level("PR", "DER-SP", "ANTT", "OSM")
+        self.assertEqual(pr, {"level": "federal", "sources": ["ANTT", "DER-SP", "OSM"]})
+        self.assertEqual(level("MG", "DER-SP", "BHTRANS+OSM", "DNIT")["level"], "federal+municipal")
+        self.assertEqual(level("GO", "DETRAN-DF", "DER-GO")["level"], "state")
+        self.assertEqual(level("AC", "OSM")["level"], "osm")
+
 
 class FileSize(unittest.TestCase):
     """Nenhum arquivo publicado pode passar do teto (o GitHub recusa acima de 100 MB)."""

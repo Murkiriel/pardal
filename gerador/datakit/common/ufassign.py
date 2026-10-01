@@ -32,6 +32,13 @@ class UfAssigner:
     def uf_of(self, lat: float, lng: float) -> Optional[str]:
         return self.assign([lat], [lng])[0]
 
+    def distance_m(self, uf: str, lat: float, lng: float) -> float:
+        """Distância do ponto ao polígono da UF, em metros (0 dentro dela)."""
+        import shapely
+        line = shapely.shortest_line(self.polys[self.ufs.index(uf)], shapely.points(lng, lat))
+        sx, sy = shapely.get_coordinates(line)[0]
+        return haversine_m((lat, lng), (sy, sx))
+
     def assign(self, lats: Sequence[float], lngs: Sequence[float]) -> List[Optional[str]]:
         import numpy as np
         import shapely

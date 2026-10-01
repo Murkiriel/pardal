@@ -62,6 +62,14 @@ UF_NAME: Dict[str, str] = {
 }
 
 
+# UF de cada órgão estadual, distrital ou municipal, pelo `source` dos radares dele. As fontes
+# federais (DNIT, ANTT) e o OSM cobrem o país inteiro e não entram aqui.
+SOURCE_HOME_UF: Dict[str, str] = {
+    "DER-SP": "SP", "DER-GO": "GO", "DER-PE": "PE", "DETRAN-DF": "DF",
+    "CET-SP": "SP", "RIO": "RJ", "BHTRANS": "MG", "PMF": "CE", "PCR": "PE", "PMJP": "PB",
+}
+
+
 def uf_name(uf: str) -> str:
     return UF_NAME.get(uf.upper(), uf.upper())
 

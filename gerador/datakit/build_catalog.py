@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from datakit.build_pack import CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE
-from datakit.common.ufs import uf_name
+from datakit.common.ufs import SOURCE_HOME_UF, uf_name
 
 # Versão do formato do catálogo. 2 (2026-09-30): nome catalogo.json e etiquetas em inglês (name,
 # coverage, cameras, limits, limits_estimated, structs, included_ufs); a 1 era catalog.json com
@@ -31,8 +31,11 @@ _FEDERAL = {"DNIT", "ANTT"}
 _MUNICIPAL = {"PMF", "PCR", "PMJP", "CET-SP", "RIO", "BHTRANS"}
 
 
-def _coverage(cameras_csv: str) -> dict:
-    """Que tipo de fonte de radar entrou nesta UF — pra UI ser honesta."""
+def _coverage(cameras_csv: str, uf: str) -> dict:
+    """Que tipo de fonte de radar entrou nesta UF — pra UI ser honesta. `sources` lista todas;
+    `level` só conta órgão estadual ou municipal da própria UF: um radar do DER-SP colado na
+    divisa aparece no pacote de MG, mas não faz de MG um estado com cobertura estadual. O
+    Detran-DF conta como estadual (era a maior fonte oficial e o DF saía só como "federal")."""
     srcs: set = set()
     try:
         with open(cameras_csv, newline="", encoding="utf-8") as f:
@@ -40,12 +43,13 @@ def _coverage(cameras_csv: str) -> dict:
                 srcs.update(p for p in (r.get("source") or "").split("+") if p)
     except OSError:
         pass
+    local = {s for s in srcs if SOURCE_HOME_UF.get(s, uf) == uf}
     parts = []
     if srcs & _FEDERAL:
         parts.append("federal")
-    if any(s.startswith("DER-") for s in srcs):
+    if any(s.startswith("DER-") or s == "DETRAN-DF" for s in local):
         parts.append("state")
-    if srcs & _MUNICIPAL:
+    if local & _MUNICIPAL:
         parts.append("municipal")
     if "OSM" in srcs and not parts:
         parts.append("osm")
@@ -95,7 +99,7 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             "bbox": man.get("bbox", []),
             "built_at": man.get("built_at"),
             "artifact_built_at": man.get("artifact_built_at"),
-            "coverage": _coverage(os.path.join(pdir, CAMERAS_FILE)),
+            "coverage": _coverage(os.path.join(pdir, CAMERAS_FILE), uf),
             "cameras": _file_ref(rad_dst, counts.get("cameras"), dist_dir),
             "limits": _file_ref(lim_dst, counts.get("limits"), dist_dir),
             "counts": counts,

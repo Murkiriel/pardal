@@ -25,7 +25,7 @@ from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, mer
                                   override_limits)
 from datakit.common.geo import in_bbox
 from datakit.common.ufassign import UfAssigner
-from datakit.common.ufs import UF_BBOX, geofabrik_region, uf_bbox
+from datakit.common.ufs import SOURCE_HOME_UF, UF_BBOX, geofabrik_region, uf_bbox
 from datakit.context import BuildContext
 from datakit.sources import dnit, antt, der_go, der_sp, der_pe, municipal, bh, df_detran, rio, cet_sp
 
@@ -51,6 +51,26 @@ def _resolve_hints(cams, probe_dirs):
             b = probe_dirs.get((c.lat, c.lng, c.heading_hint))
             if b is not None:
                 c = replace(c, direction_deg=to_dir(b))
+        out.append(c)
+    return out
+
+
+def _drop_far_from_home(uf: str, cams: list, assigner: "UfAssigner | None") -> list:
+    """Radar de órgão estadual ou municipal que caiu noutra UF: fica se estiver colado na UF do
+    órgão (até NEAR_M, a mesma folga da divisa em common/ufassign.py); mais longe que isso é
+    coordenada errada na fonte e sai. Medido em 01/10/2026 (FONTES.md): 1 do Detran-DF a 0,1 km
+    do DF (fica); 3 do DER-SP a 10, 16 e 380 km de SP (saem)."""
+    if assigner is None:
+        return cams
+    out = []
+    for c in cams:
+        home = SOURCE_HOME_UF.get(c.source)
+        if home and home != uf and home in assigner.ufs:
+            d = assigner.distance_m(home, c.lat, c.lng)
+            if d > assigner.near_m:
+                print(f"[build] {uf}: radar de {c.source} em {c.lat:.5f},{c.lng:.5f}, a {d / 1000:.0f} km "
+                      f"de {home}: coordenada errada na fonte, descartado")
+                continue
         out.append(c)
     return out
 
@@ -102,6 +122,7 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     structs = split.structs(uf, "osm-estruturas", osm_structs)
     off_c = _resolve_hints([c for name, loaded in official.items()
                             for c in split.points(uf, ("oficial", name), loaded.cameras)], probe_dirs)
+    off_c = _drop_far_from_home(uf, off_c, split.assigner)
 
     # mesmo radar em dois órgãos, no oficial e no OSM, ou duas vezes no OSM: um só (common/model.py)
     audit: list = []

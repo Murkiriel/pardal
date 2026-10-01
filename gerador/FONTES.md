@@ -209,6 +209,27 @@ passaram a sair direto da memória (sem os tiles intermediários); a volta pelos
 as coordenadas e juntava por acaso alguns pontos de limite a ~1 m um do outro (10 nos 3 estados),
 que agora ficam os dois.
 
+### Radar de órgão estadual ou municipal fora da UF do órgão (2026-10-01)
+
+Nos dados publicados em 01/10/2026 (17.800 radares; 6.983 de órgão estadual, distrital ou
+municipal), 4 estavam numa UF que não é a do órgão. Distância até o polígono da UF do órgão:
+
+| Fonte | Caiu em | Coordenada | Distância da UF do órgão |
+|---|---|---|---|
+| DETRAN-DF | GO | -15.58148, -47.34271 | 0,1 km |
+| DER-SP | MG | -22.26290, -46.59110 | 10,0 km |
+| DER-SP | PR | -23.18713, -49.96888 | 16,0 km |
+| DER-SP | SC | -27.88159, -50.65344 | 380,1 km |
+
+Órgão estadual não fiscaliza a 10 km para dentro do estado vizinho: os três do DER-SP são
+coordenada errada na fonte. Regra (`_drop_far_from_home` em `datakit/build.py`): radar de órgão
+de outra UF fica se estiver a até 5 km da UF do órgão (a mesma folga da divisa); mais longe, sai,
+e o build registra no log. Fontes federais e o OSM não entram na regra.
+
+O campo `coverage.level` do catálogo contava esses radares: SC, PR e MG saíam com cobertura
+estadual por causa de um radar do DER-SP cada, e o DF saía só como "federal" porque o Detran-DF
+não era contado. Agora o nível só conta órgão da própria UF, e o Detran-DF conta como estadual.
+
 ### Build depois da revisão do gerador (2026-09-30)
 
 Build completo (27 UFs, mesmos extratos do OSM) contra o anterior: 0 falhas; radares 17.748 →

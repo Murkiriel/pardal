@@ -82,6 +82,43 @@ class BuildSelection(unittest.TestCase):
 
 
 @unittest.skipIf(box is None, "shapely não instalado")
+class FarFromHome(unittest.TestCase):
+    """Radar de órgão estadual ou municipal noutra UF: colado na UF do órgão fica; longe dela é
+    coordenada errada na fonte (01/10/2026: DER-SP a 10, 16 e 380 km de SP) e sai."""
+
+    def setUp(self):
+        # "SP" e "MG" encostados (divisa em lng 1.0); "SC" longe, ao sul.
+        self.assigner = UfAssigner({"SP": box(0.0, 0.0, 1.0, 1.0), "MG": box(1.0, 0.0, 2.0, 1.0),
+                                    "SC": box(0.0, -5.0, 1.0, -4.0)})
+
+    def test_distance_to_a_state(self):
+        self.assertEqual(self.assigner.distance_m("SP", 0.5, 0.5), 0.0)
+        self.assertAlmostEqual(self.assigner.distance_m("SP", 0.5, 1.02), 2224, delta=30)   # ~2,2 km a leste
+
+    def test_keeps_what_is_next_to_the_agency_state_and_drops_the_rest(self):
+        from datakit.build import _drop_far_from_home
+        from datakit.common import Camera
+        near = Camera(0.5, 1.02, source="DER-SP")        # em "MG", a ~2,2 km de "SP"
+        far = Camera(0.5, 1.10, source="DER-SP")         # em "MG", a ~11 km de "SP"
+        other = [Camera(0.5, 1.5, source="DNIT"), Camera(0.5, 1.5, source="OSM"),
+                 Camera(0.5, 1.5, source="BHTRANS")]     # federal, OSM e o órgão da própria UF
+        self.assertEqual(_drop_far_from_home("MG", [near, far, *other], self.assigner), [near, *other])
+        self.assertEqual(_drop_far_from_home("SC", [Camera(-4.5, 0.5, source="DER-SP")], self.assigner), [])
+
+    def test_without_polygons_nothing_is_dropped(self):
+        from datakit.build import _drop_far_from_home
+        from datakit.common import Camera
+        cams = [Camera(0.5, 1.10, source="DER-SP")]
+        self.assertEqual(_drop_far_from_home("MG", cams, None), cams)
+
+    def test_agency_whose_state_has_no_polygon_is_left_alone(self):
+        from datakit.build import _drop_far_from_home
+        from datakit.common import Camera
+        cams = [Camera(0.5, 1.5, source="DER-GO")]       # não há "GO" nesta malha
+        self.assertEqual(_drop_far_from_home("MG", cams, self.assigner), cams)
+
+
+@unittest.skipIf(box is None, "shapely não instalado")
 class IbgeMesh(unittest.TestCase):
     """A malha vem da API de malhas do IBGE (v3), que identifica a UF pelo código (codarea)."""
 
