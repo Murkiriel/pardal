@@ -14,7 +14,7 @@ o que a comunidade do OpenStreetMap mapeia.
 
 **Brasil inteiro:** [`radares.csv`](brasil/radares.csv) · [`radares.gpx`](brasil/radares.gpx) ·
 [`radares.kml`](brasil/radares.kml) · [`radares.geojson`](brasil/radares.geojson) ·
-[`limites.csv`](brasil/limites.csv) · [`limites_estimados.csv`](brasil) ·
+[`limites.csv`](brasil/limites.csv) · [`limites_estimados.csv`](brasil/limites_estimados.csv) ·
 [`estruturas.csv`](brasil/estruturas.csv)
 **Por estado:** pasta [`estados/`](estados), por exemplo [`estados/SP/`](estados/SP).
 
