@@ -86,7 +86,7 @@ O `publish.py` não monta os arquivos se:
 ## Publicação automática
 
 O workflow `.github/workflows/gerar-dados.yml` gera e publica os dados a cada 29 dias numa
-máquina do GitHub Actions: todo dia, às 03:00 em Brasília, confere a data de geração dos dados
+máquina do GitHub Actions: todo dia, às 03:17 em Brasília, confere a data de geração dos dados
 publicados (`built_at` do `catalogo.json`) e só gera quando eles têm 29 dias ou mais — se o build
 falhar, tenta de novo no dia seguinte. Também pode ser disparado à mão (Actions → Gerar dados →
 Run workflow; só publica com "publish" marcado). Roda os testes, o build completo e o
