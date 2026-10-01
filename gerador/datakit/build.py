@@ -19,7 +19,7 @@ import sys
 
 from datakit.build_catalog import build as build_catalog
 from datakit.build_pack import build as build_pack
-from datakit import failures, inmetro_status
+from datakit import failures, inmetro_addresses, inmetro_status
 from datakit.common import merge_cameras, merge_limits
 from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, merge_cross_agency,
                                   override_limits)
@@ -139,6 +139,12 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     status: dict = {}
     if nat["snv"] is not None and nat["meters"]:
         cams, status = inmetro_status.apply(cams, uf, nat["meters"], nat["snv"], nat["concessions"])
+    # medidores do Inmetro só com endereço: confirmam o radar que já existe ali, ou viram radar novo
+    by_address = split.points(uf, ("inmetro-enderecos", "GO" if uf == "DF" else uf), ctx.inmetro_points(uf))
+    cams, addressed = inmetro_addresses.apply(cams, by_address)
+    print(f"[build] {uf}: Inmetro por endereço: {addressed['confirmed']} radares confirmados "
+          f"({addressed['limits_filled']} ganharam limite, {addressed['reactivated']} voltaram a ativo), "
+          f"{addressed['new']} novos")
     off_by_src = {n: split.points(uf, ("limites", n), pts) for n, pts in nat["official_limits"].items()}
     off_l = [x for pts in off_by_src.values() for x in pts]
     lims = merge_limits(override_limits(off_l, osm_l))
@@ -149,6 +155,7 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     sources += [{"name": f"{n} (limites)", "count": len(pts)} for n, pts in off_by_src.items()]
     if status:
         sources.append({"name": "Inmetro (situação)", "snv": nat["snv_version"], **status})
+    sources.append({"name": "Inmetro (endereços, CNEFE)", "count": len(by_address), **addressed})
 
     manifest = build_pack(uf, packs_dir, cams, lims, structs, sources)
     print(f"[build] pacote {uf}: {manifest['counts']}")

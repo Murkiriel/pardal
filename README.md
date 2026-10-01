@@ -53,7 +53,7 @@ interesse, e o limite é um valor da via, não um lugar.
 |---|---|
 | `kind` | `FIXED` (radar de velocidade ou lombada eletrônica), `SECTION` (radar de trecho, com o fim em `end_lat,end_lng`), `RED_LIGHT` (avanço de sinal) |
 | `limit_kmh` | Limite fiscalizado, quando a fonte informa (veículo leve) |
-| `source` | De onde veio o ponto (`OSM`, `DNIT`, `ANTT`, `DER-SP`, `RIO`…). Quando mais de uma fonte traz o mesmo radar, elas vêm juntas com `+` (ex.: `DNIT+OSM`, confirmado por duas fontes independentes) |
+| `source` | De onde veio o ponto (`OSM`, `DNIT`, `ANTT`, `DER-SP`, `RIO`, `INMETRO`…). Quando mais de uma fonte traz o mesmo radar, elas vêm juntas com `+` (ex.: `DNIT+OSM`, confirmado por duas fontes independentes). `INMETRO` sozinho é um radar que só o cadastro de aferições do Inmetro conhece, com a posição tirada do endereço (ver as perguntas frequentes) |
 | `active` | `0` quando o radar está desativado ou com a aferição do Inmetro vencida |
 | `direction_deg` | Sentido fiscalizado: rumo do trânsito que o radar fiscaliza, em graus a partir do norte (0 = norte, 90 = leste, 180 = sul, 270 = oeste). Vazio quando o radar fiscaliza os dois sentidos ou a fonte não informa |
 
@@ -135,6 +135,15 @@ olha). Vazio quer dizer os dois sentidos ou sentido não informado.
 ANTT e pelos DERs, nas rodovias federais a validade da aferição no Inmetro e, na cidade de São
 Paulo, os locais que a CET desativou.
 
+**O que é um radar com fonte `INMETRO`?** O Inmetro registra todo medidor de velocidade aferido
+do país, com a velocidade e a validade da aferição, mas sem coordenada: só o endereço. Quando o
+endereço é "rua + número" ou um cruzamento, a posição vem do cadastro de endereços do IBGE (Censo
+2022). Se há um radar conhecido a até 100 m, é o mesmo: ele ganha `+INMETRO` na coluna `source`
+(aferição válida confirmada) e o limite, se não tinha. Se não há, sai um radar novo com
+`source=INMETRO`. A posição desses é a do endereço, menos exata que a das outras fontes: medida
+nas cinco capitais que têm lista oficial com coordenada, fica a 23 m do radar na mediana e a até
+100 m em 89% dos casos; cerca de 1 em cada 10 pode estar a mais de 100 m do lugar certo.
+
 **O mesmo radar aparece duas vezes?** Não: quando o OpenStreetMap e uma fonte oficial trazem o
 mesmo radar (a até 30 m), ou dois órgãos publicam o mesmo radar, fica um ponto só, com a
 posição, o limite e o sentido da fonte oficial, e a coluna `source` lista as fontes que o
@@ -158,10 +167,11 @@ fontes e manter a mesma licença em bases derivadas.
 | DNIT — Sistema Nacional de Viação | Quilometragem das BRs, usada para casar com o Inmetro e para converter o sentido (crescente/decrescente) em rumo | Dado aberto governamental |
 | ANTT — Radar | Radares das concessões federais, com situação e sentido | CC-BY |
 | ANTT — Sinalização | Placas de velocidade máxima das concessões federais, por sentido | CC-BY |
-| Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo) | Creative Commons |
+| Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo); nos medidores com endereço urbano, a confirmação do radar, o limite e os radares que nenhuma outra fonte tem | Creative Commons |
 | DER-SP / Artesp, DER-GO (Goinfra), DER-PE | Radares das rodovias estaduais, com o sentido fiscalizado (SP e GO) | Dado aberto governamental |
 | Goinfra — malha rodoviária estadual | Quilometragem das rodovias de Goiás, para converter o sentido em rumo | Dado aberto governamental |
 | IBGE — malha das unidades da federação (API de malhas) | Contorno de cada estado, para decidir em que estado fica cada ponto | Dado aberto governamental |
+| IBGE — CNEFE, cadastro de endereços do Censo 2022 | Coordenada do endereço dos medidores do Inmetro que só informam rua e número ou um cruzamento | Dado aberto governamental |
 | Prefeitura do Rio de Janeiro (IPP, SMTR/CET-Rio) | Limite por trecho de rua e radares da cidade | CC-BY 4.0 |
 | Prefeitura de São Paulo (GeoSampa, CET) | Limite pela classificação viária (vias de trânsito rápido e arteriais) e os radares ativos da cidade (locais fiscalizados da CET, com limite e sentido centro/bairro) | Dado aberto municipal |
 | BHTrans (Belo Horizonte) | Radares e detectores de avanço de sinal | CC-BY |

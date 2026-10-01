@@ -51,6 +51,7 @@ class BuildContext:
         self._national: Optional[dict] = None
         self._osm_region: Optional[str] = None
         self._osm: Optional[tuple] = None
+        self._inmetro_points: Dict[str, List[Camera]] = {}
 
     # ── bases carregadas uma vez por execução ──────────────────────────────────
 
@@ -100,6 +101,18 @@ class BuildContext:
             self._osm_region, self._osm = region, (ex, cams, lims, structs, probe_dirs)
         return self._osm
 
+    def inmetro_points(self, uf: str) -> List[Camera]:
+        """Locais do Inmetro só com endereço, localizados pelo cadastro do IBGE (inmetro_addresses.py),
+        do arquivo do Inmetro que cobre a UF: o da própria UF, ou o de Goiás para o DF (os medidores
+        de Brasília vêm nele). Um arquivo é geocodificado uma vez por execução."""
+        file_uf = "GO" if uf == "DF" else uf
+        if file_uf not in self._inmetro_points:
+            from datakit import inmetro_addresses
+            meters = [m for m in self.national()["meter_list"] if m.uf == file_uf]
+            self._inmetro_points[file_uf] = _try(
+                f"Inmetro {file_uf} (endereços)", lambda: inmetro_addresses.geocode(meters, file_uf, self.raw_dir), [])
+        return self._inmetro_points[file_uf]
+
     def national(self) -> dict:
         """SNV (rotas + concessões), Inmetro e os limites oficiais. Cada base que falhar fica
         vazia — o pacote sai só sem aquela parte."""
@@ -119,5 +132,6 @@ class BuildContext:
             print(f"[build] limites oficiais: ANTT {len(antt_l)}, Rio {len(rio_l)}, CET-SP {len(cet_l)} pontos")
             self._national = dict(snv=routes, concessions=conc, snv_version=paths[2] if paths else None,
                                   meters=inmetro_status.index_meters(meters), n_meters=len(meters),
+                                  meter_list=meters,
                                   official_limits={"ANTT": antt_l, "RIO": rio_l, "CET-SP": cet_l})
         return self._national

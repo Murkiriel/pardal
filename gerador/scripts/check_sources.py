@@ -23,7 +23,7 @@ import requests  # noqa: E402
 
 from datakit.common import ufpoly  # noqa: E402
 from datakit.sources import (  # noqa: E402
-    _powerbi, antt, antt_placas, bh, cet_sp, der_go, der_pe, der_sp, df_detran, dnit, inmetro,
+    _powerbi, antt, antt_placas, bh, cet_sp, cnefe, der_go, der_pe, der_sp, df_detran, dnit, inmetro,
     municipal, osm_pbf, rio, snv,
 )
 from datakit.sources._http import UA  # noqa: E402
@@ -85,6 +85,7 @@ SOURCES = [
     ("CET-SP (limites)", "GeoSampa WFS", lambda: _req("GET", cet_sp.WFS, params={"service": "WFS", "request": "GetCapabilities"})),
     ("OpenStreetMap", "Geofabrik (HEAD do extrato)", lambda: _req("HEAD", f"{osm_pbf.GEOFABRIK_BASE}/norte-latest.osm.pbf")),
     ("IBGE (malha das UFs)", "API de malhas v3", lambda: _req("GET", ufpoly.MESH_URL)),
+    ("IBGE (CNEFE)", "pasta dos endereços do Acre", lambda: _req("GET", f"{cnefe.BASE}/12_AC/")),
 ]
 
 

@@ -230,6 +230,94 @@ O campo `coverage.level` do catálogo contava esses radares: SC, PR e MG saíam 
 estadual por causa de um radar do DER-SP cada, e o DF saía só como "federal" porque o Detran-DF
 não era contado. Agora o nível só conta órgão da própria UF, e o Detran-DF conta como estadual.
 
+### Endereços do Inmetro geocodificados pelo CNEFE do IBGE (2026-10-01)
+
+O CNEFE do Censo 2022 (`ftp.ibge.gov.br/Cadastro_Nacional_de_Enderecos_para_Fins_Estatisticos/
+Censo_Demografico_2022/Arquivos_CNEFE/CSV/`, um CSV por UF e um por município) traz, para cada
+um dos 106,8 milhões de endereços do país, tipo, título e nome do logradouro, número, latitude,
+longitude e o nível da coordenada (`NV_GEO_COORD`: 1 e 2 são do próprio endereço). É o
+geocodificador nacional com número de porta que faltava. Licença específica do CNEFE não
+confirmada (dado público do IBGE, como a malha das UFs já usada).
+
+Medidores fixos e válidos do Inmetro só com endereço, no país: 7.311 locais distintos. Como o
+endereço vem escrito:
+
+| Forma | Locais | |
+|---|---|---|
+| Rua + número ("AV. CABO BRANCO, Nº 2300") | 3.054 | 41% |
+| Cruzamento ("AV. T 7 X AV. CASTELO BRANCO") | 1.849 | 25% |
+| Setor de Brasília ("VIA M2 QNM 20") | 260 | 3% |
+| Quadra e lote (quase só Goiás) | 142 | 1% |
+| "A 23 m da rua tal" | 108 | 1% |
+| Outro (ponto de referência, "em frente a…") | 1.898 | 25% |
+
+Goiás é atípico (707 locais: 260 de Brasília, 166 cruzamentos, 130 quadra/lote, só 78 com
+número); SP tem 2.572 locais, 1.265 com número.
+
+Medição em quatro capitais que têm lista oficial com coordenada, para ter com o que comparar.
+Rua + número: o nome da rua é normalizado (sem acento, abreviaturas expandidas, sem o tipo do
+logradouro) e procurado no CNEFE do município (igual, ou parecido com o mesmo último nome); o
+ponto é o do número mais próximo na rua, interpolando entre o menor e o maior. Cruzamento: o par
+de endereços mais próximos entre as duas ruas, se ficarem a até 80 m um do outro. Distância do
+ponto obtido até o radar publicado mais perto (qualquer fonte):
+
+| Cidade | Locais | Rua + número, com número a até 20 de um endereço do CNEFE | Cruzamento |
+|---|---|---|---|
+| Belo Horizonte | 119 | 56: mediana 26 m, 80% a ≤ 50 m, 92% a ≤ 100 m | 4: mediana 72 m |
+| Fortaleza | 106 | 54: mediana 25 m, 61% a ≤ 50 m, 77% a ≤ 100 m | 26: mediana 32 m, 73% a ≤ 50 m, 88% a ≤ 100 m |
+| Recife | 71 | 16: mediana 22 m, 62% a ≤ 50 m, 87% a ≤ 100 m | — |
+| João Pessoa | 74 | 26: mediana 14 m, 84% a ≤ 50 m, 88% a ≤ 100 m | 17: mediana 26 m, 82% a ≤ 50 m |
+| Soma | 370 | 152: 72% a ≤ 50 m, 86% a ≤ 100 m, 91% a ≤ 200 m | 47: 72% a ≤ 50 m, 85% a ≤ 100 m |
+
+Funil nas quatro: dos 370 locais, 220 têm número; a rua foi achada em 200 (91%; 188 com o nome
+igual); em 152 há endereço no CNEFE com número a até 20 do procurado. Sem esse filtro (os 200):
+57% a ≤ 50 m e 75% a ≤ 100 m. Dos 64 cruzamentos, as duas ruas foram achadas em 53 e ficam a até
+80 m em 47.
+
+Leitura: a distância mede o erro por baixo, porque parte dos locais do Inmetro não está em lista
+nenhuma (o que sobra a mais de 200 m pode ser radar que falta na base, não erro). Mesmo assim é
+outra ordem de precisão em relação ao "rodovia + km" medido antes (SNV: mediana 226 m, 34% a
+≤ 100 m): aqui a mediana fica entre 14 e 32 m. **Não medido:** cidades sem lista oficial, onde
+não há com o que comparar, e as formas de Goiás e de Brasília (quadra/lote e setor).
+
+**Virou fonte do gerador** (`datakit/inmetro_addresses.py`, `sources/cnefe.py`,
+`common/address.py`). Regra: o ponto do endereço nunca move um radar conhecido. A até 100 m de um
+radar de velocidade (ativo antes de inativo), só o confirma: a fonte ganha `+INMETRO` e o limite
+é preenchido se faltava; radar inativo de fonte sem situação própria (OSM, DNIT, DER-GO,
+Detran-DF) volta a ativo. Longe de todos, vira radar novo com fonte `INMETRO`; dois locais do
+Inmetro a até 30 m um do outro são um só.
+
+País inteiro, sobre os 17.800 radares publicados em 01/10/2026:
+
+| | |
+|---|---|
+| Locais com "rua + número" ou cruzamento | 4.693 |
+| Localizados pelo CNEFE | 2.938 (2.111 pelo número, 827 pelo cruzamento) |
+| Radares conhecidos confirmados | 835 (50 ganharam limite, 1 voltou a ativo) |
+| Radares novos | 1.714 (1.397 com limite), em 197 municípios |
+
+Por UF, os novos: SP 678, PR 197, SC 164, MG 143, RS 123, GO 82, MS 54, MT 54, CE 35, BA 33, PA
+23, PB 16, PE 16, TO 14, RJ 13, PI 12, RO 12, RN 10, AP 9, AM 8, MA 7, RR 6, ES 5; nenhum em AC,
+AL, DF e SE. Cidades com mais: Joinville 102, Maringá 63, Guarulhos 63, Taubaté 42, Campinas 38,
+Cascavel 37, Jacareí 34, Jundiaí 31. O DF fica de fora porque os endereços de Brasília são por
+setor, forma que o leitor não trata.
+
+Conferência com a fonte já integrada, nas cinco cidades com lista oficial completa (São Paulo,
+que não entrou na medição acima, e as quatro de antes): 483 locais localizados, mediana de 23 m
+até o radar publicado mais perto, 89% a ≤ 100 m, 6% entre 100 e 300 m, 4% a mais de 300 m. Ou
+seja, nessas cidades cerca de 1 em cada 10 locais viraria "radar novo" sem que a lista oficial o
+confirme: é o tamanho do erro esperado entre os novos. No resto do país (2.432 locais) a
+distribuição tem dois grupos: 23% a ≤ 100 m de um radar conhecido, 5% entre 100 e 300 m e 71% a
+mais de 300 m. Erro de posição encheria a faixa do meio; o grupo de longe é radar que a base
+não tinha.
+
+A conferência em São Paulo achou um erro do leitor de endereços, corrigido: a vírgula de um
+decimal ("A MAIS 24,7 METROS DO NUMERO 966") e uma distância ("2 METROS APÓS A AV. …") eram lidas
+como número de porta e punham o radar no número 5 ou 7 da avenida, a centenas de metros.
+
+Custo: o cadastro de 295 municípios soma 1,1 GB e é baixado uma vez (o Censo não muda); com os
+arquivos em `data/raw/cnefe/`, a geocodificação do país leva cerca de 2 minutos.
+
 ### Build depois da revisão do gerador (2026-09-30)
 
 Build completo (27 UFs, mesmos extratos do OSM) contra o anterior: 0 falhas; radares 17.748 →
