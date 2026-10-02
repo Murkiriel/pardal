@@ -1,6 +1,6 @@
 {
  "schema": 2,
- "built_at": "2026-10-01T09:13:14Z",
+ "built_at": "2026-10-02T12:52:28Z",
  "base_url": "",
  "ufs": {
   "AC": {
@@ -11,8 +11,8 @@
     -7.11,
     -66.62
    ],
-   "built_at": "2026-10-01T09:01:22Z",
-   "artifact_built_at": "2026-10-01T09:01:22Z",
+   "built_at": "2026-10-02T12:42:59Z",
+   "artifact_built_at": "2026-10-02T12:42:59Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -55,8 +55,8 @@
     -8.81,
     -35.15
    ],
-   "built_at": "2026-10-01T08:59:32Z",
-   "artifact_built_at": "2026-10-01T08:59:32Z",
+   "built_at": "2026-10-02T12:41:15Z",
+   "artifact_built_at": "2026-10-02T12:41:15Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -100,20 +100,21 @@
     2.25,
     -56.1
    ],
-   "built_at": "2026-10-01T09:01:22Z",
-   "artifact_built_at": "2026-10-01T09:01:22Z",
+   "built_at": "2026-10-02T12:43:03Z",
+   "artifact_built_at": "2026-10-02T12:43:03Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/AM/radares.csv",
-    "bytes": 625,
-    "sha256": "afa0983b9e4ad659978bd9f6ab1a301dfa42a0fe4c27d199874ad52c10d8d95d",
-    "count": 14
+    "bytes": 969,
+    "sha256": "1ed24407c05a19958d060c1d05fbf1a59c750bad6082bc89752cd4e41160bce9",
+    "count": 22
    },
    "limits": {
     "file": "estados/AM/limites.csv",
@@ -122,8 +123,8 @@
     "count": 20484
    },
    "counts": {
-    "cameras": 14,
-    "cameras_with_limit": 11,
+    "cameras": 22,
+    "cameras_with_limit": 19,
     "cameras_inactive": 2,
     "sections": 0,
     "red_lights": 0,
@@ -145,19 +146,20 @@
     4.44,
     -49.87
    ],
-   "built_at": "2026-10-01T09:01:22Z",
-   "artifact_built_at": "2026-10-01T09:01:22Z",
+   "built_at": "2026-10-02T12:43:04Z",
+   "artifact_built_at": "2026-10-02T12:43:04Z",
    "coverage": {
     "level": "federal",
     "sources": [
-     "DNIT"
+     "DNIT",
+     "INMETRO"
     ]
    },
    "cameras": {
     "file": "estados/AP/radares.csv",
-    "bytes": 178,
-    "sha256": "59b231025b3035f78bc354dd2d3dcca188ba45ee6d3e5f9666e1d9834bf71d82",
-    "count": 3
+    "bytes": 556,
+    "sha256": "df23dbdc93fea53b4f5048f1b27f30c98b2d4f800c16e079c95b29596733ef0d",
+    "count": 12
    },
    "limits": {
     "file": "estados/AP/limites.csv",
@@ -166,8 +168,8 @@
     "count": 4926
    },
    "counts": {
-    "cameras": 3,
-    "cameras_with_limit": 0,
+    "cameras": 12,
+    "cameras_with_limit": 9,
     "cameras_inactive": 0,
     "sections": 0,
     "red_lights": 0,
@@ -189,21 +191,22 @@
     -8.53,
     -37.34
    ],
-   "built_at": "2026-10-01T08:59:48Z",
-   "artifact_built_at": "2026-10-01T08:59:48Z",
+   "built_at": "2026-10-02T12:41:42Z",
+   "artifact_built_at": "2026-10-02T12:41:42Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/BA/radares.csv",
-    "bytes": 17320,
-    "sha256": "de89fc50de7dc7805e61e74723d9cde6d81f078d109ad01c3c9977303144eb7f",
-    "count": 428
+    "bytes": 18926,
+    "sha256": "60f60adb060d24b06234c9e5baeace98bc9e417d960aea3c4bd66fa26ad56819",
+    "count": 463
    },
    "limits": {
     "file": "estados/BA/limites.csv",
@@ -212,8 +215,8 @@
     "count": 202846
    },
    "counts": {
-    "cameras": 428,
-    "cameras_with_limit": 206,
+    "cameras": 463,
+    "cameras_with_limit": 242,
     "cameras_inactive": 20,
     "sections": 0,
     "red_lights": 6,
@@ -235,21 +238,22 @@
     -2.78,
     -37.25
    ],
-   "built_at": "2026-10-01T08:59:54Z",
-   "artifact_built_at": "2026-10-01T08:59:54Z",
+   "built_at": "2026-10-02T12:41:54Z",
+   "artifact_built_at": "2026-10-02T12:41:54Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM",
      "PMF"
     ]
    },
    "cameras": {
     "file": "estados/CE/radares.csv",
-    "bytes": 29954,
-    "sha256": "2b43da47f48f83528ab8673831bee98ff3cb9740701251ddec749156afda6034",
-    "count": 728
+    "bytes": 31876,
+    "sha256": "bb287562ea55c01b2e07edd96fac39a27bee4f37e8fb776c495f01e476ae8fd6",
+    "count": 762
    },
    "limits": {
     "file": "estados/CE/limites.csv",
@@ -258,8 +262,8 @@
     "count": 68734
    },
    "counts": {
-    "cameras": 728,
-    "cameras_with_limit": 443,
+    "cameras": 762,
+    "cameras_with_limit": 499,
     "cameras_inactive": 12,
     "sections": 53,
     "red_lights": 114,
@@ -281,10 +285,10 @@
     -15.5,
     -47.31
    ],
-   "built_at": "2026-10-01T08:56:11Z",
-   "artifact_built_at": "2026-10-01T08:56:11Z",
+   "built_at": "2026-10-02T12:38:20Z",
+   "artifact_built_at": "2026-10-02T12:38:20Z",
    "coverage": {
-    "level": "federal",
+    "level": "federal+state",
     "sources": [
      "ANTT",
      "DETRAN-DF",
@@ -328,21 +332,22 @@
     -17.89,
     -39.66
    ],
-   "built_at": "2026-10-01T09:07:14Z",
-   "artifact_built_at": "2026-10-01T09:07:14Z",
+   "built_at": "2026-10-02T12:46:38Z",
+   "artifact_built_at": "2026-10-02T12:46:38Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/ES/radares.csv",
-    "bytes": 12983,
-    "sha256": "183e693f64634965ad9fec1614ffce506040be657451c75cb927a1faa632f1ca",
-    "count": 308
+    "bytes": 13203,
+    "sha256": "ed5a1d7084a7ebb9560f2b25537affd6e9fa71ca6343abe96df2eade3a9ef424",
+    "count": 313
    },
    "limits": {
     "file": "estados/ES/limites.csv",
@@ -351,8 +356,8 @@
     "count": 114539
    },
    "counts": {
-    "cameras": 308,
-    "cameras_with_limit": 208,
+    "cameras": 313,
+    "cameras_with_limit": 213,
     "cameras_inactive": 29,
     "sections": 5,
     "red_lights": 4,
@@ -374,8 +379,8 @@
     -12.4,
     -45.9
    ],
-   "built_at": "2026-10-01T08:56:28Z",
-   "artifact_built_at": "2026-10-01T08:56:28Z",
+   "built_at": "2026-10-02T12:38:37Z",
+   "artifact_built_at": "2026-10-02T12:38:37Z",
    "coverage": {
     "level": "federal+state",
     "sources": [
@@ -383,14 +388,15 @@
      "DER-GO",
      "DETRAN-DF",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/GO/radares.csv",
-    "bytes": 62936,
-    "sha256": "baa125c51d819fb3c2cfbc8be52b6956e18ae32029b28100e45e9a06197093c5",
-    "count": 1428
+    "bytes": 66712,
+    "sha256": "92ad79ce0de949f90ec64464c3862f2c7662831bef4bac400157df7ed42de907",
+    "count": 1512
    },
    "limits": {
     "file": "estados/GO/limites.csv",
@@ -399,8 +405,8 @@
     "count": 125483
    },
    "counts": {
-    "cameras": 1428,
-    "cameras_with_limit": 1321,
+    "cameras": 1512,
+    "cameras_with_limit": 1405,
     "cameras_inactive": 2,
     "sections": 0,
     "red_lights": 0,
@@ -422,20 +428,21 @@
     -1.04,
     -41.8
    ],
-   "built_at": "2026-10-01T08:59:56Z",
-   "artifact_built_at": "2026-10-01T08:59:56Z",
+   "built_at": "2026-10-02T12:41:59Z",
+   "artifact_built_at": "2026-10-02T12:41:59Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/MA/radares.csv",
-    "bytes": 5449,
-    "sha256": "3de1727f77dbf9489cac2343d7ddc8f6ad236c44b2ef572805ef6e327693e86e",
-    "count": 137
+    "bytes": 5799,
+    "sha256": "239a1c0f3ff724f373bceec9c1cebc42af114e712890b35f5005344fae033e99",
+    "count": 145
    },
    "limits": {
     "file": "estados/MA/limites.csv",
@@ -444,8 +451,8 @@
     "count": 56175
    },
    "counts": {
-    "cameras": 137,
-    "cameras_with_limit": 103,
+    "cameras": 145,
+    "cameras_with_limit": 110,
     "cameras_inactive": 7,
     "sections": 0,
     "red_lights": 0,
@@ -467,23 +474,23 @@
     -14.23,
     -39.86
    ],
-   "built_at": "2026-10-01T09:08:08Z",
-   "artifact_built_at": "2026-10-01T09:08:08Z",
+   "built_at": "2026-10-02T12:47:43Z",
+   "artifact_built_at": "2026-10-02T12:47:43Z",
    "coverage": {
-    "level": "federal+state+municipal",
+    "level": "federal+municipal",
     "sources": [
      "ANTT",
      "BHTRANS",
-     "DER-SP",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/MG/radares.csv",
-    "bytes": 71481,
-    "sha256": "e393bc8d6d972d1958a571398cd2b384b4d064555af95c25b19814382c8a00e9",
-    "count": 1717
+    "bytes": 78626,
+    "sha256": "ba901d4d4d0ba793fa484e983f6b523d8e1d2a59992b9c49db7d4e76a5b56557",
+    "count": 1861
    },
    "limits": {
     "file": "estados/MG/limites.csv",
@@ -492,8 +499,8 @@
     "count": 415990
    },
    "counts": {
-    "cameras": 1717,
-    "cameras_with_limit": 1232,
+    "cameras": 1861,
+    "cameras_with_limit": 1384,
     "cameras_inactive": 18,
     "sections": 2,
     "red_lights": 211,
@@ -515,21 +522,22 @@
     -17.16,
     -50.92
    ],
-   "built_at": "2026-10-01T08:56:31Z",
-   "artifact_built_at": "2026-10-01T08:56:31Z",
+   "built_at": "2026-10-02T12:38:43Z",
+   "artifact_built_at": "2026-10-02T12:38:43Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/MS/radares.csv",
-    "bytes": 7802,
-    "sha256": "2c0f67844bbd81502370705539561e4541d8ac58d22617c977341c634e8490f1",
-    "count": 190
+    "bytes": 10184,
+    "sha256": "75b3d320e108b49f3e06576ab33e228b959b7460ad7f30c41abf190d924426b0",
+    "count": 243
    },
    "limits": {
     "file": "estados/MS/limites.csv",
@@ -538,9 +546,9 @@
     "count": 64063
    },
    "counts": {
-    "cameras": 190,
-    "cameras_with_limit": 135,
-    "cameras_inactive": 13,
+    "cameras": 243,
+    "cameras_with_limit": 189,
+    "cameras_inactive": 12,
     "sections": 0,
     "red_lights": 0,
     "limits": 64063,
@@ -561,21 +569,22 @@
     -7.35,
     -50.22
    ],
-   "built_at": "2026-10-01T08:56:36Z",
-   "artifact_built_at": "2026-10-01T08:56:36Z",
+   "built_at": "2026-10-02T12:38:52Z",
+   "artifact_built_at": "2026-10-02T12:38:52Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/MT/radares.csv",
-    "bytes": 9577,
-    "sha256": "f02fe9c7d4ca9d93fc7f3da07ef2b15b75d4fc3a7c2b6017c20e9f34d8eaa6e4",
-    "count": 231
+    "bytes": 12495,
+    "sha256": "da4b70a0dcf9e20a2a4f423d1710ba7249ed719e90c4ee85b596863f533217ba",
+    "count": 296
    },
    "limits": {
     "file": "estados/MT/limites.csv",
@@ -584,8 +593,8 @@
     "count": 132858
    },
    "counts": {
-    "cameras": 231,
-    "cameras_with_limit": 165,
+    "cameras": 296,
+    "cameras_with_limit": 231,
     "cameras_inactive": 0,
     "sections": 0,
     "red_lights": 4,
@@ -607,21 +616,22 @@
     2.59,
     -46.06
    ],
-   "built_at": "2026-10-01T09:01:25Z",
-   "artifact_built_at": "2026-10-01T09:01:25Z",
+   "built_at": "2026-10-02T12:43:10Z",
+   "artifact_built_at": "2026-10-02T12:43:10Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/PA/radares.csv",
-    "bytes": 5426,
-    "sha256": "3bdc51cf3bc868d8660945e596281059c109476aadad6ab37f53b0f080fceb1a",
-    "count": 131
+    "bytes": 6345,
+    "sha256": "cc0441dddc40855461eb56a62ac249ff08d18aa6e16673144c13fe1b463dae5f",
+    "count": 152
    },
    "limits": {
     "file": "estados/PA/limites.csv",
@@ -630,8 +640,8 @@
     "count": 80947
    },
    "counts": {
-    "cameras": 131,
-    "cameras_with_limit": 91,
+    "cameras": 152,
+    "cameras_with_limit": 112,
     "cameras_inactive": 0,
     "sections": 2,
     "red_lights": 0,
@@ -653,21 +663,22 @@
     -6.02,
     -34.79
    ],
-   "built_at": "2026-10-01T08:59:59Z",
-   "artifact_built_at": "2026-10-01T08:59:59Z",
+   "built_at": "2026-10-02T12:42:04Z",
+   "artifact_built_at": "2026-10-02T12:42:04Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM",
      "PMJP"
     ]
    },
    "cameras": {
     "file": "estados/PB/radares.csv",
-    "bytes": 10229,
-    "sha256": "d9d92613170a4d81622e31ec9681a5acc70baf24ea8ec318ab43810ee84d621e",
-    "count": 253
+    "bytes": 11240,
+    "sha256": "b355b3b90f89b1dab7f13aad4ba7ede058613130924b570890a79049b1d52782",
+    "count": 270
    },
    "limits": {
     "file": "estados/PB/limites.csv",
@@ -676,8 +687,8 @@
     "count": 46502
    },
    "counts": {
-    "cameras": 253,
-    "cameras_with_limit": 186,
+    "cameras": 270,
+    "cameras_with_limit": 203,
     "cameras_inactive": 6,
     "sections": 0,
     "red_lights": 0,
@@ -699,22 +710,23 @@
     -7.27,
     -34.81
    ],
-   "built_at": "2026-10-01T09:00:02Z",
-   "artifact_built_at": "2026-10-01T09:00:02Z",
+   "built_at": "2026-10-02T12:42:12Z",
+   "artifact_built_at": "2026-10-02T12:42:12Z",
    "coverage": {
     "level": "federal+state+municipal",
     "sources": [
      "DER-PE",
      "DNIT",
+     "INMETRO",
      "OSM",
      "PCR"
     ]
    },
    "cameras": {
     "file": "estados/PE/radares.csv",
-    "bytes": 14712,
-    "sha256": "4a930e910444b985baa05070a4a68f4e95f0410f09d03aa1adad6a9ad2c6f051",
-    "count": 370
+    "bytes": 15576,
+    "sha256": "d5e26120626e484ffc09908402c632b43f2e1067156e32dacfe79a2f63e2c2c4",
+    "count": 386
    },
    "limits": {
     "file": "estados/PE/limites.csv",
@@ -723,8 +735,8 @@
     "count": 63001
    },
    "counts": {
-    "cameras": 370,
-    "cameras_with_limit": 280,
+    "cameras": 386,
+    "cameras_with_limit": 296,
     "cameras_inactive": 14,
     "sections": 0,
     "red_lights": 0,
@@ -746,20 +758,21 @@
     -2.74,
     -40.37
    ],
-   "built_at": "2026-10-01T09:00:03Z",
-   "artifact_built_at": "2026-10-01T09:00:03Z",
+   "built_at": "2026-10-02T12:42:15Z",
+   "artifact_built_at": "2026-10-02T12:42:15Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/PI/radares.csv",
-    "bytes": 2497,
-    "sha256": "bfc79a2321234358671c10d8ddd67fe5a7e3725ad68b6cd789a939140e96043e",
-    "count": 62
+    "bytes": 3072,
+    "sha256": "a354bb3d9f3cb8aed45fdd68df0d7936d0775404830e8bd0a43ec763c4d4b588",
+    "count": 75
    },
    "limits": {
     "file": "estados/PI/limites.csv",
@@ -768,8 +781,8 @@
     "count": 62392
    },
    "counts": {
-    "cameras": 62,
-    "cameras_with_limit": 38,
+    "cameras": 75,
+    "cameras_with_limit": 51,
     "cameras_inactive": 4,
     "sections": 0,
     "red_lights": 0,
@@ -791,22 +804,22 @@
     -22.52,
     -48.02
    ],
-   "built_at": "2026-10-01T09:12:37Z",
-   "artifact_built_at": "2026-10-01T09:12:37Z",
+   "built_at": "2026-10-02T12:51:39Z",
+   "artifact_built_at": "2026-10-02T12:51:39Z",
    "coverage": {
-    "level": "federal+state",
+    "level": "federal",
     "sources": [
      "ANTT",
-     "DER-SP",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/PR/radares.csv",
-    "bytes": 50308,
-    "sha256": "60931b515925c28a3f63507bdfc5b0681cd10742310cd393103224f6c2c6d303",
-    "count": 1217
+    "bytes": 60467,
+    "sha256": "02a1e5a99151b09120c68ea67c9af8ff00b3305bfc45c097fa90fba03718945b",
+    "count": 1427
    },
    "limits": {
     "file": "estados/PR/limites.csv",
@@ -815,8 +828,8 @@
     "count": 191767
    },
    "counts": {
-    "cameras": 1217,
-    "cameras_with_limit": 1025,
+    "cameras": 1427,
+    "cameras_with_limit": 1238,
     "cameras_inactive": 6,
     "sections": 30,
     "red_lights": 9,
@@ -838,22 +851,23 @@
     -20.76,
     -40.96
    ],
-   "built_at": "2026-10-01T09:08:20Z",
-   "artifact_built_at": "2026-10-01T09:08:20Z",
+   "built_at": "2026-10-02T12:48:07Z",
+   "artifact_built_at": "2026-10-02T12:48:07Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM",
      "RIO"
     ]
    },
    "cameras": {
     "file": "estados/RJ/radares.csv",
-    "bytes": 48543,
-    "sha256": "fb1c738d47c9abfc6f4a38382050adb56e0d4370f3b93023bb4466ce39587914",
-    "count": 1180
+    "bytes": 49017,
+    "sha256": "03a57fe82b0aab6e8e6ced7299e3fd8057f3b5fb81ac2e30cd63c1beb171c769",
+    "count": 1188
    },
    "limits": {
     "file": "estados/RJ/limites.csv",
@@ -862,8 +876,8 @@
     "count": 188039
    },
    "counts": {
-    "cameras": 1180,
-    "cameras_with_limit": 963,
+    "cameras": 1188,
+    "cameras_with_limit": 972,
     "cameras_inactive": 2,
     "sections": 2,
     "red_lights": 198,
@@ -885,20 +899,21 @@
     -4.83,
     -34.96
    ],
-   "built_at": "2026-10-01T09:00:05Z",
-   "artifact_built_at": "2026-10-01T09:00:05Z",
+   "built_at": "2026-10-02T12:42:19Z",
+   "artifact_built_at": "2026-10-02T12:42:19Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/RN/radares.csv",
-    "bytes": 5922,
-    "sha256": "5087056cecf36314c93a1c6c1d65de8ce861c268f258420b50d5a0ea7a85e3a6",
-    "count": 146
+    "bytes": 6376,
+    "sha256": "ce4a23ca56d54d72154820fa3d9c0f824ec671ec07bbb9fe18045c791bea894a",
+    "count": 156
    },
    "limits": {
     "file": "estados/RN/limites.csv",
@@ -907,8 +922,8 @@
     "count": 30179
    },
    "counts": {
-    "cameras": 146,
-    "cameras_with_limit": 61,
+    "cameras": 156,
+    "cameras_with_limit": 71,
     "cameras_inactive": 11,
     "sections": 0,
     "red_lights": 0,
@@ -930,20 +945,21 @@
     -7.97,
     -59.77
    ],
-   "built_at": "2026-10-01T09:01:26Z",
-   "artifact_built_at": "2026-10-01T09:01:26Z",
+   "built_at": "2026-10-02T12:43:12Z",
+   "artifact_built_at": "2026-10-02T12:43:12Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/RO/radares.csv",
-    "bytes": 1004,
-    "sha256": "a6675ed9a05205c5565159984bbcda4fde6721dd13fa23814619014334e0a488",
-    "count": 23
+    "bytes": 1520,
+    "sha256": "3af3393758d6478d2cee0c6c69c093689c6ed77179462d14d9888d854cc97b61",
+    "count": 35
    },
    "limits": {
     "file": "estados/RO/limites.csv",
@@ -952,8 +968,8 @@
     "count": 32279
    },
    "counts": {
-    "cameras": 23,
-    "cameras_with_limit": 15,
+    "cameras": 35,
+    "cameras_with_limit": 27,
     "cameras_inactive": 0,
     "sections": 0,
     "red_lights": 0,
@@ -975,20 +991,21 @@
     5.27,
     -58.89
    ],
-   "built_at": "2026-10-01T09:01:26Z",
-   "artifact_built_at": "2026-10-01T09:01:26Z",
+   "built_at": "2026-10-02T12:43:13Z",
+   "artifact_built_at": "2026-10-02T12:43:13Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/RR/radares.csv",
-    "bytes": 994,
-    "sha256": "d18a226efd2e0c19f54d340b96025dc4cc586d55bb9aa33ca3e42653639388a4",
-    "count": 24
+    "bytes": 1352,
+    "sha256": "a0539ef40d6072745a017861744a3a27b664897f3678ff3e3d4c5afe2694ea38",
+    "count": 31
    },
    "limits": {
     "file": "estados/RR/limites.csv",
@@ -997,8 +1014,8 @@
     "count": 9891
    },
    "counts": {
-    "cameras": 24,
-    "cameras_with_limit": 21,
+    "cameras": 31,
+    "cameras_with_limit": 28,
     "cameras_inactive": 0,
     "sections": 0,
     "red_lights": 0,
@@ -1020,21 +1037,22 @@
     -27.08,
     -49.69
    ],
-   "built_at": "2026-10-01T09:13:01Z",
-   "artifact_built_at": "2026-10-01T09:13:01Z",
+   "built_at": "2026-10-02T12:52:11Z",
+   "artifact_built_at": "2026-10-02T12:52:11Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/RS/radares.csv",
-    "bytes": 37745,
-    "sha256": "5f0e9fd2e4109981e3cd66dd3205d676c098f8dc42a7c419dcaf4936c06caac6",
-    "count": 875
+    "bytes": 43861,
+    "sha256": "ad7df7bcc68945bb1d7b94b7b287ddda08bb1457313893ef30ba684a813fe569",
+    "count": 1007
    },
    "limits": {
     "file": "estados/RS/limites.csv",
@@ -1043,8 +1061,8 @@
     "count": 227273
    },
    "counts": {
-    "cameras": 875,
-    "cameras_with_limit": 597,
+    "cameras": 1007,
+    "cameras_with_limit": 731,
     "cameras_inactive": 212,
     "sections": 85,
     "red_lights": 4,
@@ -1066,22 +1084,22 @@
     -25.95,
     -48.35
    ],
-   "built_at": "2026-10-01T09:13:13Z",
-   "artifact_built_at": "2026-10-01T09:13:13Z",
+   "built_at": "2026-10-02T12:52:27Z",
+   "artifact_built_at": "2026-10-02T12:52:27Z",
    "coverage": {
-    "level": "federal+state",
+    "level": "federal",
     "sources": [
      "ANTT",
-     "DER-SP",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/SC/radares.csv",
-    "bytes": 45992,
-    "sha256": "ac06538352f08aef89dc45cd90a7fd1eb5162edc23ba137e58558a6ae2df6974",
-    "count": 1006
+    "bytes": 54011,
+    "sha256": "e19b915c89021df4131b85654ae1745c9ebf938a186134a8e4907275d813830e",
+    "count": 1178
    },
    "limits": {
     "file": "estados/SC/limites.csv",
@@ -1090,8 +1108,8 @@
     "count": 138479
    },
    "counts": {
-    "cameras": 1006,
-    "cameras_with_limit": 805,
+    "cameras": 1178,
+    "cameras_with_limit": 978,
     "cameras_inactive": 62,
     "sections": 198,
     "red_lights": 89,
@@ -1113,20 +1131,21 @@
     -9.51,
     -36.39
    ],
-   "built_at": "2026-10-01T09:00:07Z",
-   "artifact_built_at": "2026-10-01T09:00:07Z",
+   "built_at": "2026-10-02T12:42:22Z",
+   "artifact_built_at": "2026-10-02T12:42:22Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/SE/radares.csv",
-    "bytes": 5327,
-    "sha256": "b7e52d9673499edb0cc626a477254c11b2aca80e84b8ac759184c85121425820",
-    "count": 130
+    "bytes": 5403,
+    "sha256": "06b65013a6706c1df155cf1a93e606cd0272d4d2b745542ab3f1eac36495578e",
+    "count": 131
    },
    "limits": {
     "file": "estados/SE/limites.csv",
@@ -1135,8 +1154,8 @@
     "count": 15988
    },
    "counts": {
-    "cameras": 130,
-    "cameras_with_limit": 104,
+    "cameras": 131,
+    "cameras_with_limit": 105,
     "cameras_inactive": 0,
     "sections": 0,
     "red_lights": 0,
@@ -1158,8 +1177,8 @@
     -19.78,
     -44.16
    ],
-   "built_at": "2026-10-01T09:08:44Z",
-   "artifact_built_at": "2026-10-01T09:08:44Z",
+   "built_at": "2026-10-02T12:49:23Z",
+   "artifact_built_at": "2026-10-02T12:49:23Z",
    "coverage": {
     "level": "federal+state+municipal",
     "sources": [
@@ -1167,14 +1186,15 @@
      "CET-SP",
      "DER-SP",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/SP/radares.csv",
-    "bytes": 194521,
-    "sha256": "82d6353e17e730318e2f892758708677ee575a2e20bc74088adffcb94c98cc5e",
-    "count": 4539
+    "bytes": 228013,
+    "sha256": "9e7106e537806dab56e976a62ac584d6027e7181c4da74fde5eb672051ac90a4",
+    "count": 5239
    },
    "limits": {
     "file": "estados/SP/limites.csv",
@@ -1183,8 +1203,8 @@
     "count": 460558
    },
    "counts": {
-    "cameras": 4539,
-    "cameras_with_limit": 2689,
+    "cameras": 5239,
+    "cameras_with_limit": 3079,
     "cameras_inactive": 69,
     "sections": 39,
     "red_lights": 81,
@@ -1206,21 +1226,22 @@
     -5.17,
     -45.7
    ],
-   "built_at": "2026-10-01T09:01:27Z",
-   "artifact_built_at": "2026-10-01T09:01:27Z",
+   "built_at": "2026-10-02T12:43:15Z",
+   "artifact_built_at": "2026-10-02T12:43:15Z",
    "coverage": {
     "level": "federal",
     "sources": [
      "ANTT",
      "DNIT",
+     "INMETRO",
      "OSM"
     ]
    },
    "cameras": {
     "file": "estados/TO/radares.csv",
-    "bytes": 2675,
-    "sha256": "17eaeec888c080d8b50bc41a7fd8052a614ca508198deebb372964a6c13f5779",
-    "count": 64
+    "bytes": 3234,
+    "sha256": "ac4a6d096124c40bf6219f7564e353325a5386a5236227853970016c887e9307",
+    "count": 77
    },
    "limits": {
     "file": "estados/TO/limites.csv",
@@ -1229,8 +1250,8 @@
     "count": 48595
    },
    "counts": {
-    "cameras": 64,
-    "cameras_with_limit": 41,
+    "cameras": 77,
+    "cameras_with_limit": 54,
     "cameras_inactive": 4,
     "sections": 0,
     "red_lights": 0,
@@ -1252,7 +1273,7 @@
     6.0,
     -32.0
    ],
-   "built_at": "2026-10-01T09:13:39Z",
+   "built_at": "2026-10-02T12:52:54Z",
    "coverage": {
     "level": "bundle",
     "sources": [
@@ -1261,9 +1282,9 @@
    },
    "cameras": {
     "file": "brasil/radares.csv",
-    "bytes": 758336,
-    "sha256": "aafe3e23d819c67a8b7ebda614aed3b70211bba412b54cb85291e6d8b91091a5",
-    "count": 17800
+    "bytes": 842969,
+    "sha256": "b491866ec686dccbeb760df598312e460be53ae901e1b587e4b1985454d90b56",
+    "count": 19577
    },
    "limits": {
     "file": "brasil/limites.csv",
@@ -1284,7 +1305,7 @@
     "count": 127295
    },
    "counts": {
-    "cameras": 17800,
+    "cameras": 19577,
     "limits": 1423707,
     "limits_estimated": 1437430,
     "structs": 127295

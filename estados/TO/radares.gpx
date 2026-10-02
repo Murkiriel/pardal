@@ -54,7 +54,20 @@
 <wpt lat="-7.221574" lon="-48.248218"><name>Radar</name><desc>Fonte: DNIT · sentido 31° (nordeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-7.219456" lon="-48.247407"><name>Radar</name><desc>Fonte: DNIT · sentido 205° (sudoeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-7.208500" lon="-48.242000"><name>Radar 30 km/h</name><desc>Fonte: DNIT+OSM · sentido 38° (nordeste)</desc><type>FIXED</type></wpt>
+<wpt lat="-7.208387" lon="-48.200642"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.207701" lon="-48.201108"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.207337" lon="-48.193193"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-7.205260" lon="-48.240730"><name>Radar 60 km/h</name><desc>Fonte: DNIT+OSM · sentido 193° (sul)</desc><type>FIXED</type></wpt>
+<wpt lat="-7.202043" lon="-48.212176"><name>Radar 60 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.201644" lon="-48.212767"><name>Radar 60 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.196418" lon="-48.215673"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.196018" lon="-48.198046"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.195746" lon="-48.183176"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.194226" lon="-48.196775"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.192509" lon="-48.221038"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.191559" lon="-48.218433"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.186979" lon="-48.217150"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
+<wpt lat="-7.186854" lon="-48.217472"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-7.179463" lon="-48.222795"><name>Radar 30 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-7.177353" lon="-48.221209"><name>Radar 40 km/h</name><desc>Fonte: DNIT+OSM · sentido 214° (sudoeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-7.116600" lon="-48.188882"><name>Radar</name><desc>Fonte: DNIT · sentido 37° (nordeste)</desc><type>FIXED</type></wpt>
