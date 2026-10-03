@@ -6,6 +6,9 @@ Descobre o XLSX mais novo pela API do CKAN; coluna "Coordenadas (Lat/Long)" no f
 "Faixas" diz o sentido de cada faixa fiscalizada ("P-C-1" = pista crescente, "P-D-1" =
 decrescente). Só um dos dois -> direction_deg pela rota do SNV da BR (ver common/direction.py);
 os dois -> vazio.
+
+"Rodovia" + "Km" vão em road_km: é o km do cadastro, o mesmo que o Inmetro usa, e por ele o radar
+casa com o medidor (e ganha o limite dele) em inmetro_status.py.
 """
 from __future__ import annotations
 
@@ -24,6 +27,13 @@ from datakit.sources._http import ckan_resources, get_bytes, in_br, newest, to_f
 
 CKAN = "https://servicos.dnit.gov.br/dadosabertos/api/3/action/package_show?id=controle-de-velocidade"
 SNAP_M = 150.0
+
+
+def road_km(rodovia, km) -> Optional[Tuple[int, float]]:
+    """('070', 189.8) -> (70, 189.8); sem rodovia ou km legíveis -> None."""
+    m = re.search(r"(\d{2,3})", str(rodovia or ""))
+    k = to_float(km) if km is not None else None
+    return (int(m.group(1)), k) if m and k is not None else None
 
 
 def lanes_increasing(faixas: Optional[str]) -> Optional[bool]:
@@ -45,6 +55,7 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None,
     except ValueError:
         raise RuntimeError(f"coluna de coordenadas não encontrada; header={header}") from None
     col = {name: header.index(name) for name in ("UF", "Rodovia", "Faixas") if name in header}
+    ki = header.index("Km") if "Km" in header else None
     get_routes = routes or (lambda: snv.load_routes(raw_dir))
     snv_routes = get_routes() if len(col) == 3 else None
 
@@ -58,8 +69,9 @@ def load(raw_dir: str, bbox: Optional[Tuple[float, float, float, float]] = None,
         if lat is None or lng is None or not in_br(lat, lng) or not in_bbox(bbox, lat, lng):
             continue
         direction = _direction(snv_routes, row, col, lat, lng) if snv_routes is not None else None
+        rk = road_km(row[col["Rodovia"]], row[ki]) if "Rodovia" in col and ki is not None else None
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, None, "DNIT", True,
-                          direction_deg=direction))
+                          direction_deg=direction, road_km=rk))
     return out, []
 
 

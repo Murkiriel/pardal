@@ -3,6 +3,7 @@
     python -m unittest discover -s datakit/tests -t .
 """
 import unittest
+from dataclasses import replace
 from datetime import date
 
 from datakit.common import Camera, CameraKind, Limit
@@ -88,12 +89,51 @@ class Inmetro(unittest.TestCase):
             Camera(*at(8.0), CameraKind.FIXED, None, "DNIT", True),    # medidor válido perto
             Camera(*at(2.1), CameraKind.FIXED, None, "ANTT", True),    # tem situação própria
         ]
-        idx = {(60, "GO"): [(2.3, False), (8.4, True)]}
+        idx = {(60, "GO"): [(2.3, False, None), (8.4, True, None)]}
         out, st = inmetro_status.apply(cams, "GO", idx, snv, {})
         self.assertEqual([c.active for c in out], [False, True, True])
         self.assertEqual((st["deactivated"], st["confirmed"]), (1, 1))
         out, _ = inmetro_status.apply(cams, "GO", idx, snv, {(60, "GO"): [(0.0, 11.2)]})
         self.assertTrue(all(c.active for c in out))  # trecho concedido: km não vale
+
+    def test_apply_fills_missing_limit_from_the_confirming_meter(self):
+        """O PNCV do DNIT não traz limite; o medidor válido que confirma o radar traz a velocidade
+        nominal. Radar com limite próprio fica com ele; medidor vencido não dá limite; dois
+        medidores no mesmo km (um por sentido) dão o menor."""
+        snv = SnvRoutes({(70, "GO"): [_line()]})
+        def at(km):
+            return _line().at(km)
+        cams = [
+            Camera(*at(2.0), CameraKind.FIXED, None, "DNIT", True),   # válido a 0,2 km: ganha 60
+            Camera(*at(5.0), CameraKind.FIXED, 80, "DNIT", True),     # já tem limite: fica 80
+            Camera(*at(8.0), CameraKind.FIXED, None, "OSM", True),    # só vencido perto: sem limite
+            Camera(*at(10.0), CameraKind.FIXED, None, "DNIT", True),  # dois no mesmo km: o menor
+        ]
+        idx = {(70, "GO"): [(2.2, True, 60), (2.9, True, 40), (5.1, True, 60), (8.1, False, 50),
+                            (10.1, True, 80), (10.1, True, 60)]}
+        out, st = inmetro_status.apply(cams, "GO", idx, snv, {})
+        self.assertEqual([c.limit_kmh for c in out], [60, 80, None, 60])
+        self.assertEqual(st["limits_filled"], 2)
+
+    def test_apply_matches_by_the_source_km_when_the_radar_has_one(self):
+        """Itaberaí, BR-070 (2026-10-03): o DNIT diz km 189,8 e o Inmetro também, mas a geometria
+        do SNV põe o radar no km 187,9, fora de MATCH_KM. Com o km da própria fonte, casa; o km do
+        SNV fica para quem não tem o seu."""
+        snv = SnvRoutes({(70, "GO"): [_line()]})
+        cam = Camera(*_line().at(2.0), CameraKind.FIXED, None, "DNIT", True, road_km=(70, 9.8))
+        idx = {(70, "GO"): [(9.8, True, 60)]}
+        out, st = inmetro_status.apply([cam], "GO", idx, snv, {})
+        self.assertEqual((out[0].limit_kmh, st["confirmed"], st["limits_filled"]), (60, 1, 1))
+        # o km da fonte vale mesmo longe de qualquer linha do SNV
+        far = replace(cam, lat=-10.0, lng=-40.0)
+        self.assertEqual(inmetro_status.apply([far], "GO", idx, snv, {})[0][0].limit_kmh, 60)
+        # e sem medidor no km da fonte não cai para o do SNV
+        idx2 = {(70, "GO"): [(2.0, True, 60)]}
+        self.assertIsNone(inmetro_status.apply([cam], "GO", idx2, snv, {})[0][0].limit_kmh)
+
+    def test_index_keeps_the_meter_limit(self):
+        m = inmetro.parse([self.REC], "GO", date(2026, 9, 29))
+        self.assertEqual(inmetro_status.index_meters(m), {(60, "GO"): [(181.0, True, 60)]})
 
     def test_eligible_only_if_every_official_source_lacks_status(self):
         """ANTT e DER-SP já dizem a situação; juntar o radar com o OSM não pode passar a
@@ -110,7 +150,7 @@ class Inmetro(unittest.TestCase):
     def test_apply_leaves_antt_osm_alone(self):
         from datakit.common.lrs import MeasuredLine
         snv = SnvRoutes({(60, "GO"): [MeasuredLine([(-16.0, -49.0), (-16.1, -49.0)], [0.0, 11.1])]})
-        idx = {(60, "GO"): [(5.55, False)]}
+        idx = {(60, "GO"): [(5.55, False, None)]}
         cam = Camera(-16.05, -49.0, CameraKind.FIXED, 80, "ANTT+OSM", True)
         out, st = inmetro_status.apply([cam], "GO", idx, snv, {})
         self.assertTrue(out[0].active)
@@ -196,6 +236,12 @@ class Direction(unittest.TestCase):
 
 
 class NominalDirection(unittest.TestCase):
+    def test_dnit_road_km(self):
+        self.assertEqual(dnit.road_km("070", 189.8), (70, 189.8))
+        self.assertEqual(dnit.road_km("BR-060", "181,5"), (60, 181.5))
+        self.assertIsNone(dnit.road_km("070", None))
+        self.assertIsNone(dnit.road_km(None, 12.0))
+
     def test_dnit_lanes(self):
         self.assertEqual([dnit.lanes_increasing(t) for t in ("P-C-1, P-C-2", "P-D-1", "P-C-1, P-D-1", None)],
                          [True, False, None, None])
@@ -350,6 +396,13 @@ class Absorb(unittest.TestCase):
         self.assertEqual((merged.source, merged.lat, merged.limit_kmh, merged.direction_deg, merged.active),
                          ("DNIT+DETRAN-DF", -15.80020, 60, 180, True))     # posição de quem tem sentido
         self.assertEqual(len(out), 2)
+
+    def test_merging_keeps_the_source_km(self):
+        dnit = Camera(-15.80, -47.90, source="DNIT", road_km=(70, 12.0))
+        df = Camera(-15.80020, -47.90, source="DETRAN-DF", direction_deg=180)
+        merged = next(c for c in merge_cross_agency([dnit, df])[0] if "+" in c.source)
+        self.assertEqual(merged.road_km, (70, 12.0))
+        self.assertEqual(len(merged.row()), len(Camera.HEADER))   # não vai para o CSV
 
     def test_opposite_directions_from_two_agencies_stay_apart(self):
         a = Camera(-16.0, -49.0, source="ANTT", direction_deg=0)

@@ -167,7 +167,7 @@ fontes e manter a mesma licença em bases derivadas.
 | DNIT — Sistema Nacional de Viação | Quilometragem das BRs, usada para casar com o Inmetro e para converter o sentido (crescente/decrescente) em rumo | Dado aberto governamental |
 | ANTT — Radar | Radares das concessões federais, com situação e sentido | CC-BY |
 | ANTT — Sinalização | Placas de velocidade máxima das concessões federais, por sentido | CC-BY |
-| Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo); nos medidores com endereço urbano, a confirmação do radar, o limite e os radares que nenhuma outra fonte tem | Creative Commons |
+| Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo) e, nas rodovias federais, o limite do radar que não trazia nenhum; nos medidores com endereço urbano, a confirmação do radar, o limite e os radares que nenhuma outra fonte tem | Creative Commons |
 | DER-SP / Artesp, DER-GO (Goinfra), DER-PE | Radares das rodovias estaduais, com o sentido fiscalizado (SP e GO) | Dado aberto governamental |
 | Goinfra — malha rodoviária estadual | Quilometragem das rodovias de Goiás, para converter o sentido em rumo | Dado aberto governamental |
 | IBGE — malha das unidades da federação (API de malhas) | Contorno de cada estado, para decidir em que estado fica cada ponto | Dado aberto governamental |

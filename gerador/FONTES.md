@@ -96,7 +96,7 @@ redistribuição), bases comerciais, Waze/Google (sem API, termos proíbem).
 | Rio — trechos | `sources/rio.py`: vértices + preenchimento a 150 m | 208.986 pontos |
 | Rio — radares | PDF da SMTR + geocodificador de número de porta da prefeitura (score ≥ 95) | 1.083 itens (599 velocidade, 484 avanço de sinal), 615 geocodificados |
 | BH / DF | `sources/bh.py` (UTM 23S, via curl: o WAF da PBH barra o TLS do Python), `sources/df_detran.py` | 396 / 2.355 |
-| Inmetro | `inmetro_status.py`: casa por km na mesma BR/UF fora de concessão; só mexe em OSM, DNIT, DER-GO, Detran-DF — num radar juntado, só se todas as fontes oficiais dele forem dessas (`ANTT+OSM` fica com a situação da ANTT; antes bastava uma parte, e 1.393 radares publicados entravam indevidamente na regra) | GO: 66 confirmados / 4 desativados; MG: 129 / 21 |
+| Inmetro | `inmetro_status.py`: casa por km na mesma BR/UF fora de concessão; só mexe em OSM, DNIT, DER-GO, Detran-DF — num radar juntado, só se todas as fontes oficiais dele forem dessas (`ANTT+OSM` fica com a situação da ANTT; antes bastava uma parte, e 1.393 radares publicados entravam indevidamente na regra). Radar do DNIT casa pelo km da própria planilha (o mesmo do Inmetro; em Itaberaí, BR-070, o SNV punha o radar 1,9 km longe do km 189,8), os outros pelo km do SNV. Radar confirmado sem limite ganha a velocidade nominal do medidor (o de km mais perto; empate, a menor) | GO: 71 confirmados / 2 desativados, 58 ganharam limite (dos 69 do DNIT, 8 seguem sem); MG: 129 / 21 (antes do limite) |
 | Limites oficiais x OSM | `model.override_limits`: pontos do OSM a < 50 m de um oficial saem, para o valor não alternar entre as duas fontes no mesmo trecho | — |
 
 **Descartado depois de medir:** criar radar novo a partir de "rodovia + km".
