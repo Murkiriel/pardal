@@ -6,7 +6,7 @@ Situação em 2026-09-30, com as fontes travadas conferidas de novo em 2026-10-0
 
 | Item | Situação |
 |---|---|
-| **Zerar o histórico do git de tempos em tempos** | Combinado. Cada geração acrescenta dezenas de MB ao histórico e só a versão mais recente interessa a quem baixa. Quando o repositório passar de ~1 GB: criar um branch órfão com o estado atual, forçar o push no `main` e apagar o branch antigo. |
+| **Zerar o histórico do git de tempos em tempos** | Combinado. Cada geração acrescenta dezenas de MB ao histórico e só a versão mais recente interessa a quem baixa. Quando o repositório passar de ~1 GB: criar um branch órfão com o estado atual, forçar o push no `main` e apagar o branch antigo. Medido em 2026-10-05: 84 MB no GitHub (tamanho do repositório pela API), 118 MiB no `.git` de uma cópia local, 28 commits, 3 gerações de dados. Cada geração acrescentou de 1,5 a 46 MiB na cópia local (depende de como o git compacta); mesmo no pior caso, 1 GB fica a mais de um ano de gerações mensais. |
 
 ## Melhorias de dados
 
