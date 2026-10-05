@@ -61,7 +61,7 @@ jobs:
           # Geração extra, fora do intervalo: a partir desta data (UTC), gera se os dados publicados
           # forem mais antigos que ela (e tenta de novo nos dias seguintes se falhar). Depois de
           # publicar, não tem mais efeito. Vazio = só o intervalo.
-          GENERATE_FROM: "2026-10-02"
+          GENERATE_FROM: "2026-10-06"
           EVENT: ${{ github.event_name }}
         run: |
           if [ "$EVENT" != "schedule" ]; then
