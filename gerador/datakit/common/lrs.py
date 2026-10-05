@@ -21,7 +21,8 @@ from typing import Dict, List, Optional, Sequence, Tuple
 
 Point = Tuple[float, float]  # (lat, lng)
 
-_ROAD = re.compile(r"\b(BR|[A-Z]{2})\s*-?\s*(\d{2,3})\b")
+# "KM 004" não é rodovia: no Inmetro de SP, "SPA-372/321 KM 004,000" (acesso) virava a rodovia KM-4.
+_ROAD = re.compile(r"\b(?!KM)(BR|[A-Z]{2})\s*-?\s*(\d{2,3})\b")
 
 
 def parse_road(text: str) -> Optional[Tuple[str, int]]:

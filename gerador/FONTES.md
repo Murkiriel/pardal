@@ -96,13 +96,48 @@ redistribuição), bases comerciais, Waze/Google (sem API, termos proíbem).
 | Rio — trechos | `sources/rio.py`: vértices + preenchimento a 150 m | 208.986 pontos |
 | Rio — radares | PDF da SMTR + geocodificador de número de porta da prefeitura (score ≥ 95) | 1.083 itens (599 velocidade, 484 avanço de sinal), 615 geocodificados |
 | BH / DF | `sources/bh.py` (UTM 23S, via curl: o WAF da PBH barra o TLS do Python), `sources/df_detran.py` | 396 / 2.355 |
-| Inmetro | `inmetro_status.py`: casa por km na mesma BR/UF fora de concessão; só mexe em OSM, DNIT, DER-GO, Detran-DF — num radar juntado, só se todas as fontes oficiais dele forem dessas (`ANTT+OSM` fica com a situação da ANTT; antes bastava uma parte, e 1.393 radares publicados entravam indevidamente na regra). Radar do DNIT casa pelo km da própria planilha (o mesmo do Inmetro; em Itaberaí, BR-070, o SNV punha o radar 1,9 km longe do km 189,8), os outros pelo km do SNV. Radar confirmado sem limite ganha a velocidade nominal do medidor (o de km mais perto; empate, a menor) | GO: 71 confirmados / 2 desativados, 58 ganharam limite (dos 69 do DNIT, 8 seguem sem); MG: 129 / 21 (antes do limite) |
+| Inmetro | `inmetro_status.py`: casa por km na mesma BR/UF fora de concessão; só mexe em OSM, DNIT, DER-GO, Detran-DF — num radar juntado, só se todas as fontes oficiais dele forem dessas (`ANTT+OSM` fica com a situação da ANTT; antes bastava uma parte, e 1.393 radares publicados entravam indevidamente na regra). Radar do DNIT casa pelo km da própria planilha (o mesmo do Inmetro; em Itaberaí, BR-070, o SNV punha o radar 1,9 km longe do km 189,8), os outros pelo km do SNV. Radar confirmado sem limite ganha a velocidade nominal do medidor (o de km mais perto; empate, a menor). Desde 2026-10-05 o índice tem também as rodovias estaduais, e o DER-SP (Artesp e planilha própria, com situação própria) casa pelo km das planilhas dele e ganha **só o limite** (ver "Radares sem limite, por fonte") | GO: 71 confirmados / 2 desativados, 58 ganharam limite (dos 69 do DNIT, 8 seguem sem); MG: 129 / 21 (antes do limite) |
 | Limites oficiais x OSM | `model.override_limits`: pontos do OSM a < 50 m de um oficial saem, para o valor não alternar entre as duas fontes no mesmo trecho | — |
 
 **Descartado depois de medir:** criar radar novo a partir de "rodovia + km".
 - SNV contra os 1.774 radares do DNIT (coordenada + km): mediana 226 m, p75 873 m, só 34% a ≤ 100 m.
 - Marcos quilométricos do OSM (por UF): mediana 83 m, mas 25% > 200 m e só ~100 casos fora de SC.
 - O km das placas ANTT é o da concessão (PNV antigo): BR-381/MG km 480,5 cai 7 km longe no SNV atual.
+
+## Radares sem limite, por fonte (2026-10-05)
+
+Contagem nos dados publicados em 2026-10-03 (`brasil/radares.csv`, depois do limite do Inmetro
+para o DNIT): 4.933 dos 19.020 radares ativos saem sem limite.
+
+| Fonte (ativos) | Total | Sem limite |
+|---|---|---|
+| DETRAN-DF | 2.196 | 1.326 |
+| OSM | 7.281 | 1.294 |
+| DER-SP | 1.268 | 1.268 (todos) |
+| INMETRO (só endereço) | 1.784 | 325 |
+| BHTRANS | 260 | 179 |
+| RIO | 290 | 178 |
+| DNIT | 1.030 | 174 |
+| PMF | 72 | 72 |
+| CET-SP | 256 | 36 |
+| ANTT, DER-GO, ANTT+OSM, DER-GO+OSM | 2.108 | 0 |
+
+ANTT e DER-GO já trazem o limite de todo radar: casar o km deles com o Inmetro não acrescenta nada.
+O buraco grande era o DER-SP: as duas planilhas (Artesp e a do DER) não têm limite, mas têm rodovia
+e km ("SP330" + "km 060+550"; "SP 008" + 96,86), o mesmo cadastro do Inmetro, que lista 1.702
+medidores fixos em rodovia estadual de SP (1.125 válidos, com velocidade nominal). Casando pelo km
+das planilhas, como o DNIT:
+
+- concordância com o OSM nos radares DER-SP+OSM que já tinham limite: 302 de 320 iguais (janela de
+  1 km; 225 de 240 a 50 m). Quase toda diferença é OSM 110 e medidor 90 ou 100;
+- situação: continua a do DER-SP (status da Artesp, cancelamento do DER); o Inmetro só dá o limite;
+- SP gerado localmente: radares DER-SP ativos sem limite de 1.301 para 456 (845 ganharam limite);
+  os das outras fontes ficaram iguais (793). No estado, os ativos sem limite foram de 2.094 para 1.249.
+
+Os que sobram no DER-SP: acesso (SPA, SPI, sem km que case), medidor só vencido ou reprovado perto,
+ou nenhum medidor no km. De passagem: "KM 004" deixou de ser lido como a rodovia "KM-4" (no
+Inmetro de SP, "SPA-372/321 KM 004,000"); 618 medidores válidos do país saem dessa falsa rodovia, e
+um deles, um cruzamento em Rio Claro, passa a poder ser localizado pelo endereço.
 
 ## Sentido dos radares e das placas (2026-09-29)
 

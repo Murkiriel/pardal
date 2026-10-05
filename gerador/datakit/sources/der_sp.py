@@ -5,6 +5,9 @@ source="DER-SP" nas duas. `active` vem do status/cancelamento.
 Sentido: a Artesp dá o sentido nominal da rodovia (Norte/Sul/Leste/Oeste) e o DER-SP as faixas
 por sentido ("N-1, S-1" = os dois; "O-1" = só oeste). Viram heading_hint, que o build converte
 em direction_deg com a geometria do OSM (common/direction.py).
+Nenhuma das duas dá o limite, mas as duas dão rodovia e km ("SP330" + "km 060+550" na Artesp,
+"SP 008" + 96.86 no DER), o mesmo cadastro do Inmetro: vão em road_km, e por ele o radar ganha a
+velocidade nominal do medidor válido em inmetro_status.py (a situação continua a da fonte).
 """
 from __future__ import annotations
 
@@ -17,6 +20,7 @@ import openpyxl
 from datakit.context import SourceData, BuildContext
 from datakit.common import Camera, CameraKind, Limit, in_bbox
 from datakit.common.direction import hint_from_text
+from datakit.common.lrs import parse_km, parse_road
 from datakit.sources._http import get_bytes, in_br, to_float
 
 ARTESP_XLSX = ("https://dadosabertos.artesp.sp.gov.br/dataset/491d79c5-ee09-4fe8-a3ce-1b425fe60bbe/"
@@ -36,6 +40,8 @@ def _artesp(bbox) -> List[Camera]:
     di, si = h.index("Desc_Componente"), h.index("Cod_Status")
     la, lo = h.index("Latitude"), h.index("Longitude")
     dir_col = h.index("Sentido") if "Sentido" in h else None
+    ri = h.index("Rodovia") if "Rodovia" in h else None
+    ki = h.index("Localizacao") if "Localizacao" in h else None
     out: List[Camera] = []
     for row in rows:
         if not _ARTESP_RADAR.search(str(row[di] or "")):
@@ -45,9 +51,22 @@ def _artesp(bbox) -> List[Camera]:
             continue
         active = str(row[si] or "").strip() not in _ARTESP_DEAD
         hint = hint_from_text(row[dir_col]) if dir_col is not None else None
+        rk = road_km(row[ri], row[ki]) if ri is not None and ki is not None else None
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, None, "DER-SP", active,
-                          heading_hint=hint))
+                          heading_hint=hint, road_km=rk))
     return out
+
+
+def road_km(rodovia, km) -> Optional[Tuple[Tuple[str, int], float]]:
+    """('SP330', 'km 060+550') -> (('SP', 330), 60.55); ('SP 008', 96.86) -> (('SP', 8), 96.86).
+    Acesso ('SPA 009/010') ou km ilegível -> None."""
+    road = parse_road(str(rodovia or ""))
+    if isinstance(km, (int, float)):
+        k: Optional[float] = float(km)
+    else:
+        text = str(km or "")
+        k = parse_km(text) if re.search(r"km", text, re.I) else to_float(text)
+    return (road, k) if road is not None and k is not None else None
 
 
 def lanes_hint(faixas: Optional[str]) -> Optional[str]:
@@ -63,6 +82,8 @@ def _der_sp_own(bbox) -> List[Camera]:
     h = [str(c).strip() if c is not None else "" for c in next(rows)]
     ci, cx = h.index("Coordenadas"), h.index("Cancelamento")
     fx = h.index("Faixas") if "Faixas" in h else None
+    ri = h.index("Rodovia") if "Rodovia" in h else None
+    ki = h.index("Km") if "Km" in h else None
     out: List[Camera] = []
     for row in rows:
         cell = str(row[ci] or "")
@@ -74,8 +95,9 @@ def _der_sp_own(bbox) -> List[Camera]:
             continue
         active = row[cx] in (None, "")
         hint = lanes_hint(row[fx]) if fx is not None else None
+        rk = road_km(row[ri], row[ki]) if ri is not None and ki is not None else None
         out.append(Camera(round(lat, 6), round(lng, 6), CameraKind.FIXED, None, "DER-SP", active,
-                          heading_hint=hint))
+                          heading_hint=hint, road_km=rk))
     return out
 
 

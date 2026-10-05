@@ -28,10 +28,18 @@ class Lrs(unittest.TestCase):
         self.assertEqual(parse_road("BR 060 KM  181,000"), ("BR", 60))
         self.assertEqual(parse_road("GO-469, KM 027+244M"), ("GO", 469))
         self.assertIsNone(parse_road("AV. ANHANGUERA, 1000"))
+        self.assertEqual(parse_road("SP330"), ("SP", 330))  # Artesp, sem separador
         self.assertAlmostEqual(parse_km("GO-469, KM 027+244M"), 27.244)
         self.assertAlmostEqual(parse_km("BR 060 KM  181,000"), 181.0)
         self.assertAlmostEqual(parse_km("km 12,5"), 12.5)
         self.assertIsNone(parse_km("RUA 7"))
+
+    def test_km_is_never_read_as_a_road(self):
+        """Inmetro SP (2026-10-05): 'SPA-372/321 KM 004,000' (acesso, sem rodovia legível) virava a
+        rodovia ('KM', 4). Com as rodovias estaduais no índice, ela casaria com um radar da 'KM-4'."""
+        self.assertIsNone(parse_road("SPA-372/321 KM 004,000 SENTIDO: LESTE - FX 1"))
+        self.assertIsNone(parse_road("SPI 016/021 KM 000+400 SUL"))
+        self.assertEqual(parse_road("SP-294 KM 596+350m, sentido Oeste"), ("SP", 294))
 
     def test_snv_key_only_main_axis(self):
         self.assertEqual(snv_key("010BDF202607A"), (10, "DF"))
@@ -89,7 +97,7 @@ class Inmetro(unittest.TestCase):
             Camera(*at(8.0), CameraKind.FIXED, None, "DNIT", True),    # medidor válido perto
             Camera(*at(2.1), CameraKind.FIXED, None, "ANTT", True),    # tem situação própria
         ]
-        idx = {(60, "GO"): [(2.3, False, None), (8.4, True, None)]}
+        idx = {(("BR", 60), "GO"): [(2.3, False, None), (8.4, True, None)]}
         out, st = inmetro_status.apply(cams, "GO", idx, snv, {})
         self.assertEqual([c.active for c in out], [False, True, True])
         self.assertEqual((st["deactivated"], st["confirmed"]), (1, 1))
@@ -109,8 +117,8 @@ class Inmetro(unittest.TestCase):
             Camera(*at(8.0), CameraKind.FIXED, None, "OSM", True),    # só vencido perto: sem limite
             Camera(*at(10.0), CameraKind.FIXED, None, "DNIT", True),  # dois no mesmo km: o menor
         ]
-        idx = {(70, "GO"): [(2.2, True, 60), (2.9, True, 40), (5.1, True, 60), (8.1, False, 50),
-                            (10.1, True, 80), (10.1, True, 60)]}
+        idx = {(("BR", 70), "GO"): [(2.2, True, 60), (2.9, True, 40), (5.1, True, 60), (8.1, False, 50),
+                                    (10.1, True, 80), (10.1, True, 60)]}
         out, st = inmetro_status.apply(cams, "GO", idx, snv, {})
         self.assertEqual([c.limit_kmh for c in out], [60, 80, None, 60])
         self.assertEqual(st["limits_filled"], 2)
@@ -120,20 +128,44 @@ class Inmetro(unittest.TestCase):
         do SNV põe o radar no km 187,9, fora de MATCH_KM. Com o km da própria fonte, casa; o km do
         SNV fica para quem não tem o seu."""
         snv = SnvRoutes({(70, "GO"): [_line()]})
-        cam = Camera(*_line().at(2.0), CameraKind.FIXED, None, "DNIT", True, road_km=(70, 9.8))
-        idx = {(70, "GO"): [(9.8, True, 60)]}
+        cam = Camera(*_line().at(2.0), CameraKind.FIXED, None, "DNIT", True, road_km=(("BR", 70), 9.8))
+        idx = {(("BR", 70), "GO"): [(9.8, True, 60)]}
         out, st = inmetro_status.apply([cam], "GO", idx, snv, {})
         self.assertEqual((out[0].limit_kmh, st["confirmed"], st["limits_filled"]), (60, 1, 1))
         # o km da fonte vale mesmo longe de qualquer linha do SNV
         far = replace(cam, lat=-10.0, lng=-40.0)
         self.assertEqual(inmetro_status.apply([far], "GO", idx, snv, {})[0][0].limit_kmh, 60)
         # e sem medidor no km da fonte não cai para o do SNV
-        idx2 = {(70, "GO"): [(2.0, True, 60)]}
+        idx2 = {(("BR", 70), "GO"): [(2.0, True, 60)]}
         self.assertIsNone(inmetro_status.apply([cam], "GO", idx2, snv, {})[0][0].limit_kmh)
+
+    def test_source_with_own_status_takes_only_the_limit_by_its_km(self):
+        """DER-SP (Artesp e a planilha do DER) tem situação própria e nenhum limite, mas dá a rodovia
+        e o km do cadastro, o mesmo do Inmetro (SP-330 km 60+550 nos dois). Ganha a velocidade nominal
+        do medidor válido; a situação continua a da fonte, nem confirmada nem desligada."""
+        snv = SnvRoutes({})
+        sp = ("SP", 330)
+        cams = [
+            Camera(-23.17, -46.91, CameraKind.FIXED, None, "DER-SP", True, road_km=(sp, 60.55)),   # ganha 80
+            Camera(-23.20, -46.92, CameraKind.FIXED, None, "DER-SP", False, road_km=(sp, 70.0)),   # só vencido: nada
+            Camera(-23.21, -46.93, CameraKind.FIXED, 100, "DER-SP+OSM", True, road_km=(sp, 75.0)),  # tem limite
+            Camera(-23.22, -46.94, CameraKind.FIXED, None, "DER-SP", True),                         # sem km: nada
+            Camera(-23.23, -46.95, CameraKind.FIXED, None, "DER-SP", False, road_km=(sp, 80.0)),   # 70, segue inativo
+        ]
+        idx = {(sp, "SP"): [(60.55, True, 80), (70.1, False, 60), (75.0, True, 60), (80.0, True, 70)]}
+        out, st = inmetro_status.apply(cams, "SP", idx, snv, {})
+        self.assertEqual([c.limit_kmh for c in out], [80, None, 100, None, 70])
+        self.assertEqual([c.active for c in out], [True, False, True, True, False])
+        self.assertEqual((st["limits_filled"], st["confirmed"], st["deactivated"]), (2, 0, 0))
 
     def test_index_keeps_the_meter_limit(self):
         m = inmetro.parse([self.REC], "GO", date(2026, 9, 29))
-        self.assertEqual(inmetro_status.index_meters(m), {(60, "GO"): [(181.0, True, 60)]})
+        self.assertEqual(inmetro_status.index_meters(m), {(("BR", 60), "GO"): [(181.0, True, 60)]})
+
+    def test_index_takes_state_roads_too(self):
+        rec = dict(self.REC, LocalVerificacao="GO-469, KM 027+244M")
+        m = inmetro.parse([rec], "GO", date(2026, 9, 29))
+        self.assertEqual(inmetro_status.index_meters(m), {(("GO", 469), "GO"): [(27.244, True, 60)]})
 
     def test_eligible_only_if_every_official_source_lacks_status(self):
         """ANTT e DER-SP já dizem a situação; juntar o radar com o OSM não pode passar a
@@ -150,7 +182,7 @@ class Inmetro(unittest.TestCase):
     def test_apply_leaves_antt_osm_alone(self):
         from datakit.common.lrs import MeasuredLine
         snv = SnvRoutes({(60, "GO"): [MeasuredLine([(-16.0, -49.0), (-16.1, -49.0)], [0.0, 11.1])]})
-        idx = {(60, "GO"): [(5.55, False, None)]}
+        idx = {(("BR", 60), "GO"): [(5.55, False, None)]}
         cam = Camera(-16.05, -49.0, CameraKind.FIXED, 80, "ANTT+OSM", True)
         out, st = inmetro_status.apply([cam], "GO", idx, snv, {})
         self.assertTrue(out[0].active)
@@ -237,10 +269,20 @@ class Direction(unittest.TestCase):
 
 class NominalDirection(unittest.TestCase):
     def test_dnit_road_km(self):
-        self.assertEqual(dnit.road_km("070", 189.8), (70, 189.8))
-        self.assertEqual(dnit.road_km("BR-060", "181,5"), (60, 181.5))
+        self.assertEqual(dnit.road_km("070", 189.8), (("BR", 70), 189.8))
+        self.assertEqual(dnit.road_km("BR-060", "181,5"), (("BR", 60), 181.5))
         self.assertIsNone(dnit.road_km("070", None))
         self.assertIsNone(dnit.road_km(None, 12.0))
+
+    def test_der_sp_road_km(self):
+        """As duas planilhas do DER-SP dão rodovia e km, cada uma num formato; acesso (SPA, SPI)
+        não tem km que case com o Inmetro."""
+        self.assertEqual(der_sp.road_km("SP330", "km 060+550"), (("SP", 330), 60.55))
+        self.assertEqual(der_sp.road_km("SP 008", 96.86), (("SP", 8), 96.86))
+        self.assertEqual(der_sp.road_km("BR116", "km 210+000"), (("BR", 116), 210.0))
+        self.assertIsNone(der_sp.road_km("SPA 009/010", 8.41))
+        self.assertIsNone(der_sp.road_km("SP 008", None))
+        self.assertIsNone(der_sp.road_km(None, 12.0))
 
     def test_dnit_lanes(self):
         self.assertEqual([dnit.lanes_increasing(t) for t in ("P-C-1, P-C-2", "P-D-1", "P-C-1, P-D-1", None)],
@@ -398,10 +440,10 @@ class Absorb(unittest.TestCase):
         self.assertEqual(len(out), 2)
 
     def test_merging_keeps_the_source_km(self):
-        dnit = Camera(-15.80, -47.90, source="DNIT", road_km=(70, 12.0))
+        dnit = Camera(-15.80, -47.90, source="DNIT", road_km=(("BR", 70), 12.0))
         df = Camera(-15.80020, -47.90, source="DETRAN-DF", direction_deg=180)
         merged = next(c for c in merge_cross_agency([dnit, df])[0] if "+" in c.source)
-        self.assertEqual(merged.road_km, (70, 12.0))
+        self.assertEqual(merged.road_km, (("BR", 70), 12.0))
         self.assertEqual(len(merged.row()), len(Camera.HEADER))   # não vai para o CSV
 
     def test_opposite_directions_from_two_agencies_stay_apart(self):

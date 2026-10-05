@@ -33,9 +33,10 @@ class Camera:
     # Sentido nominal da rodovia ("N", "S", "L", "O"), para as fontes que dão só isso (SP).
     # Vira direction_deg com a geometria do OSM (common/direction.py); não vai para o CSV.
     heading_hint: Optional[str] = field(default=None, compare=False)
-    # (BR, km) do cadastro da própria fonte (DNIT), o mesmo do Inmetro: casa com o medidor sem passar
-    # pela geometria do SNV, que erra o km em até ~2 km (inmetro_status.py). Não vai para o CSV.
-    road_km: Optional[Tuple[int, float]] = field(default=None, compare=False)
+    # ((sigla, número), km) do cadastro da própria fonte (DNIT, DER-SP), o mesmo do Inmetro: casa com o
+    # medidor sem passar pela geometria do SNV, que erra o km em até ~2 km (inmetro_status.py), e vale
+    # também em rodovia estadual, que o SNV não tem. Não vai para o CSV.
+    road_km: Optional[Tuple[Tuple[str, int], float]] = field(default=None, compare=False)
 
     HEADER = ("lat", "lng", "kind", "limit_kmh", "source", "active", "end_lat", "end_lng", "direction_deg")
 

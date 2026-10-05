@@ -29,11 +29,11 @@ CKAN = "https://servicos.dnit.gov.br/dadosabertos/api/3/action/package_show?id=c
 SNAP_M = 150.0
 
 
-def road_km(rodovia, km) -> Optional[Tuple[int, float]]:
-    """('070', 189.8) -> (70, 189.8); sem rodovia ou km legíveis -> None."""
+def road_km(rodovia, km) -> Optional[Tuple[Tuple[str, int], float]]:
+    """('070', 189.8) -> (('BR', 70), 189.8); sem rodovia ou km legíveis -> None."""
     m = re.search(r"(\d{2,3})", str(rodovia or ""))
     k = to_float(km) if km is not None else None
-    return (int(m.group(1)), k) if m and k is not None else None
+    return (("BR", int(m.group(1))), k) if m and k is not None else None
 
 
 def lanes_increasing(faixas: Optional[str]) -> Optional[bool]:
