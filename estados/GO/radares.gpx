@@ -995,7 +995,7 @@
 <wpt lat="-16.254773" lon="-48.991761"><name>Radar 80 km/h</name><desc>Fonte: ANTT · sentido 140° (sudeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-16.249033" lon="-48.934741"><name>Radar 60 km/h</name><desc>Fonte: ANTT · sentido 12° (norte)</desc><type>FIXED</type></wpt>
 <wpt lat="-16.246521" lon="-47.912161"><name>Radar 40 km/h</name><desc>Fonte: DER-GO · sentido 73° (leste)</desc><type>FIXED</type></wpt>
-<wpt lat="-16.245167" lon="-47.906278"><name>Radar 40 km/h</name><desc>Fonte: DNIT · sentido 323° (noroeste)</desc><type>FIXED</type></wpt>
+<wpt lat="-16.245167" lon="-47.906278"><name>Radar 40 km/h</name><desc>Fonte: DNIT+OSM · sentido 323° (noroeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-16.244198" lon="-47.907447"><name>Radar 40 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-16.243793" lon="-47.907711"><name>Radar 40 km/h</name><desc>Fonte: DNIT · sentido 144° (sudeste)</desc><type>FIXED</type></wpt>
 <wpt lat="-16.242058" lon="-49.003264"><name>Radar 80 km/h</name><desc>Fonte: ANTT · sentido 155° (sudeste)</desc><type>FIXED</type></wpt>
