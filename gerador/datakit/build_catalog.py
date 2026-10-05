@@ -28,7 +28,7 @@ from datakit.common.ufs import SOURCE_HOME_UF, uf_name
 SCHEMA = 2
 
 _FEDERAL = {"DNIT", "ANTT"}
-_MUNICIPAL = {"PMF", "PCR", "PMJP", "CET-SP", "RIO", "BHTRANS"}
+_MUNICIPAL = {"PMF", "PCR", "PMJP", "CET-SP", "RIO", "BHTRANS", "CURITIBA"}
 
 
 def _coverage(cameras_csv: str, uf: str) -> dict:

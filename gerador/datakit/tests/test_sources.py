@@ -576,12 +576,56 @@ class Municipal(unittest.TestCase):
         try:
             with mock.patch.object(municipal, "_pmjp", boom), \
                     mock.patch.object(municipal, "_fortaleza", lambda bbox: []), \
-                    mock.patch.object(municipal, "_recife", lambda bbox: ok):
+                    mock.patch.object(municipal, "_recife", lambda bbox: ok), \
+                    mock.patch.object(municipal, "_curitiba", lambda bbox: []):
                 cams, _ = municipal.load("")
             self.assertEqual(cams, ok)
             self.assertTrue(any("João Pessoa" in f and "ConnectionError" in f for f in failures.recorded()), failures.recorded())
         finally:
             failures._FAILURES[:] = before
+
+    # Trecho da página da Setran (2026-10-05), quatro itens como vêm: velocidade com limite, velocidade
+    # sem o ícone do limite, só avanço de sinal, só conversão proibida.
+    CWB = """
+    <div class="item-lista"> <span id="x_lblLocal_0">Rua Mateus Leme</span>
+      <span>Identificação: <span id="x_lblIdentificacao_0">RADAR AR-15</span></span>
+      <span class='icone-velocidade' title='Velocidade controlada'></span><span class='icone-faixa-pedestre' title='Parada na faixa'></span><span class='icone-semaforo' title='Avanço de sinal'></span>
+      <span class='icn-velocidade-50'></span>
+      <a onclick="javascript:verNoMapa(&#39;-25.38096&#39;,&#39;-49.27183&#39;);">ver no mapa</a></div>
+    <div class="item-lista"> <span id="x_lblIdentificacao_1">Radar MO-07A</span>
+      <span class='icone-velocidade' title='Velocidade controlada'></span><span class='icone-faixa' title='Faixa Exclusiva'></span>
+      <a onclick="javascript:verNoMapa(&#39;-25.43010&#39;,&#39;-49.26560&#39;);">ver no mapa</a></div>
+    <div class="item-lista"> <span id="x_lblIdentificacao_2">RADAR AR-61C</span>
+      <span class='icone-faixa-pedestre' title='Parada na faixa'></span><span class='icone-semaforo' title='Avanço de sinal'></span>
+      <a onclick="javascript:verNoMapa(&#39;-25.44000&#39;,&#39;-49.28000&#39;);">ver no mapa</a></div>
+    <div class="item-lista"> <span id="x_lblIdentificacao_3">RADAR MO-91A</span>
+      <span class='icone-conversao-proibida' title='Conversão proibida'></span>
+      <a onclick="javascript:verNoMapa(&#39;-25.45000&#39;,&#39;-49.29000&#39;);">ver no mapa</a></div>
+    """
+
+    def test_curitiba_reads_the_setran_page(self):
+        """Velocidade controlada -> FIXED com o limite do ícone; só avanço de sinal -> RED_LIGHT;
+        só conversão proibida fica de fora (não é aviso de velocidade nem de sinal), como no BH."""
+        from datakit.sources import municipal
+        cams = municipal.parse_curitiba(self.CWB)
+        self.assertEqual([(c.lat, c.lng, c.kind, c.limit_kmh, c.source, c.active) for c in cams], [
+            (-25.38096, -49.27183, CameraKind.FIXED, 50, "CURITIBA", True),
+            (-25.4301, -49.2656, CameraKind.FIXED, None, "CURITIBA", True),
+            (-25.44, -49.28, CameraKind.RED_LIGHT, None, "CURITIBA", True),
+        ])
+
+    def test_curitiba_outside_the_bbox_or_brazil_is_left_out(self):
+        from datakit.sources import municipal
+        html = self.CWB.replace("-49.27183", "49.27183")   # fora do Brasil
+        self.assertEqual(len(municipal.parse_curitiba(html)), 2)
+        self.assertEqual(municipal.parse_curitiba(self.CWB, bbox=(-25.40, -49.30, -25.35, -49.20))[0].lat, -25.38096)
+        self.assertEqual(len(municipal.parse_curitiba(self.CWB, bbox=(-25.40, -49.30, -25.35, -49.20))), 1)
+
+    def test_curitiba_is_a_municipal_agency_of_parana(self):
+        from datakit.build_catalog import _MUNICIPAL
+        from datakit.common.ufs import SOURCE_HOME_UF
+        self.assertEqual(SOURCE_HOME_UF.get("CURITIBA"), "PR")
+        self.assertIn("CURITIBA", _MUNICIPAL)
 
 
 class Formats(unittest.TestCase):

@@ -176,7 +176,7 @@ fontes e manter a mesma licença em bases derivadas.
 | Prefeitura de São Paulo (GeoSampa, CET) | Limite pela classificação viária (vias de trânsito rápido e arteriais) e os radares ativos da cidade (locais fiscalizados da CET, com limite e sentido centro/bairro) | Dado aberto municipal |
 | BHTrans (Belo Horizonte) | Radares e detectores de avanço de sinal | CC-BY |
 | Detran-DF | Radares e lombadas eletrônicas | Dado aberto governamental |
-| Prefeituras de Fortaleza, Recife e João Pessoa | Radares urbanos | Dado aberto governamental |
+| Prefeituras de Fortaleza, Recife, João Pessoa e Curitiba | Radares urbanos | Dado aberto governamental |
 
 ## Como os arquivos são gerados
 

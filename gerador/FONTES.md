@@ -37,6 +37,7 @@ endereços (geocodificador).
 | **DF — Detran (ArcGIS `Base_DETRAN`)** | 1.125 radares (lat/lng, limite) + 1.230 lombadas eletrônicas | ArcGIS REST, dados de 2019 |
 | **DF — portal de dados abertos** | versão atual do mesmo cadastro | CSV; o portal bloqueia download automático (baixar no navegador) |
 | Mogi das Cruzes (ArcGIS `radares`) | 14 radares | ArcGIS REST |
+| **Curitiba — fiscalização eletrônica da Setran** (`transito.curitiba.pr.gov.br/fiscalizacaoeletronica`, desde 2026-10-05) | 308 pontos em operação: coordenada, identificação, o que fiscaliza (velocidade, avanço de sinal, parada na faixa, conversão), limite | Página HTML (a lista inteira numa página só) |
 
 ## B — Rodovia + km (precisam de referência linear)
 
@@ -60,8 +61,9 @@ Referência linear disponível:
   (atualizado 2026-09-11). A própria prefeitura tem geocodificador com número de porta
   (`pgeo3.../Geocode/Geocode_NP`, `Geocode_Logradouros_WGS84`).
 - **Inmetro**: ~8.900 válidos com endereço urbano (Brasília 1.013, Goiânia 291, …).
-- Porto Alegre (painel ObservaMob), Curitiba (portal Setran), CET-SP (mapa), Salvador
+- Porto Alegre (relatórios Power BI do ObservaMob, a ler), CET-SP (mapa), Salvador
   (Transalvador, fora do ar no teste), Goiânia (consulta na tela) — sem arquivo aberto.
+  Curitiba saiu desta lista em 2026-10-05: a página da Setran passou a trazer a coordenada (seção A).
 
 ## D — Indisponíveis agora
 
@@ -138,6 +140,22 @@ Os que sobram no DER-SP: acesso (SPA, SPI, sem km que case), medidor só vencido
 ou nenhum medidor no km. De passagem: "KM 004" deixou de ser lido como a rodovia "KM-4" (no
 Inmetro de SP, "SPA-372/321 KM 004,000"); 618 medidores válidos do país saem dessa falsa rodovia, e
 um deles, um cruzamento em Rio Claro, passa a poder ser localizado pelo endereço.
+
+### Curitiba — página da Setran (2026-10-05)
+
+`sources/municipal.py`, fonte `CURITIBA`. Cada item da página de fiscalização eletrônica traz o
+ponto (`verNoMapa('lat','lng')`), a identificação ("RADAR AR-15", "Radar MO-07A"), os tipos de
+fiscalização (títulos dos ícones) e o limite (classe `icn-velocidade-NN`). Velocidade controlada vira
+radar fixo; só avanço de sinal vira avanço de sinal; só conversão proibida fica de fora, como no BH.
+Na leitura de 2026-10-05: 308 pontos, 293 de velocidade (274 com limite: 50 km/h 142, 40 km/h 65,
+60 km/h 40, 70 km/h 27) e 15 só de sinal. Sem sentido publicado (as letras A, B, C da identificação
+separam faixas ou sentidos, sem dizer qual).
+
+PR gerado localmente, área de Curitiba: radares ativos de 420 para 542. Dos 308 pontos, 165 se
+juntam a radares que já estavam (111 do OSM, 29 do Inmetro por endereço, 25 dos dois) e 143 entram
+novos (128 de velocidade e 15 de sinal). Observação: 25 desses novos têm um radar só do OSM entre
+30 e 50 m, fora do raio de junção (30 m, o mesmo para todas as fontes); podem ser o mesmo
+equipamento mapeado longe ou o do outro sentido. Fica anotado, sem mudar a regra.
 
 ## Sentido dos radares e das placas (2026-09-29)
 
