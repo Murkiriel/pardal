@@ -27,14 +27,14 @@ from datakit.common.geo import in_bbox
 from datakit.common.ufassign import UfAssigner
 from datakit.common.ufs import SOURCE_HOME_UF, UF_BBOX, geofabrik_region, uf_bbox
 from datakit.context import BuildContext
-from datakit.sources import dnit, antt, der_go, der_sp, der_pe, municipal, bh, df_detran, rio, cet_sp
+from datakit.sources import dnit, antt, der_go, der_sp, der_pe, municipal, bh, df_detran, rio, cet_sp, eptc
 
 # Fontes oficiais de radares, na ordem do manifest. Cada módulo expõe fetch(ctx) -> SourceData
 # (datakit/context.py).
 OFFICIAL = {
     "DNIT": dnit, "ANTT": antt,
     "DER-GO": der_go, "DER-SP": der_sp, "DER-PE": der_pe,
-    "capitais": municipal, "BHTRANS": bh, "DETRAN-DF": df_detran, "RIO": rio, "CET-SP": cet_sp,
+    "capitais": municipal, "BHTRANS": bh, "DETRAN-DF": df_detran, "RIO": rio, "CET-SP": cet_sp, "EPTC": eptc,
 }
 
 # Gravado em data/dist no início do build e apagado só no fim: enquanto existir (build rodando,

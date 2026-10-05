@@ -38,6 +38,7 @@ endereços (geocodificador).
 | **DF — portal de dados abertos** | versão atual do mesmo cadastro | CSV; o portal bloqueia download automático (baixar no navegador) |
 | Mogi das Cruzes (ArcGIS `radares`) | 14 radares | ArcGIS REST |
 | **Curitiba — fiscalização eletrônica da Setran** (`transito.curitiba.pr.gov.br/fiscalizacaoeletronica`, desde 2026-10-05) | 308 pontos em operação: coordenada, identificação, o que fiscaliza (velocidade, avanço de sinal, parada na faixa, conversão), limite | Página HTML (a lista inteira numa página só) |
+| **Porto Alegre — EPTC, medidores eletrônicos de velocidade** (relatório Power BI público ligado à página da EPTC, desde 2026-10-05) | 155 medidores: coordenada, sentido, limite, tipo (pardal, lombada, DAS, portátil), situação | Power BI "publicar na web", como o da CET-SP |
 
 ## B — Rodovia + km (precisam de referência linear)
 
@@ -61,9 +62,10 @@ Referência linear disponível:
   (atualizado 2026-09-11). A própria prefeitura tem geocodificador com número de porta
   (`pgeo3.../Geocode/Geocode_NP`, `Geocode_Logradouros_WGS84`).
 - **Inmetro**: ~8.900 válidos com endereço urbano (Brasília 1.013, Goiânia 291, …).
-- Porto Alegre (relatórios Power BI do ObservaMob, a ler), CET-SP (mapa), Salvador
+- CET-SP (mapa), Salvador
   (Transalvador, fora do ar no teste), Goiânia (consulta na tela) — sem arquivo aberto.
-  Curitiba saiu desta lista em 2026-10-05: a página da Setran passou a trazer a coordenada (seção A).
+  Curitiba e Porto Alegre saíram desta lista em 2026-10-05 (seção A): a página da Setran passou a trazer
+  a coordenada, e o relatório Power BI da EPTC tem a tabela dos medidores com ela.
 
 ## D — Indisponíveis agora
 
@@ -156,6 +158,25 @@ juntam a radares que já estavam (111 do OSM, 29 do Inmetro por endereço, 25 do
 novos (128 de velocidade e 15 de sinal). Observação: 25 desses novos têm um radar só do OSM entre
 30 e 50 m, fora do raio de junção (30 m, o mesmo para todas as fontes); podem ser o mesmo
 equipamento mapeado longe ou o do outro sentido. Fica anotado, sem mudar a regra.
+
+### Porto Alegre — relatório da EPTC (2026-10-05)
+
+`sources/eptc.py`, fonte `EPTC`. A página "Medidores Eletrônicos de Velocidade" da EPTC liga dois
+relatórios Power BI públicos. O de localização ("Localização da Fiscalização por Equipamentos
+Eletrônicos") tem a tabela `BaseMevFluxo`, lida como a da CET-SP (`_powerbi.py`), com a cópia da última
+leitura boa em `data/raw/` se a API falhar. O relatório fica no cluster do norte da Europa do Power BI
+(o endereço de roteamento responde 403; achado testando os clusters). O outro relatório (fluxo e
+infrações) tem uma tabela de autos com placa de veículo: não é lido.
+
+Na leitura de 2026-10-05: 155 medidores, todos "Ativo": 46 pardais, 39 lombadas eletrônicas, 11 DAS
+(detector de avanço de sinal que também mede velocidade) e 59 portáteis. Os três primeiros viram radar
+fixo (96, todos com limite: 60 km/h 46, 40 km/h 38, 30 km/h 10, 80 km/h 2); o portátil é ponto de
+operação do radar móvel e fica de fora. Limite com dois valores ("40km/h_60km/h"): o menor. O sentido
+(BC/CB, NS/SN, IC/CI) ainda não é usado.
+
+RS gerado localmente, área de Porto Alegre: radares ativos de 147 para 192. Dos 96, 47 se juntam a
+radares que já estavam (33 do OSM, 8 do Inmetro, 6 dos dois) e 49 entram novos; 6 dos novos têm um
+radar só do OSM entre 30 e 50 m (como em Curitiba, fora do raio de junção).
 
 ## Sentido dos radares e das placas (2026-09-29)
 

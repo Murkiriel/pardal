@@ -379,6 +379,73 @@ class CetCameras(unittest.TestCase):
         self.assertEqual(hint_target("L"), 90.0)
 
 
+class Eptc(unittest.TestCase):
+    """Porto Alegre: a tabela BaseMevFluxo do relatório Power BI público da EPTC (2026-10-05)."""
+    ROWS = [
+        {"IDLocalMEV": "1", "LOCAL": "Av. Antonio de Carvalho 10m do n 2079 - SN", "LATITUDE": "-30.05078",
+         "LONGITUDE": "-51.14496", "SENTIDO": "SN", "LIMITEKMH": "40 km/h", "CONTROLADOR": "Fixo Redutor (Lombada)",
+         "SITUACAO": "Ativo"},
+        {"IDLocalMEV": "2", "LOCAL": "Av. Ipiranga 1", "LATITUDE": "-30.0500", "LONGITUDE": "-51.2000",
+         "SENTIDO": "BC", "LIMITEKMH": "60 km/h", "CONTROLADOR": "Fixo Controlador (Pardal)", "SITUACAO": "Ativo"},
+        {"IDLocalMEV": "3", "LOCAL": "Av. Bento 2", "LATITUDE": "-30.0600", "LONGITUDE": "-51.2100",
+         "SENTIDO": "Cruzamento", "LIMITEKMH": "40km/h_60km/h", "CONTROLADOR": "DAS (Caetano)", "SITUACAO": "Ativo"},
+        {"IDLocalMEV": "100", "LOCAL": "Av. Juca Batista 1648", "LATITUDE": "-30.1455813", "LONGITUDE": "-51.2123125",
+         "SENTIDO": "N/A", "LIMITEKMH": "60 km/h", "CONTROLADOR": "Medidor Portatil (Radar)", "SITUACAO": "Ativo"},
+        {"IDLocalMEV": "4", "LOCAL": "R. X", "LATITUDE": "-30.0700", "LONGITUDE": "-51.2200",
+         "SENTIDO": "CB", "LIMITEKMH": "60 km/h", "CONTROLADOR": "Fixo Controlador (Pardal)", "SITUACAO": "Inativo"},
+        {"IDLocalMEV": "5", "LOCAL": "R. Y", "LATITUDE": None, "LONGITUDE": "-51.2300",
+         "SENTIDO": "CB", "LIMITEKMH": "60 km/h", "CONTROLADOR": "Fixo Controlador (Pardal)", "SITUACAO": "Ativo"},
+    ]
+
+    def test_fixed_ones_with_the_lowest_limit(self):
+        """Pardal, lombada e DAS (avanço de sinal que também mede velocidade) são radar fixo; o
+        portátil é ponto de operação, não equipamento: fora. Dois limites ("40km/h_60km/h"): o menor."""
+        from datakit.sources import eptc
+        cams = eptc.rows_to_cameras(self.ROWS)
+        self.assertEqual([(c.lat, c.lng, c.kind, c.limit_kmh, c.source, c.active) for c in cams], [
+            (-30.05078, -51.14496, CameraKind.FIXED, 40, "EPTC", True),
+            (-30.05, -51.2, CameraKind.FIXED, 60, "EPTC", True),
+            (-30.06, -51.21, CameraKind.FIXED, 40, "EPTC", True),
+        ])
+
+    def test_bbox_and_the_report_key(self):
+        from datakit.sources import _powerbi, eptc
+        self.assertEqual(len(eptc.rows_to_cameras(self.ROWS, bbox=(-30.055, -51.15, -30.04, -51.14))), 1)
+        self.assertEqual(_powerbi.resource_key(eptc.PBI_VIEW), "3fbcc8cd-9d67-4553-9459-e6d17975d98f")
+
+    def test_eptc_is_an_official_municipal_source_of_rio_grande_do_sul(self):
+        from datakit import build
+        from datakit.build_catalog import _MUNICIPAL
+        from datakit.common.ufs import SOURCE_HOME_UF
+        from datakit.sources import eptc
+        self.assertIs(build.OFFICIAL.get("EPTC"), eptc)
+        self.assertEqual(SOURCE_HOME_UF.get("EPTC"), "RS")
+        self.assertIn("EPTC", _MUNICIPAL)
+
+    def test_a_failing_report_falls_back_to_the_saved_copy(self):
+        """API não documentada: a leitura boa fica em data/raw/ e, se o Power BI falhar, vale a cópia
+        com aviso (como a CET-SP). Sem cópia, a falha sobe."""
+        import tempfile
+        from unittest import mock
+        from datakit import failures
+        from datakit.sources import _powerbi, eptc
+        with tempfile.TemporaryDirectory() as raw:
+            with mock.patch.object(_powerbi, "model_id", lambda api, key: 1), \
+                    mock.patch.object(_powerbi, "query_table", lambda *a: self.ROWS):
+                self.assertEqual(len(eptc.load(raw)[0]), 3)
+            before = list(failures._WARNINGS)
+            try:
+                with mock.patch.object(_powerbi, "model_id", mock.Mock(side_effect=ConnectionError("fora"))):
+                    self.assertEqual(len(eptc.load(raw)[0]), 3)
+                self.assertTrue(any("EPTC" in w for w in failures.warnings()), failures.warnings())
+            finally:
+                failures._WARNINGS[:] = before
+        with tempfile.TemporaryDirectory() as empty:
+            with mock.patch.object(_powerbi, "model_id", mock.Mock(side_effect=ConnectionError("fora"))):
+                with self.assertRaises(ConnectionError):
+                    eptc.load(empty)
+
+
 class PowerBi(unittest.TestCase):
     def test_decode_repeats_nulls_and_dictionaries(self):
         from datakit.sources import _powerbi

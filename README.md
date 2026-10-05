@@ -177,6 +177,7 @@ fontes e manter a mesma licença em bases derivadas.
 | BHTrans (Belo Horizonte) | Radares e detectores de avanço de sinal | CC-BY |
 | Detran-DF | Radares e lombadas eletrônicas | Dado aberto governamental |
 | Prefeituras de Fortaleza, Recife, João Pessoa e Curitiba | Radares urbanos | Dado aberto governamental |
+| EPTC (Porto Alegre) | Radares fixos, lombadas eletrônicas e detectores de avanço de sinal, com limite (relatório público da EPTC) | Dado aberto municipal |
 
 ## Como os arquivos são gerados
 

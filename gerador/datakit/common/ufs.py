@@ -66,7 +66,7 @@ UF_NAME: Dict[str, str] = {
 # federais (DNIT, ANTT) e o OSM cobrem o país inteiro e não entram aqui.
 SOURCE_HOME_UF: Dict[str, str] = {
     "DER-SP": "SP", "DER-GO": "GO", "DER-PE": "PE", "DETRAN-DF": "DF",
-    "CET-SP": "SP", "RIO": "RJ", "BHTRANS": "MG", "PMF": "CE", "PCR": "PE", "PMJP": "PB", "CURITIBA": "PR",
+    "CET-SP": "SP", "RIO": "RJ", "BHTRANS": "MG", "PMF": "CE", "PCR": "PE", "PMJP": "PB", "CURITIBA": "PR", "EPTC": "RS",
 }
 
 
