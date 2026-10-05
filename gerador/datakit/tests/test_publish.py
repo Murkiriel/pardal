@@ -485,3 +485,17 @@ class HttpSession(unittest.TestCase):
             params={"q": 1}))
         self.assertEqual(get.call_args_list[1], mock.call(
             "https://x.gov.br/b", headers={"A": "b"}, timeout=(_http.CONNECT_TIMEOUT, 5), params=None))
+
+
+class ForkSchedule(unittest.TestCase):
+    """Um fork com o Actions ligado não pode gerar e publicar sozinho todo dia: o agendamento só vale
+    no repositório do projeto (à mão, gera onde for disparado). Sem a trava, o fork lia a data dos
+    dados do repositório original e geraria sem o segredo do túnel."""
+
+    def test_the_schedule_only_runs_in_the_project_repository(self):
+        path = os.path.join(os.path.dirname(__file__), "..", "..", "..", ".github", "workflows", "gerar-dados.yml")
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        job = text.split("\n  interval:\n", 1)[1].split("\n  generate:\n", 1)[0]
+        guard = [ln.strip() for ln in job.splitlines() if ln.startswith("    if:")]
+        self.assertEqual(guard, ["if: github.event_name != 'schedule' || github.repository == 'Murkiriel/pardal'"])

@@ -46,6 +46,9 @@ concurrency:
 
 jobs:
   interval:
+    # O agendamento só vale no repositório do projeto: um fork com o Actions ligado não gera nem publica
+    # sozinho (leria a data dos dados daqui e não tem o segredo do túnel). À mão, gera onde for disparado.
+    if: github.event_name != 'schedule' || github.repository == 'Murkiriel/pardal'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
