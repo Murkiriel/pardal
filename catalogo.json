@@ -1,6 +1,6 @@
 {
  "schema": 2,
- "built_at": "2026-10-05T22:15:36Z",
+ "built_at": "2026-10-06T13:43:38Z",
  "base_url": "",
  "ufs": {
   "AC": {
@@ -11,8 +11,8 @@
     -7.11,
     -66.62
    ],
-   "built_at": "2026-10-05T22:07:06Z",
-   "artifact_built_at": "2026-10-05T22:07:06Z",
+   "built_at": "2026-10-06T13:31:16Z",
+   "artifact_built_at": "2026-10-06T13:31:16Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -55,8 +55,8 @@
     -8.81,
     -35.15
    ],
-   "built_at": "2026-10-05T22:05:39Z",
-   "artifact_built_at": "2026-10-05T22:05:39Z",
+   "built_at": "2026-10-06T13:29:16Z",
+   "artifact_built_at": "2026-10-06T13:29:16Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -100,8 +100,8 @@
     2.25,
     -56.1
    ],
-   "built_at": "2026-10-05T22:07:08Z",
-   "artifact_built_at": "2026-10-05T22:07:08Z",
+   "built_at": "2026-10-06T13:31:21Z",
+   "artifact_built_at": "2026-10-06T13:31:21Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -146,8 +146,8 @@
     4.44,
     -49.87
    ],
-   "built_at": "2026-10-05T22:07:09Z",
-   "artifact_built_at": "2026-10-05T22:07:09Z",
+   "built_at": "2026-10-06T13:31:22Z",
+   "artifact_built_at": "2026-10-06T13:31:22Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -191,8 +191,8 @@
     -8.53,
     -37.34
    ],
-   "built_at": "2026-10-05T22:05:55Z",
-   "artifact_built_at": "2026-10-05T22:05:55Z",
+   "built_at": "2026-10-06T13:29:41Z",
+   "artifact_built_at": "2026-10-06T13:29:41Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -238,8 +238,8 @@
     -2.78,
     -37.25
    ],
-   "built_at": "2026-10-05T22:06:05Z",
-   "artifact_built_at": "2026-10-05T22:06:05Z",
+   "built_at": "2026-10-06T13:29:56Z",
+   "artifact_built_at": "2026-10-06T13:29:56Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
@@ -285,8 +285,8 @@
     -15.5,
     -47.31
    ],
-   "built_at": "2026-10-05T22:02:43Z",
-   "artifact_built_at": "2026-10-05T22:02:43Z",
+   "built_at": "2026-10-06T13:25:39Z",
+   "artifact_built_at": "2026-10-06T13:25:39Z",
    "coverage": {
     "level": "federal+state",
     "sources": [
@@ -332,8 +332,8 @@
     -17.89,
     -39.66
    ],
-   "built_at": "2026-10-05T22:10:44Z",
-   "artifact_built_at": "2026-10-05T22:10:44Z",
+   "built_at": "2026-10-06T13:36:19Z",
+   "artifact_built_at": "2026-10-06T13:36:19Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -379,8 +379,8 @@
     -12.4,
     -45.9
    ],
-   "built_at": "2026-10-05T22:02:56Z",
-   "artifact_built_at": "2026-10-05T22:02:56Z",
+   "built_at": "2026-10-06T13:26:01Z",
+   "artifact_built_at": "2026-10-06T13:26:01Z",
    "coverage": {
     "level": "federal+state",
     "sources": [
@@ -428,8 +428,8 @@
     -1.04,
     -41.8
    ],
-   "built_at": "2026-10-05T22:06:09Z",
-   "artifact_built_at": "2026-10-05T22:06:09Z",
+   "built_at": "2026-10-06T13:30:02Z",
+   "artifact_built_at": "2026-10-06T13:30:02Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -474,8 +474,8 @@
     -14.23,
     -39.86
    ],
-   "built_at": "2026-10-05T22:11:33Z",
-   "artifact_built_at": "2026-10-05T22:11:33Z",
+   "built_at": "2026-10-06T13:37:39Z",
+   "artifact_built_at": "2026-10-06T13:37:39Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
@@ -522,8 +522,8 @@
     -17.16,
     -50.92
    ],
-   "built_at": "2026-10-05T22:03:00Z",
-   "artifact_built_at": "2026-10-05T22:03:00Z",
+   "built_at": "2026-10-06T13:26:08Z",
+   "artifact_built_at": "2026-10-06T13:26:08Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -535,8 +535,8 @@
    },
    "cameras": {
     "file": "estados/MS/radares.csv",
-    "bytes": 10236,
-    "sha256": "0f11c4ed2ec3fd9f9456e9f1867dd20a461c9d5e3b52b98ad11e5f56d53023f1",
+    "bytes": 10228,
+    "sha256": "036b35b2d7b0962e7d263d141d63aef51fff8807716318243c2e4c1f9dbfb28b",
     "count": 243
    },
    "limits": {
@@ -569,8 +569,8 @@
     -7.35,
     -50.22
    ],
-   "built_at": "2026-10-05T22:03:11Z",
-   "artifact_built_at": "2026-10-05T22:03:11Z",
+   "built_at": "2026-10-06T13:26:17Z",
+   "artifact_built_at": "2026-10-06T13:26:17Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -616,8 +616,8 @@
     2.59,
     -46.06
    ],
-   "built_at": "2026-10-05T22:07:13Z",
-   "artifact_built_at": "2026-10-05T22:07:13Z",
+   "built_at": "2026-10-06T13:31:28Z",
+   "artifact_built_at": "2026-10-06T13:31:28Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -663,8 +663,8 @@
     -6.02,
     -34.79
    ],
-   "built_at": "2026-10-05T22:06:12Z",
-   "artifact_built_at": "2026-10-05T22:06:12Z",
+   "built_at": "2026-10-06T13:30:07Z",
+   "artifact_built_at": "2026-10-06T13:30:07Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
@@ -676,8 +676,8 @@
    },
    "cameras": {
     "file": "estados/PB/radares.csv",
-    "bytes": 11370,
-    "sha256": "40531dfcfbdd3fae7fb56b9482b5f455bb4b219b26e725f100bb4522489b745f",
+    "bytes": 11368,
+    "sha256": "6215a4288b93a787b252195a6dbf9b2f7989dd1eba152b2cad5436f1946e1ddd",
     "count": 270
    },
    "limits": {
@@ -688,8 +688,8 @@
    },
    "counts": {
     "cameras": 270,
-    "cameras_with_limit": 265,
-    "cameras_inactive": 6,
+    "cameras_with_limit": 264,
+    "cameras_inactive": 8,
     "sections": 0,
     "red_lights": 0,
     "limits": 46504,
@@ -710,8 +710,8 @@
     -7.27,
     -34.81
    ],
-   "built_at": "2026-10-05T22:06:18Z",
-   "artifact_built_at": "2026-10-05T22:06:18Z",
+   "built_at": "2026-10-06T13:30:17Z",
+   "artifact_built_at": "2026-10-06T13:30:17Z",
    "coverage": {
     "level": "federal+state+municipal",
     "sources": [
@@ -724,8 +724,8 @@
    },
    "cameras": {
     "file": "estados/PE/radares.csv",
-    "bytes": 15640,
-    "sha256": "8e952475b31491a192c4bf826db81b431bc76b4a82adfbcf0c14645c0e8fc8eb",
+    "bytes": 15638,
+    "sha256": "72df40275381ec6a6ea27ecdf3c7b1cadb2e105d789857322ae78a7cf7d46cab",
     "count": 386
    },
    "limits": {
@@ -736,8 +736,8 @@
    },
    "counts": {
     "cameras": 386,
-    "cameras_with_limit": 328,
-    "cameras_inactive": 16,
+    "cameras_with_limit": 327,
+    "cameras_inactive": 18,
     "sections": 0,
     "red_lights": 0,
     "limits": 63023,
@@ -758,8 +758,8 @@
     -2.74,
     -40.37
    ],
-   "built_at": "2026-10-05T22:06:20Z",
-   "artifact_built_at": "2026-10-05T22:06:20Z",
+   "built_at": "2026-10-06T13:30:21Z",
+   "artifact_built_at": "2026-10-06T13:30:21Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -804,8 +804,8 @@
     -22.52,
     -48.02
    ],
-   "built_at": "2026-10-05T22:15:05Z",
-   "artifact_built_at": "2026-10-05T22:15:05Z",
+   "built_at": "2026-10-06T13:42:48Z",
+   "artifact_built_at": "2026-10-06T13:42:48Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
@@ -852,8 +852,8 @@
     -20.76,
     -40.96
    ],
-   "built_at": "2026-10-05T22:11:52Z",
-   "artifact_built_at": "2026-10-05T22:11:52Z",
+   "built_at": "2026-10-06T13:38:09Z",
+   "artifact_built_at": "2026-10-06T13:38:09Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
@@ -900,8 +900,8 @@
     -4.83,
     -34.96
    ],
-   "built_at": "2026-10-05T22:06:23Z",
-   "artifact_built_at": "2026-10-05T22:06:23Z",
+   "built_at": "2026-10-06T13:30:25Z",
+   "artifact_built_at": "2026-10-06T13:30:25Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -946,8 +946,8 @@
     -7.97,
     -59.77
    ],
-   "built_at": "2026-10-05T22:07:15Z",
-   "artifact_built_at": "2026-10-05T22:07:15Z",
+   "built_at": "2026-10-06T13:31:31Z",
+   "artifact_built_at": "2026-10-06T13:31:31Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -992,8 +992,8 @@
     5.27,
     -58.89
    ],
-   "built_at": "2026-10-05T22:07:16Z",
-   "artifact_built_at": "2026-10-05T22:07:16Z",
+   "built_at": "2026-10-06T13:31:32Z",
+   "artifact_built_at": "2026-10-06T13:31:32Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -1038,8 +1038,8 @@
     -27.08,
     -49.69
    ],
-   "built_at": "2026-10-05T22:15:24Z",
-   "artifact_built_at": "2026-10-05T22:15:24Z",
+   "built_at": "2026-10-06T13:43:19Z",
+   "artifact_built_at": "2026-10-06T13:43:19Z",
    "coverage": {
     "level": "federal+municipal",
     "sources": [
@@ -1086,8 +1086,8 @@
     -25.95,
     -48.35
    ],
-   "built_at": "2026-10-05T22:15:36Z",
-   "artifact_built_at": "2026-10-05T22:15:36Z",
+   "built_at": "2026-10-06T13:43:37Z",
+   "artifact_built_at": "2026-10-06T13:43:37Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -1100,7 +1100,7 @@
    "cameras": {
     "file": "estados/SC/radares.csv",
     "bytes": 54097,
-    "sha256": "b9d50c116247b337e516f608718441c4bad88facf5beabf393dc1484977e09cb",
+    "sha256": "5d23533c9c96c38c05b071e3fe027993cf7dec32463434bcbfc91e4dbe0f5686",
     "count": 1178
    },
    "limits": {
@@ -1112,7 +1112,7 @@
    "counts": {
     "cameras": 1178,
     "cameras_with_limit": 1021,
-    "cameras_inactive": 66,
+    "cameras_inactive": 72,
     "sections": 198,
     "red_lights": 89,
     "limits": 138488,
@@ -1133,8 +1133,8 @@
     -9.51,
     -36.39
    ],
-   "built_at": "2026-10-05T22:06:25Z",
-   "artifact_built_at": "2026-10-05T22:06:25Z",
+   "built_at": "2026-10-06T13:30:27Z",
+   "artifact_built_at": "2026-10-06T13:30:27Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -1179,8 +1179,8 @@
     -19.78,
     -44.16
    ],
-   "built_at": "2026-10-05T22:12:53Z",
-   "artifact_built_at": "2026-10-05T22:12:53Z",
+   "built_at": "2026-10-06T13:39:47Z",
+   "artifact_built_at": "2026-10-06T13:39:47Z",
    "coverage": {
     "level": "federal+state+municipal",
     "sources": [
@@ -1194,9 +1194,9 @@
    },
    "cameras": {
     "file": "estados/SP/radares.csv",
-    "bytes": 229903,
-    "sha256": "da53704274f5a488b2faf24b39b1926e9dbacdbfe7b31c64f0f6ade6773e5041",
-    "count": 5237
+    "bytes": 229775,
+    "sha256": "92d7402bd17c1cfced57b18a9d83c006c4e0c6b76c03ad1bbed49f8f6c5c0252",
+    "count": 5234
    },
    "limits": {
     "file": "estados/SP/limites.csv",
@@ -1205,8 +1205,8 @@
     "count": 460796
    },
    "counts": {
-    "cameras": 5237,
-    "cameras_with_limit": 3966,
+    "cameras": 5234,
+    "cameras_with_limit": 3965,
     "cameras_inactive": 69,
     "sections": 39,
     "red_lights": 81,
@@ -1228,8 +1228,8 @@
     -5.17,
     -45.7
    ],
-   "built_at": "2026-10-05T22:07:18Z",
-   "artifact_built_at": "2026-10-05T22:07:18Z",
+   "built_at": "2026-10-06T13:31:35Z",
+   "artifact_built_at": "2026-10-06T13:31:35Z",
    "coverage": {
     "level": "federal",
     "sources": [
@@ -1275,7 +1275,7 @@
     6.0,
     -32.0
    ],
-   "built_at": "2026-10-05T22:15:58Z",
+   "built_at": "2026-10-06T13:44:12Z",
    "coverage": {
     "level": "bundle",
     "sources": [
@@ -1284,9 +1284,9 @@
    },
    "cameras": {
     "file": "brasil/radares.csv",
-    "bytes": 856804,
-    "sha256": "ceb8b9b265913dace8527963277c1e79c903882db76ed22b7e5f260d2ed23e3e",
-    "count": 19765
+    "bytes": 856664,
+    "sha256": "2385c4b9d35e933bfef9306df5573cbcea919c6bc26bbcf28525c855e50c3fce",
+    "count": 19762
    },
    "limits": {
     "file": "brasil/limites.csv",
@@ -1307,7 +1307,7 @@
     "count": 127333
    },
    "counts": {
-    "cameras": 19765,
+    "cameras": 19762,
     "limits": 1424524,
     "limits_estimated": 1437280,
     "structs": 127333

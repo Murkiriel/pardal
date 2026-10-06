@@ -64,7 +64,7 @@
 <wpt lat="-22.241827" lon="-54.800646"><name>Radar 30 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-22.241399" lon="-54.824300"><name>Radar 30 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-22.231899" lon="-53.329823"><name>Radar 40 km/h</name><desc>Fonte: INMETRO+OSM</desc><type>FIXED</type></wpt>
-<wpt lat="-22.230126" lon="-53.330432"><name>Radar 40 km/h</name><desc>Fonte: INMETRO+OSM</desc><type>FIXED</type></wpt>
+<wpt lat="-22.230126" lon="-53.330432"><name>Radar 40 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-22.229506" lon="-54.843791"><name>Radar 30 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-22.224387" lon="-54.845096"><name>Radar 30 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-22.220214" lon="-54.802098"><name>Radar 30 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>

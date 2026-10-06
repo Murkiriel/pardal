@@ -2715,7 +2715,6 @@
 <wpt lat="-23.310652" lon="-45.934019"><name>Radar 50 km/h</name><desc>Fonte: DER-SP</desc><type>FIXED</type></wpt>
 <wpt lat="-23.310242" lon="-45.987282"><name>Radar 40 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-23.309793" lon="-45.941288"><name>Radar 50 km/h</name><desc>Fonte: DER-SP+OSM</desc><type>FIXED</type></wpt>
-<wpt lat="-23.309645" lon="-45.978437"><name>Radar 40 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-23.309640" lon="-45.953337"><name>Radar 40 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-23.309522" lon="-45.941543"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-23.309499" lon="-47.796568"><name>Radar 80 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
@@ -2852,7 +2851,6 @@
 <wpt lat="-23.227856" lon="-46.407335"><name>Radar 60 km/h</name><desc>Fonte: DER-SP</desc><type>FIXED</type></wpt>
 <wpt lat="-23.227812" lon="-47.518928"><name>Radar 50 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-23.225307" lon="-45.313727"><name>Radar 40 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
-<wpt lat="-23.223037" lon="-46.875201"><name>Radar</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-23.222384" lon="-45.902207"><name>Radar 70 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
 <wpt lat="-23.221767" lon="-46.875172"><name>Radar</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-23.221471" lon="-45.911149"><name>Radar 60 km/h</name><desc>Fonte: OSM</desc><type>FIXED</type></wpt>
@@ -2868,7 +2866,6 @@
 <wpt lat="-23.213100" lon="-47.296624"><name>Radar 40 km/h</name><desc>Fonte: DER-SP · sentido 22° (norte)</desc><type>FIXED</type></wpt>
 <wpt lat="-23.213078" lon="-45.857166"><name>Radar 60 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-23.212862" lon="-46.841263"><name>Radar</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
-<wpt lat="-23.212381" lon="-46.874847"><name>Radar</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
 <wpt lat="-23.212366" lon="-48.070734"><name>Radar 60 km/h</name><desc>Fonte: DER-SP</desc><type>FIXED</type></wpt>
 <wpt lat="-23.211420" lon="-49.372940"><name>Radar 60 km/h</name><desc>Fonte: DER-SP</desc><type>FIXED</type></wpt>
 <wpt lat="-23.211241" lon="-45.805537"><name>Radar 50 km/h</name><desc>Fonte: INMETRO</desc><type>FIXED</type></wpt>
