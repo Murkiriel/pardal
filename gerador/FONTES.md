@@ -229,6 +229,52 @@ sentido vazio só avisa nos dois sentidos. Em via de mão dupla não há referê
 independente: o lado da via não serve, porque as coordenadas ficam a poucos metros do eixo
 (concordância de 46-82%, casos demais perto do eixo para concluir).
 
+### Sentido pelo lado da via de mão dupla: medição (2026-10-07)
+
+Pergunta: dá para dar sentido aos radares que não têm, pelo lado do eixo da via em que o ponto
+está? No Brasil se anda pela direita, então numa via de mão dupla o poste à direita do eixo
+(olhando num sentido) fiscalizaria aquele sentido. Só medição: nada mudou nos pacotes.
+
+Gabarito: os 3.679 radares dos pacotes de 2026-10-06 que já têm `direction_deg`. Para cada um,
+o trecho de via do OSM mais perto (até 40 m; vias de veículo, extratos regionais da Geofabrik
+da mesma geração), o lado do eixo e o rumo inferido, contra o sentido conhecido (certo se a
+menos de 90°).
+
+- 2.471 têm uma pista de mão única como via mais perto (o caso que `resolve_probes` já cobre;
+  conferência: o sentido da pista bate em 2.321, 94%).
+- 1.187 ficam numa via de mão dupla: é o caso medido. 18 caíram numa transversal (eixo a mais
+  de 45° do sentido) e 3 não têm via a 40 m.
+
+Acerto em via de mão dupla, por distância do ponto ao eixo do OSM:
+
+| Fonte | 0-3 m | 3-6 m | 6-10 m | 10-15 m | 15-25 m | Total |
+|---|---|---|---|---|---|---|
+| DNIT | 78% (88) | 91% (139) | 90% (147) | 87% (46) | 80% (5) | 88% (426) |
+| ANTT | 65% (62) | 80% (88) | 79% (111) | 88% (43) | 67% (9) | 77% (313) |
+| DER-GO | 60% (177) | 83% (147) | 90% (89) | 73% (15) | 100% (2) | 75% (433) |
+| Todas | 66% (330) | 84% (377) | 86% (350) | 82% (108) | 72% (18) | 79% (1.187) |
+
+Por classe da via: `trunk` 87% (642), `primary` 79% (400), `secondary` 71% (80), `tertiary` 27%
+(11), `residential` 17% (30). Rente ao eixo o lado é sorte; em rua de bairro, o ponto mais perto
+costuma ser outra rua.
+
+Melhor recorte (escolhido entre ~100, o que infla o número): DNIT em `trunk`/`primary`, de 6 a
+15 m do eixo, 171 de 178 = 96,1% (limite inferior de Wilson 95%: 92,1%; metades sorteadas de
+94,4% a 98,9%). Concentrado no RS (84 de 84) e SC (25 de 25); no ES, 15 de 19.
+
+Por que não serve: os radares do DNIT sem sentido no pacote **não** são de sentido
+desconhecido. Na planilha do PNCV, 973 fiscalizam faixas de um sentido só, 783 fiscalizam
+faixas dos dois sentidos (`P-C-n` e `P-D-n`) e 18 não informam; os sem sentido são quase todos
+os de dois sentidos, e o vazio está certo (vale para os dois). Dos 870 sem sentido, 275 cairiam
+no recorte acima: dar um sentido a eles faria o radar sumir para quem passa no outro. Nas fontes
+que não informam sentido nenhum (OSM, Inmetro, Detran-DF, prefeituras), os radares são urbanos,
+o gabarito não tem como medi-los, e o que ele mostra em via urbana (`secondary` 71%,
+`residential` 17%) fica longe dos 95%.
+
+Recomendação: **não adotar**. O vazio continua significando "os dois sentidos ou
+desconhecido". A medição confirma, por um terceiro caminho, que o sentido do DNIT de um sentido
+só está certo (88-91% a 3-15 m do eixo, com o erro do eixo do OSM somado).
+
 ### CET-SP — radares da capital (2026-09-29)
 
 Fonte: "Locais fiscalizados" da página Fiscalização Eletrônica do Trânsito da CET
