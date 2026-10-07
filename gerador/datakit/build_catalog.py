@@ -19,7 +19,7 @@ import sys
 from datetime import datetime, timezone
 from typing import Optional
 
-from datakit.build_pack import CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE
+from datakit.build_pack import BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE
 from datakit.common.ufs import SOURCE_HOME_UF, uf_name
 
 # Versão do formato do catálogo. 2 (2026-09-30): nome catalogo.json e etiquetas em inglês (name,
@@ -109,6 +109,12 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             struct_dst = os.path.join(out, STRUCTS_FILE)
             shutil.copyfile(struct_src, struct_dst)
             entry["structs"] = _file_ref(struct_dst, counts.get("structs"), dist_dir)
+        # lombadas e quebra-molas (pacote schema 3): só a UF que tem alguma; chave nova, quem não a conhece a ignora
+        bump_src = os.path.join(pdir, BUMPS_FILE)
+        if os.path.exists(bump_src) and os.path.getsize(bump_src) > len("lat,lng,kind\n"):
+            bump_dst = os.path.join(out, BUMPS_FILE)
+            shutil.copyfile(bump_src, bump_dst)
+            entry["bumps"] = _file_ref(bump_dst, counts.get("bumps"), dist_dir)
         ufs[uf] = entry
 
     catalog = {

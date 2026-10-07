@@ -107,6 +107,19 @@ class Struct:
         return [f"{self.lat1:.6f}", f"{self.lng1:.6f}", f"{self.lat2:.6f}", f"{self.lng2:.6f}", self.kind]
 
 
+@dataclass(frozen=True)
+class Bump:
+    """Lombada, quebra-molas, faixa elevada ou sonorizador (traffic_calming do OSM): o que faz a moto pular."""
+    lat: float
+    lng: float
+    kind: str  # BUMP | HUMP | TABLE | CUSHION | RUMBLE_STRIP | UNSPECIFIED
+
+    HEADER = ("lat", "lng", "kind")
+
+    def row(self) -> List[str]:
+        return [f"{self.lat:.6f}", f"{self.lng:.6f}", self.kind]
+
+
 _KIND_WEIGHT = {CameraKind.RED_LIGHT: 3, CameraKind.SECTION: 2, CameraKind.FIXED: 1}
 
 

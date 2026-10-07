@@ -35,6 +35,9 @@ def _write_pbf(path):
         # radares do OSM: um no continente (60 km/h, sem sentido), um em mar aberto
         w.add_node(Node(id=1, location=(INLAND[1], INLAND[0]), tags={"highway": "speed_camera", "maxspeed": "60"}))
         w.add_node(Node(id=2, location=(SEA[1], SEA[0]), tags={"highway": "speed_camera"}))
+        # lombadas: uma no continente, uma em mar aberto (fica de fora)
+        w.add_node(Node(id=3, location=(-43.26, -22.91), tags={"traffic_calming": "bump"}))
+        w.add_node(Node(id=4, location=(SEA[1], SEA[0] + 0.01), tags={"traffic_calming": "hump"}))
         # uma via com limite sinalizado no continente e uma ponte que sai do "RJ" para a baía
         w.add_node(Node(id=10, location=(-43.29, -22.95)))
         w.add_node(Node(id=11, location=(-43.20, -22.95)))
@@ -99,6 +102,8 @@ class EndToEnd(unittest.TestCase):
                 lims = list(csv.DictReader(f))
             with open(os.path.join(pack, "estruturas.csv"), encoding="utf-8") as f:
                 structs = list(csv.DictReader(f))
+            with open(os.path.join(pack, "lombadas.csv"), encoding="utf-8") as f:
+                bumps = list(csv.DictReader(f))
             with open(os.path.join(pack, "manifesto.json"), encoding="utf-8") as f:
                 manifest = json.load(f)
             with open(os.path.join(tmp, "dist", "catalogo.json"), encoding="utf-8") as f:
@@ -119,7 +124,10 @@ class EndToEnd(unittest.TestCase):
         self.assertTrue(lims and all(x["limit_kmh"] == "80" and x["source"] == "OSM" for x in lims))
         self.assertTrue(any(float(x["lng"]) > -43.18 for x in lims))   # limite da ponte, fora do polígono
         self.assertEqual(manifest["counts"], {"cameras": 2, "cameras_with_limit": 2, "cameras_inactive": 0,
-                                              "sections": 0, "red_lights": 0, "limits": len(lims), "structs": 1})
+                                              "sections": 0, "red_lights": 0, "limits": len(lims), "structs": 1,
+                                              "bumps": 1})
+        self.assertEqual([(b["kind"], b["lat"]) for b in bumps], [("BUMP", "-22.910000")])  # a do mar ficou de fora
+        self.assertEqual(catalog["ufs"]["RJ"]["bumps"]["count"], 1)
         self.assertEqual(catalog["failures"], [])
         self.assertIn("RJ", catalog["ufs"])
         self.assertFalse(marker)

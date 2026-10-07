@@ -33,6 +33,7 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
   radares.csv  radares.gpx  radares.kml  radares.geojson
   limites.csv           limites sinalizados e estimados (coluna `estimated`)
   estruturas.csv
+  lombadas.csv          lombadas, quebra-molas, faixas elevadas e sonorizadores
 catalogo.json           índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
 scripts/to_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
@@ -76,6 +77,12 @@ Os estimados cobrem só a rede principal (autoestradas, troncos, primárias, sec
 terciárias). Estradas rurais sem classificação e ruas de bairro ficam sem estimativa.
 
 **Estruturas (CSV):** `lat1,lng1,lat2,lng2,kind`, com `kind` = `BRIDGE` ou `TUNNEL`.
+
+**Lombadas (CSV, só por estado):** `lat,lng,kind`, do OpenStreetMap (`traffic_calming`): o que faz o veículo
+pular, não o que só estreita a via. `kind` = `BUMP` (lombada curta, quebra-molas), `HUMP` (lombada longa), `TABLE`
+(faixa elevada), `CUSHION` (almofada, lombada com vãos), `RUMBLE_STRIP` (sonorizador) ou `UNSPECIFIED` (marcada sem
+tipo). A faixa elevada desenhada como linha vira o ponto do meio. No `catalogo.json`, a entrada `bumps` de cada
+estado que tem alguma (pacote no schema 3; quem lê o schema 2 ignora a chave).
 
 Todos em UTF-8, coordenadas em graus decimais (WGS84/SIRGAS 2000).
 

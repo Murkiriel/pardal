@@ -120,6 +120,7 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     osm_c = split.points(uf, "osm-radares", osm_cams)
     osm_l = split.points(uf, "osm-limites", osm_lims)
     structs = split.structs(uf, "osm-estruturas", osm_structs)
+    bumps = split.points(uf, "osm-lombadas", ctx.osm_bumps(region))
     off_c = _resolve_hints([c for name, loaded in official.items()
                             for c in split.points(uf, ("oficial", name), loaded.cameras)], probe_dirs)
     off_c = _drop_far_from_home(uf, off_c, split.assigner)
@@ -157,7 +158,7 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
         sources.append({"name": "Inmetro (situação)", "snv": nat["snv_version"], **status})
     sources.append({"name": "Inmetro (endereços, CNEFE)", "count": len(by_address), **addressed})
 
-    manifest = build_pack(uf, packs_dir, cams, lims, structs, sources)
+    manifest = build_pack(uf, packs_dir, cams, lims, structs, sources, bumps=bumps)
     print(f"[build] pacote {uf}: {manifest['counts']}")
     return manifest
 

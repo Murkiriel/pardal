@@ -50,6 +50,8 @@ class BuildContext:
         self._official: Optional[Dict[str, SourceData]] = None
         self._national: Optional[dict] = None
         self._osm_region: Optional[str] = None
+        self._bumps_region: Optional[str] = None
+        self._bumps: list = []
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
 
@@ -100,6 +102,19 @@ class BuildContext:
                   f"{len(structs)} pontes/túneis, {len(probe_dirs)} sentidos nominais resolvidos")
             self._osm_region, self._osm = region, (ex, cams, lims, structs, probe_dirs)
         return self._osm
+
+    def osm_bumps(self, region: str) -> list:
+        """Lombadas e quebra-molas do OSM da região (osm_pbf.load_bumps, uma passada a mais no extrato que osm()
+        já baixou). Só a região atual fica em memória, como em osm()."""
+        if self._bumps_region != region:
+            from datakit.sources import osm_pbf
+            self._bumps = []
+            osm = self._osm if self._osm_region == region else None
+            ex = osm[0] if osm is not None else osm_pbf.ensure_extract(region, self.raw_dir, refresh=False)
+            self._bumps = osm_pbf.load_bumps(ex.path)
+            self._bumps_region = region
+            print(f"[build] OSM/{region}: {len(self._bumps)} lombadas e quebra-molas")
+        return self._bumps
 
     def inmetro_points(self, uf: str) -> List[Camera]:
         """Locais do Inmetro só com endereço, localizados pelo cadastro do IBGE (inmetro_addresses.py),

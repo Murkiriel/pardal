@@ -35,7 +35,7 @@ from datakit.common.direction import orient_to_hint
 from datakit.common.spatial import lat_span_deg, lng_span_deg
 from datakit.sources._http import HTTP_TIMEOUT, UA, get_text, with_retries
 from datakit.common import (
-    Camera, CameraKind, Limit, Struct,
+    Bump, Camera, CameraKind, Limit, Struct,
     parse_maxspeed, in_bbox, haversine_m, rdp, sample_polyline,
 )
 
@@ -172,6 +172,43 @@ def _dated_url(region: str) -> str:
     if not dates:
         raise RuntimeError(f"nenhum {region}-AAMMDD.osm.pbf na listagem da Geofabrik")
     return f"{GEOFABRIK_BASE}/{region}-{max(dates)}.osm.pbf"
+
+
+# traffic_calming do OSM que faz a moto pular -> tipo no lombadas.csv. chicane, choker, island, painted_table e o resto
+# estreitam ou desviam a via, sem degrau: ficam de fora. "yes" (sem tipo) entra, quase sempre é lombada.
+BUMP_KINDS = {
+    "bump": "BUMP",                 # lombada curta (quebra-molas)
+    "hump": "HUMP",                 # lombada longa
+    "table": "TABLE",               # faixa elevada / plataforma
+    "cushion": "CUSHION",           # almofada (lombada com vãos)
+    "rumble_strip": "RUMBLE_STRIP", # sonorizador
+    "yes": "UNSPECIFIED",
+}
+
+
+def load_bumps(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None) -> List[Bump]:
+    """Lombadas e quebra-molas do extrato (uma passada só com traffic_calming). Nó vira o ponto; via (a faixa
+    elevada desenhada como linha) vira o seu nó do meio. `bbox` = (lat mín., lng mín., lat máx., lng máx.)."""
+    bumps: List[Bump] = []
+    fp = (osmium.FileProcessor(pbf_path)
+          .with_locations()
+          .with_filter(osmium.filter.KeyFilter("traffic_calming")))
+    for o in fp:
+        kind = BUMP_KINDS.get(o.tags.get("traffic_calming") or "")
+        if kind is None:
+            continue
+        if o.is_node():
+            loc = o.location
+        elif o.is_way() and len(o.nodes) > 0:
+            loc = o.nodes[len(o.nodes) // 2].location
+        else:
+            continue
+        if not loc.valid():
+            continue
+        if bbox is not None and not in_bbox(bbox, loc.lat, loc.lon):
+            continue
+        bumps.append(Bump(loc.lat, loc.lon, kind))
+    return bumps
 
 
 def load(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None,
