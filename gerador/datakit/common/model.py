@@ -121,6 +121,15 @@ class Bump:
 
 
 @dataclass(frozen=True)
+class RadarStretch:
+    """Trecho apto à fiscalização de velocidade com radar portátil (PRF, Res. Contran 798/2020): BR + km."""
+    uf: str
+    br: int
+    km_from: float
+    km_to: float
+
+
+@dataclass(frozen=True)
 class Toll:
     """Praça de pedágio (PLAZA, cabine) ou pórtico de free flow (FREE_FLOW, paga sem parar). Sem preço."""
     lat: float
