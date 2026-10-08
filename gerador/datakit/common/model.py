@@ -147,6 +147,37 @@ class RadarZone:
 
 
 @dataclass(frozen=True)
+class RoughKm:
+    """Km de rodovia federal com panela (buraco) ruim ou péssima no ICM do DNIT, ou um trecho deles juntados."""
+    uf: str
+    br: int
+    km_from: float
+    km_to: float
+    decreasing: bool   # avaliado no sentido decrescente do km
+    level: str         # BAD (ruim) | VERY_BAD (péssimo)
+
+
+@dataclass(frozen=True)
+class PotholeZone:
+    """Trecho de rodovia federal com buracos (ICM do DNIT, potholes.py), com a linha da BR pelo SNV, desenhada no
+    sentido do tráfego avaliado. A linha vai como WKT (LINESTRING, lng lat)."""
+    road: str          # "BR-060"
+    km_from: float
+    km_to: float
+    direction: str     # INCREASING | DECREASING (o sentido do km avaliado)
+    level: str         # BAD | VERY_BAD
+    month: str         # AAAA-MM do levantamento
+    points: Tuple[Tuple[float, float], ...]  # (lat, lng)
+
+    HEADER = ("road", "km_from", "km_to", "direction", "level", "month", "wkt")
+
+    def row(self) -> List[str]:
+        line = ", ".join(f"{lng:.5f} {lat:.5f}" for lat, lng in self.points)
+        return [self.road, f"{self.km_from:.1f}", f"{self.km_to:.1f}", self.direction, self.level, self.month,
+                f"LINESTRING({line})"]
+
+
+@dataclass(frozen=True)
 class Toll:
     """Praça de pedágio (PLAZA, cabine) ou pórtico de free flow (FREE_FLOW, paga sem parar). Sem preço."""
     lat: float

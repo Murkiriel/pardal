@@ -56,6 +56,7 @@ class BuildContext:
         self._tolls: list = []
         self._antt_tolls: Optional[list] = None
         self._prf_radar: Optional[tuple] = None
+        self._potholes: Optional[tuple] = None
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
 
@@ -144,6 +145,20 @@ class BuildContext:
                 failures.record("ANTT (pedágios)", e)
                 self._antt_tolls = []
         return self._antt_tolls
+
+    def dnit_potholes(self) -> tuple:
+        """(mês, km com buracos) do levantamento mais novo do ICM do DNIT, baixado uma vez por execução; falha vira
+        ("", []), registrada."""
+        if self._potholes is None:
+            from datakit import failures
+            from datakit.sources import dnit_icm
+            try:
+                self._potholes = dnit_icm.load()
+                print(f"[build] DNIT: {len(self._potholes[1])} km com buracos (ICM de {self._potholes[0]})")
+            except Exception as e:  # noqa: BLE001 - uma fonte fora do ar não derruba a geração
+                failures.record("DNIT (buracos, ICM)", e)
+                self._potholes = ("", [])
+        return self._potholes
 
     def prf_portable_radar(self) -> tuple:
         """(início da validade, trechos) da lista vigente da PRF de trechos aptos ao radar portátil, baixada uma vez por

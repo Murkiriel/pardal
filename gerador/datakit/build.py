@@ -19,7 +19,7 @@ import sys
 
 from datakit.build_catalog import build as build_catalog
 from datakit.build_pack import build as build_pack
-from datakit import failures, inmetro_addresses, inmetro_status, radar_zones
+from datakit import failures, inmetro_addresses, inmetro_status, potholes, radar_zones
 from datakit.common import merge_cameras, merge_limits
 from datakit.common.model import merge_tolls
 from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, merge_cross_agency,
@@ -164,8 +164,13 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     zones, unplaced = radar_zones.place(uf, valid_from, mine, ctx.snv_routes() if mine else None)
     sources.append({"name": "PRF (trechos aptos ao radar portátil)", "valid_from": valid_from, "count": len(zones),
                     "unplaced": unplaced})
+    month, rough = ctx.dnit_potholes()
+    rough_here = [r for r in rough if r.uf == uf]
+    holes, holes_out = potholes.place(uf, month, rough_here, ctx.snv_routes() if rough_here else None)
+    sources.append({"name": "DNIT (buracos, ICM)", "month": month, "count": len(holes), "unplaced": holes_out})
 
-    manifest = build_pack(uf, packs_dir, cams, lims, structs, sources, bumps=bumps, tolls=tolls, radar_zones=zones)
+    manifest = build_pack(uf, packs_dir, cams, lims, structs, sources, bumps=bumps, tolls=tolls, radar_zones=zones,
+                          potholes=holes)
     print(f"[build] pacote {uf}: {manifest['counts']}")
     return manifest
 

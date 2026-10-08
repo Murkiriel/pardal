@@ -18,7 +18,7 @@ try:
 except ImportError:  # pragma: no cover
     osmium = None  # type: ignore[assignment]
 
-from datakit.common import Camera, CameraKind, RadarStretch
+from datakit.common import Camera, CameraKind, RadarStretch, RoughKm
 from datakit.common.lrs import SnvRoutes
 
 LAT = -22.90
@@ -65,7 +65,7 @@ class _Antt:
 class EndToEnd(unittest.TestCase):
     def test_build_one_state(self):
         from datakit import build, failures
-        from datakit.sources import antt_pedagio, cet_sp, inmetro, osm_pbf, prf_portable_radar, rio, snv
+        from datakit.sources import antt_pedagio, cet_sp, dnit_icm, inmetro, osm_pbf, prf_portable_radar, rio, snv
 
         with tempfile.TemporaryDirectory() as tmp:
             raw = os.path.join(tmp, "raw")
@@ -89,6 +89,8 @@ class EndToEnd(unittest.TestCase):
                     mock.patch.object(antt_pedagio, "load", lambda: []), \
                     mock.patch.object(prf_portable_radar, "load",
                                       lambda: ("2026-10-03", [RadarStretch("RJ", 101, 10.0, 20.0)], 0)), \
+                    mock.patch.object(dnit_icm, "load",
+                                      lambda: ("2026-08", [RoughKm("RJ", 101, 10.0, 11.0, False, "BAD")])), \
                     mock.patch.object(inmetro, "load", lambda raw_dir: []), \
                     mock.patch.object(rio, "load_limits", lambda: []), \
                     mock.patch.object(cet_sp, "load_limits", lambda: []), \
@@ -134,10 +136,12 @@ class EndToEnd(unittest.TestCase):
         self.assertTrue(any(float(x["lng"]) > -43.18 for x in lims))   # limite da ponte, fora do polígono
         self.assertEqual(manifest["counts"], {"cameras": 2, "cameras_with_limit": 2, "cameras_inactive": 0,
                                               "sections": 0, "red_lights": 0, "limits": len(lims), "structs": 1,
-                                              "bumps": 1, "tolls": 1, "portable_radar": 0})  # sem o SNV, o trecho fica de fora
+                                              "bumps": 1, "tolls": 1, "portable_radar": 0, "potholes": 0})  # sem o SNV, os trechos ficam de fora
         prf = [s for s in manifest["sources"] if s["name"] == "PRF (trechos aptos ao radar portátil)"]
         self.assertEqual([{"name": "PRF (trechos aptos ao radar portátil)", "valid_from": "2026-10-03", "count": 0,
                            "unplaced": 1}], prf)
+        icm = [s for s in manifest["sources"] if s["name"] == "DNIT (buracos, ICM)"]
+        self.assertEqual([{"name": "DNIT (buracos, ICM)", "month": "2026-08", "count": 0, "unplaced": 1}], icm)
         self.assertEqual([(b["kind"], b["lat"]) for b in bumps], [("BUMP", "-22.910000")])  # a do mar ficou de fora
         self.assertEqual(catalog["ufs"]["RJ"]["bumps"]["count"], 1)
         self.assertEqual([(t["kind"], t["name"], t["source"]) for t in tolls], [("PLAZA", "Pedágio Teste", "OSM")])

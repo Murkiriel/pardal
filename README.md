@@ -36,6 +36,7 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
   lombadas.csv          lombadas, quebra-molas, faixas elevadas e sonorizadores
   pedagios.csv          praças de pedágio e pórticos de free flow
   radar_portatil.csv    trechos de rodovia federal aptos à fiscalização com radar portátil (PRF)
+  buracos.csv           trechos de rodovia federal com buracos (panela ruim ou péssima no ICM do DNIT)
 catalogo.json           índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
 scripts/to_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
@@ -99,6 +100,13 @@ trecho na quilometragem do SNV, `valid_from` o início da validade da lista vige
 entre os dois km (`LINESTRING(lng lat, ...)`, pelo SNV do DNIT; simplificada a 15 m). O trecho que atravessa duas linhas
 do SNV vira um pedaço por linha; contornos e acessos ("BR-101 (Contorno viário)") ficam de fora (o km não é o da BR).
 No `catalogo.json`, a entrada `portable_radar` (pacote no schema 5).
+
+**Trechos com buracos (CSV, só por estado):** `road,km_from,km_to,direction,level,month,wkt`. Do levantamento mensal
+de condições do pavimento do DNIT (ICM), os km com **panela (buraco) ruim ou péssima**, juntados quando seguidos na mesma
+rodovia e sentido. `direction` é o sentido avaliado (`INCREASING` ou `DECREASING` do km), `level` = `BAD` (ruim) ou
+`VERY_BAD` (péssimo, o pior do trecho), `month` o mês do levantamento e `wkt` a linha da rodovia pelo SNV, desenhada no
+sentido do tráfego. Só a malha do DNIT (as concessões não entram no levantamento). No `catalogo.json`, a entrada
+`potholes` (pacote no schema 6).
 
 Todos em UTF-8, coordenadas em graus decimais (WGS84/SIRGAS 2000).
 
@@ -189,6 +197,7 @@ fontes e manter a mesma licença em bases derivadas.
 | DNIT — Controle de Velocidade (PNCV) | Radares das rodovias federais, com o sentido fiscalizado | Dado aberto governamental |
 | DNIT — Sistema Nacional de Viação | Quilometragem das BRs, usada para casar com o Inmetro e para converter o sentido (crescente/decrescente) em rumo | Dado aberto governamental |
 | PRF — Trechos aptos à fiscalização com radar portátil | A relação vigente (UF, BR, km inicial e final), posta na rodovia pelo SNV | Dado aberto governamental |
+| DNIT — Condições do Pavimento (ICM) | Os km com panela ruim ou péssima do levantamento mais novo, postos na rodovia pelo SNV | Dado aberto governamental |
 | ANTT — Radar | Radares das concessões federais, com situação e sentido | CC-BY |
 | ANTT — Sinalização | Placas de velocidade máxima das concessões federais, por sentido | CC-BY |
 | Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo) e, nas rodovias federais e nas estaduais de SP (DER-SP), o limite do radar que não trazia nenhum; nos medidores com endereço urbano, a confirmação do radar, o limite e os radares que nenhuma outra fonte tem | Creative Commons |

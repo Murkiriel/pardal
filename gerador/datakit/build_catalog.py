@@ -19,8 +19,9 @@ import sys
 from datetime import datetime, timezone
 from typing import Optional
 
-from datakit.build_pack import (BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, RADAR_ZONES_FILE, STRUCTS_FILE,
-                                 TOLLS_FILE)
+from datakit.build_pack import (BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, POTHOLES_FILE, RADAR_ZONES_FILE,
+                                 STRUCTS_FILE, TOLLS_FILE)
+from datakit.common import PotholeZone
 from datakit.common.ufs import SOURCE_HOME_UF, uf_name
 
 # Versão do formato do catálogo. 2 (2026-09-30): nome catalogo.json e etiquetas em inglês (name,
@@ -128,6 +129,12 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             zone_dst = os.path.join(out, RADAR_ZONES_FILE)
             shutil.copyfile(zone_src, zone_dst)
             entry["portable_radar"] = _file_ref(zone_dst, counts.get("portable_radar"), dist_dir)
+        # trechos com buracos (pacote schema 6): só a UF que tem algum
+        hole_src = os.path.join(pdir, POTHOLES_FILE)
+        if os.path.exists(hole_src) and os.path.getsize(hole_src) > len(",".join(PotholeZone.HEADER)) + 1:
+            hole_dst = os.path.join(out, POTHOLES_FILE)
+            shutil.copyfile(hole_src, hole_dst)
+            entry["potholes"] = _file_ref(hole_dst, counts.get("potholes"), dist_dir)
         ufs[uf] = entry
 
     catalog = {
