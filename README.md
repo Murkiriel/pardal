@@ -35,6 +35,7 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
   estruturas.csv
   lombadas.csv          lombadas, quebra-molas, faixas elevadas e sonorizadores
   pedagios.csv          praças de pedágio e pórticos de free flow
+  radar_portatil.csv    trechos de rodovia federal aptos à fiscalização com radar portátil (PRF)
 catalogo.json           índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
 scripts/to_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
@@ -90,6 +91,14 @@ estado que tem alguma (pacote no schema 3; quem lê o schema 2 ignora a chave).
 mesmo pedágio nas duas fontes, a até 300 m, fica um só, com o nome da ANTT. `kind` = `PLAZA` (praça com cabine) ou
 `FREE_FLOW` (pórtico eletrônico, sem parar). Sem preço: as tabelas de tarifa publicadas estão desatualizadas. No
 `catalogo.json`, a entrada `tolls` (pacote no schema 4).
+
+**Trechos aptos ao radar portátil (CSV, só por estado):** `road,km_from,km_to,valid_from,wkt`. A relação que a PRF
+publica (Res. Contran 798/2020, art. 7º): os trechos das rodovias federais onde a fiscalização de velocidade com
+equipamento portátil **pode** acontecer, não a posição de um radar. `road` é a BR (`BR-060`), `km_from`/`km_to` o
+trecho na quilometragem do SNV, `valid_from` o início da validade da lista vigente da PRF e `wkt` a linha da rodovia
+entre os dois km (`LINESTRING(lng lat, ...)`, pelo SNV do DNIT; simplificada a 15 m). O trecho que atravessa duas linhas
+do SNV vira um pedaço por linha; contornos e acessos ("BR-101 (Contorno viário)") ficam de fora (o km não é o da BR).
+No `catalogo.json`, a entrada `portable_radar` (pacote no schema 5).
 
 Todos em UTF-8, coordenadas em graus decimais (WGS84/SIRGAS 2000).
 
@@ -179,6 +188,7 @@ fontes e manter a mesma licença em bases derivadas.
 | OpenStreetMap (extratos da Geofabrik) | Radares, limites (`maxspeed`), pontes e túneis | ODbL 1.0 — © colaboradores do OpenStreetMap |
 | DNIT — Controle de Velocidade (PNCV) | Radares das rodovias federais, com o sentido fiscalizado | Dado aberto governamental |
 | DNIT — Sistema Nacional de Viação | Quilometragem das BRs, usada para casar com o Inmetro e para converter o sentido (crescente/decrescente) em rumo | Dado aberto governamental |
+| PRF — Trechos aptos à fiscalização com radar portátil | A relação vigente (UF, BR, km inicial e final), posta na rodovia pelo SNV | Dado aberto governamental |
 | ANTT — Radar | Radares das concessões federais, com situação e sentido | CC-BY |
 | ANTT — Sinalização | Placas de velocidade máxima das concessões federais, por sentido | CC-BY |
 | Inmetro — PSIE, medidores de velocidade | Situação da aferição (ativo/inativo) e, nas rodovias federais e nas estaduais de SP (DER-SP), o limite do radar que não trazia nenhum; nos medidores com endereço urbano, a confirmação do radar, o limite e os radares que nenhuma outra fonte tem | Creative Commons |

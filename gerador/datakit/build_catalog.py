@@ -19,7 +19,8 @@ import sys
 from datetime import datetime, timezone
 from typing import Optional
 
-from datakit.build_pack import BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE, TOLLS_FILE
+from datakit.build_pack import (BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, RADAR_ZONES_FILE, STRUCTS_FILE,
+                                 TOLLS_FILE)
 from datakit.common.ufs import SOURCE_HOME_UF, uf_name
 
 # Versão do formato do catálogo. 2 (2026-09-30): nome catalogo.json e etiquetas em inglês (name,
@@ -121,6 +122,12 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             toll_dst = os.path.join(out, TOLLS_FILE)
             shutil.copyfile(toll_src, toll_dst)
             entry["tolls"] = _file_ref(toll_dst, counts.get("tolls"), dist_dir)
+        # trechos aptos ao radar portátil (pacote schema 5): só a UF que tem algum
+        zone_src = os.path.join(pdir, RADAR_ZONES_FILE)
+        if os.path.exists(zone_src) and os.path.getsize(zone_src) > len("road,km_from,km_to,valid_from,wkt\n"):
+            zone_dst = os.path.join(out, RADAR_ZONES_FILE)
+            shutil.copyfile(zone_src, zone_dst)
+            entry["portable_radar"] = _file_ref(zone_dst, counts.get("portable_radar"), dist_dir)
         ufs[uf] = entry
 
     catalog = {

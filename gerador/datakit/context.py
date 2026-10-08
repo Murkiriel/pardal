@@ -55,6 +55,7 @@ class BuildContext:
         self._tolls_region: Optional[str] = None
         self._tolls: list = []
         self._antt_tolls: Optional[list] = None
+        self._prf_radar: Optional[tuple] = None
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
 
@@ -143,6 +144,22 @@ class BuildContext:
                 failures.record("ANTT (pedágios)", e)
                 self._antt_tolls = []
         return self._antt_tolls
+
+    def prf_portable_radar(self) -> tuple:
+        """(início da validade, trechos) da lista vigente da PRF de trechos aptos ao radar portátil, baixada uma vez por
+        execução; falha vira ("", []), registrada."""
+        if self._prf_radar is None:
+            from datakit import failures
+            from datakit.sources import prf_portable_radar
+            try:
+                valid_from, stretches, skipped = prf_portable_radar.load()
+                print(f"[build] PRF: {len(stretches)} trechos aptos ao radar portátil, lista de {valid_from} "
+                      f"({skipped} linhas de fora)")
+                self._prf_radar = (valid_from, stretches)
+            except Exception as e:  # noqa: BLE001 - uma fonte fora do ar não derruba a geração
+                failures.record("PRF (trechos de radar portátil)", e)
+                self._prf_radar = ("", [])
+        return self._prf_radar
 
     def inmetro_points(self, uf: str) -> List[Camera]:
         """Locais do Inmetro só com endereço, localizados pelo cadastro do IBGE (inmetro_addresses.py),

@@ -130,6 +130,23 @@ class RadarStretch:
 
 
 @dataclass(frozen=True)
+class RadarZone:
+    """Pedaço de trecho apto ao radar portátil (PRF) com a geometria da BR pelo SNV (radar_zones.py). Diz onde a
+    fiscalização PODE acontecer, não a posição de um radar. A linha vai como WKT (LINESTRING, lng lat)."""
+    road: str  # "BR-060"
+    km_from: float
+    km_to: float
+    valid_from: str  # AAAA-MM-DD: o início da validade da lista da PRF
+    points: Tuple[Tuple[float, float], ...]  # (lat, lng)
+
+    HEADER = ("road", "km_from", "km_to", "valid_from", "wkt")
+
+    def row(self) -> List[str]:
+        line = ", ".join(f"{lng:.5f} {lat:.5f}" for lat, lng in self.points)
+        return [self.road, f"{self.km_from:.1f}", f"{self.km_to:.1f}", self.valid_from, f"LINESTRING({line})"]
+
+
+@dataclass(frozen=True)
 class Toll:
     """Praça de pedágio (PLAZA, cabine) ou pórtico de free flow (FREE_FLOW, paga sem parar). Sem preço."""
     lat: float
