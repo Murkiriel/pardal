@@ -38,6 +38,8 @@ def _write_pbf(path):
         # lombadas: uma no continente, uma em mar aberto (fica de fora)
         w.add_node(Node(id=3, location=(-43.26, -22.91), tags={"traffic_calming": "bump"}))
         w.add_node(Node(id=4, location=(SEA[1], SEA[0] + 0.01), tags={"traffic_calming": "hump"}))
+        # uma cabine de pedágio no continente (sem praça da ANTT: a fonte federal vem vazia neste teste)
+        w.add_node(Node(id=5, location=(-43.27, -22.92), tags={"barrier": "toll_booth", "name": "Pedágio Teste"}))
         # uma via com limite sinalizado no continente e uma ponte que sai do "RJ" para a baía
         w.add_node(Node(id=10, location=(-43.29, -22.95)))
         w.add_node(Node(id=11, location=(-43.20, -22.95)))
@@ -62,7 +64,7 @@ class _Antt:
 class EndToEnd(unittest.TestCase):
     def test_build_one_state(self):
         from datakit import build, failures
-        from datakit.sources import cet_sp, inmetro, osm_pbf, rio, snv
+        from datakit.sources import antt_pedagio, cet_sp, inmetro, osm_pbf, rio, snv
 
         with tempfile.TemporaryDirectory() as tmp:
             raw = os.path.join(tmp, "raw")
@@ -82,6 +84,7 @@ class EndToEnd(unittest.TestCase):
                     mock.patch.object(ufpoly, "polygons", lambda raw_dir: polys), \
                     mock.patch.object(osm_pbf, "ensure_extract", lambda region, raw_dir, refresh=True: extract), \
                     mock.patch.object(snv, "ensure", lambda raw_dir: None), \
+                    mock.patch.object(antt_pedagio, "load", lambda: []), \
                     mock.patch.object(inmetro, "load", lambda raw_dir: []), \
                     mock.patch.object(rio, "load_limits", lambda: []), \
                     mock.patch.object(cet_sp, "load_limits", lambda: []), \
@@ -102,6 +105,8 @@ class EndToEnd(unittest.TestCase):
                 lims = list(csv.DictReader(f))
             with open(os.path.join(pack, "estruturas.csv"), encoding="utf-8") as f:
                 structs = list(csv.DictReader(f))
+            with open(os.path.join(pack, "pedagios.csv"), encoding="utf-8") as f:
+                tolls = list(csv.DictReader(f))
             with open(os.path.join(pack, "lombadas.csv"), encoding="utf-8") as f:
                 bumps = list(csv.DictReader(f))
             with open(os.path.join(pack, "manifesto.json"), encoding="utf-8") as f:
@@ -125,9 +130,10 @@ class EndToEnd(unittest.TestCase):
         self.assertTrue(any(float(x["lng"]) > -43.18 for x in lims))   # limite da ponte, fora do polígono
         self.assertEqual(manifest["counts"], {"cameras": 2, "cameras_with_limit": 2, "cameras_inactive": 0,
                                               "sections": 0, "red_lights": 0, "limits": len(lims), "structs": 1,
-                                              "bumps": 1})
+                                              "bumps": 1, "tolls": 1})
         self.assertEqual([(b["kind"], b["lat"]) for b in bumps], [("BUMP", "-22.910000")])  # a do mar ficou de fora
         self.assertEqual(catalog["ufs"]["RJ"]["bumps"]["count"], 1)
+        self.assertEqual([(t["kind"], t["name"], t["source"]) for t in tolls], [("PLAZA", "Pedágio Teste", "OSM")])
         self.assertEqual(catalog["failures"], [])
         self.assertIn("RJ", catalog["ufs"])
         self.assertFalse(marker)

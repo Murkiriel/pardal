@@ -52,6 +52,9 @@ class BuildContext:
         self._osm_region: Optional[str] = None
         self._bumps_region: Optional[str] = None
         self._bumps: list = []
+        self._tolls_region: Optional[str] = None
+        self._tolls: list = []
+        self._antt_tolls: Optional[list] = None
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
 
@@ -115,6 +118,31 @@ class BuildContext:
             self._bumps_region = region
             print(f"[build] OSM/{region}: {len(self._bumps)} lombadas e quebra-molas")
         return self._bumps
+
+    def osm_tolls(self, region: str) -> list:
+        """Pedágios do OSM da região (osm_pbf.load_tolls), uma passada a mais no extrato que osm() já baixou."""
+        if self._tolls_region != region:
+            from datakit.sources import osm_pbf
+            self._tolls = []
+            osm = self._osm if self._osm_region == region else None
+            ex = osm[0] if osm is not None else osm_pbf.ensure_extract(region, self.raw_dir, refresh=False)
+            self._tolls = osm_pbf.load_tolls(ex.path)
+            self._tolls_region = region
+            print(f"[build] OSM/{region}: {len(self._tolls)} cabines e pórticos de pedágio")
+        return self._tolls
+
+    def antt_tolls(self) -> list:
+        """As praças de pedágio federais da ANTT, baixadas uma vez por execução; falha vira lista vazia, registrada."""
+        if self._antt_tolls is None:
+            from datakit import failures
+            from datakit.sources import antt_pedagio
+            try:
+                self._antt_tolls = antt_pedagio.load()
+                print(f"[build] ANTT: {len(self._antt_tolls)} praças de pedágio")
+            except Exception as e:  # noqa: BLE001 - uma fonte fora do ar não derruba a geração
+                failures.record("ANTT (pedágios)", e)
+                self._antt_tolls = []
+        return self._antt_tolls
 
     def inmetro_points(self, uf: str) -> List[Camera]:
         """Locais do Inmetro só com endereço, localizados pelo cadastro do IBGE (inmetro_addresses.py),

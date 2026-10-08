@@ -35,7 +35,7 @@ from datakit.common.direction import orient_to_hint
 from datakit.common.spatial import lat_span_deg, lng_span_deg
 from datakit.sources._http import HTTP_TIMEOUT, UA, get_text, with_retries
 from datakit.common import (
-    Bump, Camera, CameraKind, Limit, Struct,
+    Bump, Camera, CameraKind, Limit, Struct, Toll,
     parse_maxspeed, in_bbox, haversine_m, rdp, sample_polyline,
 )
 
@@ -184,6 +184,22 @@ BUMP_KINDS = {
     "rumble_strip": "RUMBLE_STRIP", # sonorizador
     "yes": "UNSPECIFIED",
 }
+
+
+def load_tolls(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None) -> List[Toll]:
+    """Pedágios do extrato: nós barrier=toll_booth (cabine, PLAZA) e highway=toll_gantry (pórtico, FREE_FLOW), com o
+    nome quando há. `bbox` = (lat mín., lng mín., lat máx., lng máx.)."""
+    tolls: List[Toll] = []
+    fp = (osmium.FileProcessor(pbf_path)
+          .with_filter(osmium.filter.EntityFilter(osmium.osm.NODE))
+          .with_filter(osmium.filter.TagFilter(("barrier", "toll_booth"), ("highway", "toll_gantry"))))
+    for o in fp:
+        loc = o.location
+        if not loc.valid() or (bbox is not None and not in_bbox(bbox, loc.lat, loc.lon)):
+            continue
+        kind = "FREE_FLOW" if o.tags.get("highway") == "toll_gantry" else "PLAZA"
+        tolls.append(Toll(loc.lat, loc.lon, kind, (o.tags.get("name") or "").strip(), "OSM"))
+    return tolls
 
 
 def load_bumps(pbf_path: str, bbox: Optional[Tuple[float, float, float, float]] = None) -> List[Bump]:

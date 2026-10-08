@@ -21,6 +21,7 @@ from datakit.build_catalog import build as build_catalog
 from datakit.build_pack import build as build_pack
 from datakit import failures, inmetro_addresses, inmetro_status
 from datakit.common import merge_cameras, merge_limits
+from datakit.common.model import merge_tolls
 from datakit.common.model import (absorb_osm, collapse_osm, deactivate_near, merge_cross_agency,
                                   override_limits)
 from datakit.common.geo import in_bbox
@@ -121,6 +122,7 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     osm_l = split.points(uf, "osm-limites", osm_lims)
     structs = split.structs(uf, "osm-estruturas", osm_structs)
     bumps = split.points(uf, "osm-lombadas", ctx.osm_bumps(region))
+    tolls = merge_tolls(split.points(uf, "antt-pedagios", ctx.antt_tolls()), split.points(uf, "osm-pedagios", ctx.osm_tolls(region)))
     off_c = _resolve_hints([c for name, loaded in official.items()
                             for c in split.points(uf, ("oficial", name), loaded.cameras)], probe_dirs)
     off_c = _drop_far_from_home(uf, off_c, split.assigner)
@@ -158,7 +160,7 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
         sources.append({"name": "Inmetro (situação)", "snv": nat["snv_version"], **status})
     sources.append({"name": "Inmetro (endereços, CNEFE)", "count": len(by_address), **addressed})
 
-    manifest = build_pack(uf, packs_dir, cams, lims, structs, sources, bumps=bumps)
+    manifest = build_pack(uf, packs_dir, cams, lims, structs, sources, bumps=bumps, tolls=tolls)
     print(f"[build] pacote {uf}: {manifest['counts']}")
     return manifest
 

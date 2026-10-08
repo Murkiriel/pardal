@@ -19,7 +19,7 @@ import sys
 from datetime import datetime, timezone
 from typing import Optional
 
-from datakit.build_pack import BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE
+from datakit.build_pack import BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, STRUCTS_FILE, TOLLS_FILE
 from datakit.common.ufs import SOURCE_HOME_UF, uf_name
 
 # Versão do formato do catálogo. 2 (2026-09-30): nome catalogo.json e etiquetas em inglês (name,
@@ -115,6 +115,12 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             bump_dst = os.path.join(out, BUMPS_FILE)
             shutil.copyfile(bump_src, bump_dst)
             entry["bumps"] = _file_ref(bump_dst, counts.get("bumps"), dist_dir)
+        # pedágios (pacote schema 4): só a UF que tem algum
+        toll_src = os.path.join(pdir, TOLLS_FILE)
+        if os.path.exists(toll_src) and os.path.getsize(toll_src) > len("lat,lng,kind,name,source\n"):
+            toll_dst = os.path.join(out, TOLLS_FILE)
+            shutil.copyfile(toll_src, toll_dst)
+            entry["tolls"] = _file_ref(toll_dst, counts.get("tolls"), dist_dir)
         ufs[uf] = entry
 
     catalog = {

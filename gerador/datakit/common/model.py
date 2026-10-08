@@ -120,6 +120,35 @@ class Bump:
         return [f"{self.lat:.6f}", f"{self.lng:.6f}", self.kind]
 
 
+@dataclass(frozen=True)
+class Toll:
+    """Praça de pedágio (PLAZA, cabine) ou pórtico de free flow (FREE_FLOW, paga sem parar). Sem preço."""
+    lat: float
+    lng: float
+    kind: str  # PLAZA | FREE_FLOW
+    name: str
+    source: str  # ANTT | OSM
+
+    HEADER = ("lat", "lng", "kind", "name", "source")
+
+    def row(self) -> List[str]:
+        return [f"{self.lat:.6f}", f"{self.lng:.6f}", self.kind, self.name, self.source]
+
+
+TOLL_SAME_M = 300.0  # a cabine do OSM a até isso de uma praça da ANTT é a mesma praça (pistas dos dois sentidos)
+
+
+def merge_tolls(antt: List[Toll], osm: List[Toll]) -> List[Toll]:
+    """As praças da ANTT, e as do OSM que não ficam a até TOLL_SAME_M de nenhuma delas; o OSM sozinho também se junta
+    (as cabines de uma praça, uma por pista): uma por TOLL_SAME_M."""
+    from datakit.common.geo import haversine_m
+    kept: List[Toll] = list(antt)
+    for t in osm:
+        if all(haversine_m((t.lat, t.lng), (k.lat, k.lng)) > TOLL_SAME_M for k in kept):
+            kept.append(t)
+    return kept
+
+
 _KIND_WEIGHT = {CameraKind.RED_LIGHT: 3, CameraKind.SECTION: 2, CameraKind.FIXED: 1}
 
 

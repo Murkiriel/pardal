@@ -16,15 +16,17 @@ import os
 from datetime import datetime, timezone
 from typing import Iterable, List, Optional, Tuple
 
-from datakit.common import Bump, Camera, CameraKind, Limit, Struct, merge_cameras, merge_limits
+from datakit.common import Bump, Camera, CameraKind, Limit, Struct, Toll, merge_cameras, merge_limits
 from datakit.common.ufs import uf_bbox
 
-SCHEMA = 3  # 1 = base (radares+limites); 2 = + estruturas.csv (ponte/túnel); 3 = + lombadas.csv. Leitor tolera ausência.
+SCHEMA = 4  # 1 = base (radares+limites); 2 = + estruturas.csv (ponte/túnel); 3 = + lombadas.csv; 4 = + pedagios.csv.
+# Leitor tolera ausência.
 # Nomes dos arquivos: os mesmos do pacote ao repositório publicado (estados/<UF>/radares.csv...).
 CAMERAS_FILE = "radares.csv"
 LIMITS_FILE = "limites.csv"
 STRUCTS_FILE = "estruturas.csv"
 BUMPS_FILE = "lombadas.csv"
+TOLLS_FILE = "pedagios.csv"
 MANIFEST_FILE = "manifesto.json"
 TILE_DEG = 0.25  # só para o campo "tiles" do manifest (quadrículas de 0,25° com dados)
 
@@ -41,7 +43,7 @@ def tile_bbox(row: int, col: int) -> Tuple[float, float, float, float]:
 
 def build(uf: str, packs_dir: str, cams: Iterable[Camera], lims: Iterable[Limit],
           structs: Iterable[Struct], sources: List[dict], built_at: Optional[str] = None,
-          bumps: Iterable[Bump] = ()) -> dict:
+          bumps: Iterable[Bump] = (), tolls: Iterable[Toll] = ()) -> dict:
     """`built_at`: quando as listas foram montadas (vai como `artifact_built_at`)."""
     uf = uf.upper()
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -49,6 +51,7 @@ def build(uf: str, packs_dir: str, cams: Iterable[Camera], lims: Iterable[Limit]
     lims = merge_limits(lims)
     structs = _dedupe_structs(list(structs))
     bump_list = _dedupe_bumps(list(bumps))
+    toll_list = sorted(tolls, key=lambda x: (x.lat, x.lng))
     tiles = sorted({tile_of(c.lat, c.lng) for c in cams} | {tile_of(x.lat, x.lng) for x in lims}
                    | {tile_of(s.lat1, s.lng1) for s in structs})
 
@@ -58,10 +61,12 @@ def build(uf: str, packs_dir: str, cams: Iterable[Camera], lims: Iterable[Limit]
     lfile = os.path.join(out, LIMITS_FILE)
     sfile = os.path.join(out, STRUCTS_FILE)
     bfile = os.path.join(out, BUMPS_FILE)
+    tfile = os.path.join(out, TOLLS_FILE)
     _write_csv(cfile, Camera.HEADER, (c.row() for c in cams))
     _write_csv(lfile, Limit.HEADER, (x.row() for x in lims))
     _write_csv(sfile, Struct.HEADER, (x.row() for x in structs))
     _write_csv(bfile, Bump.HEADER, (x.row() for x in bump_list))
+    _write_csv(tfile, Toll.HEADER, (x.row() for x in toll_list))
 
     manifest: dict = {
         "schema": SCHEMA,
@@ -84,10 +89,12 @@ def build(uf: str, packs_dir: str, cams: Iterable[Camera], lims: Iterable[Limit]
             LIMITS_FILE: {"sha256": _sha256(lfile), "bytes": os.path.getsize(lfile)},
             STRUCTS_FILE: {"sha256": _sha256(sfile), "bytes": os.path.getsize(sfile)},
             BUMPS_FILE: {"sha256": _sha256(bfile), "bytes": os.path.getsize(bfile)},
+            TOLLS_FILE: {"sha256": _sha256(tfile), "bytes": os.path.getsize(tfile)},
         },
     }
     manifest["counts"]["structs"] = len(structs)
     manifest["counts"]["bumps"] = len(bump_list)
+    manifest["counts"]["tolls"] = len(toll_list)
     with open(os.path.join(out, MANIFEST_FILE), "w", encoding="utf-8") as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     return manifest

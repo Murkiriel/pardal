@@ -34,6 +34,7 @@ estados/<UF>/           um estado (AC, AL, AM … SP, TO)
   limites.csv           limites sinalizados e estimados (coluna `estimated`)
   estruturas.csv
   lombadas.csv          lombadas, quebra-molas, faixas elevadas e sonorizadores
+  pedagios.csv          praças de pedágio e pórticos de free flow
 catalogo.json           índice dos pacotes por estado: arquivos, tamanho, sha256,
                         contagens e data de geração
 scripts/to_geojson.py converte qualquer CSV acima para GeoJSON (ver abaixo)
@@ -83,6 +84,12 @@ pular, não o que só estreita a via. `kind` = `BUMP` (lombada curta, quebra-mol
 (faixa elevada), `CUSHION` (almofada, lombada com vãos), `RUMBLE_STRIP` (sonorizador) ou `UNSPECIFIED` (marcada sem
 tipo). A faixa elevada desenhada como linha vira o ponto do meio. No `catalogo.json`, a entrada `bumps` de cada
 estado que tem alguma (pacote no schema 3; quem lê o schema 2 ignora a chave).
+
+**Pedágios (CSV, só por estado):** `lat,lng,kind,name,source`. As praças das rodovias federais concedidas vêm da ANTT
+(com o nome da praça, só as ativas) e as demais do OpenStreetMap (`barrier=toll_booth`, `highway=toll_gantry`); o
+mesmo pedágio nas duas fontes, a até 300 m, fica um só, com o nome da ANTT. `kind` = `PLAZA` (praça com cabine) ou
+`FREE_FLOW` (pórtico eletrônico, sem parar). Sem preço: as tabelas de tarifa publicadas estão desatualizadas. No
+`catalogo.json`, a entrada `tolls` (pacote no schema 4).
 
 Todos em UTF-8, coordenadas em graus decimais (WGS84/SIRGAS 2000).
 
