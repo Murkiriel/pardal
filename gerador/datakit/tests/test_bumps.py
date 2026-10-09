@@ -72,7 +72,7 @@ class PackAndCatalog(unittest.TestCase):
                                 {"lat": "-16.000000", "lng": "-49.000000", "kind": "BUMP"}])
         self.assertEqual(m["counts"]["bumps"], 2)
         self.assertIn("lombadas.csv", m["files"])
-        self.assertEqual(m["schema"], 7)  # 7 desde as multas por trecho (test_speed_fines)
+        self.assertEqual(m["schema"], 8)  # 8 desde os acidentes com moto (test_moto_accidents)
 
     def test_the_catalog_lists_the_bumps_of_a_state_that_has_them(self):
         from datakit import build_catalog

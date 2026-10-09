@@ -164,7 +164,7 @@ class PackAndCatalog(unittest.TestCase):
             cat = build_catalog.build(packs, dist)
         self.assertEqual([{"road": "BR-020", "km_from": "10.0", "km_to": "20.0", "valid_from": "2026-10-03",
                            "wkt": "LINESTRING(-49.40000 -16.00000, -49.30000 -16.00000)", "speed_fines_12m": ""}], rows)
-        self.assertEqual((m["schema"], m["counts"]["portable_radar"]), (7, 1))  # 7 desde as multas por trecho (test_speed_fines)
+        self.assertEqual((m["schema"], m["counts"]["portable_radar"]), (8, 1))  # 8 desde os acidentes com moto (test_moto_accidents)
         self.assertIn("radar_portatil.csv", m["files"])
         self.assertEqual((cat["ufs"]["GO"]["portable_radar"]["file"], cat["ufs"]["GO"]["portable_radar"]["count"]),
                          ("estados/GO/radar_portatil.csv", 1))

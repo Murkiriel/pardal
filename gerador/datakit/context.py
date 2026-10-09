@@ -58,6 +58,7 @@ class BuildContext:
         self._prf_radar: Optional[tuple] = None
         self._prf_fines: Optional[Mapping[Tuple[str, int, int], int]] = None
         self._prf_fines_read = False
+        self._moto_accidents: Optional[tuple] = None
         self._potholes: Optional[tuple] = None
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
@@ -161,6 +162,22 @@ class BuildContext:
                 failures.record("DNIT (buracos, ICM)", e)
                 self._potholes = ("", [])
         return self._potholes
+
+    def prf_moto_accidents(self) -> tuple:
+        """((primeiro mês, último mês), trechos com muitos acidentes com moto no país) da PRF, lidos uma vez por
+        execução; falha vira (("", ""), []), registrada."""
+        if self._moto_accidents is None:
+            from datakit import accident_spots
+            from datakit.sources import prf_accidents
+            try:
+                period, accidents = prf_accidents.load(self.raw_dir)
+                self._moto_accidents = (period, accident_spots.spots(accidents))
+                print(f"[build] PRF: {len(accidents)} acidentes com moto de {period[0]} a {period[1]}, "
+                      f"{len(self._moto_accidents[1])} trechos com {accident_spots.MIN_PER_KM} ou mais por km")
+            except Exception as e:  # noqa: BLE001 - uma fonte fora do ar não derruba a geração
+                failures.record("PRF (acidentes com moto)", e)
+                self._moto_accidents = (("", ""), [])
+        return self._moto_accidents
 
     def prf_speed_fines(self) -> Optional[Mapping[Tuple[str, int, int], int]]:
         """Multas de velocidade da PRF por (UF, BR, km) nos 12 meses mais novos, lidas uma vez por execução; falha vira

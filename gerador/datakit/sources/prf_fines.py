@@ -89,15 +89,19 @@ def count(path: str) -> Counter:
     return out
 
 
+def first_month(last: str, months: int) -> str:
+    """O primeiro mês (AAAA-MM) da janela de `months` meses do calendário que termina em `last`."""
+    index = int(last[:4]) * 12 + int(last[5:7]) - 1 - (months - 1)
+    return f"{index // 12:04d}-{index % 12 + 1:02d}"
+
+
 def last_months(counts: Counter, months: int) -> Tuple[Tuple[str, str], Counter]:
     """((primeiro mês, último mês), multas por (UF, BR, km)) dos `months` meses do calendário que terminam no mês mais
     novo de `counts` (um mês sem multa no meio ainda conta como mês)."""
     if not counts:
         return ("", ""), Counter()
     last = max(k[0] for k in counts)
-    year, month = int(last[:4]), int(last[5:7])
-    index = year * 12 + month - 1 - (months - 1)
-    first = f"{index // 12:04d}-{index % 12 + 1:02d}"
+    first = first_month(last, months)
     by_km: Counter = Counter()
     for (m, uf, br, km), n in counts.items():
         if first <= m <= last:

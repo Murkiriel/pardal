@@ -90,8 +90,9 @@ class Pack(unittest.TestCase):
                            built_at="2026-09-30T00:00:00Z")
             self.assertEqual(os.listdir(d), ["GO"])
             self.assertEqual(sorted(os.listdir(os.path.join(d, "GO"))),
-                             ["buracos.csv", "estruturas.csv", "limites.csv", "lombadas.csv", "manifesto.json", "pedagios.csv",
-                              "radar_portatil.csv", "radares.csv"])  # + lombadas (3), pedágios (4), radar portátil (5), buracos (6)
+                             ["acidentes_moto.csv", "buracos.csv", "estruturas.csv", "limites.csv", "lombadas.csv",
+                              "manifesto.json", "pedagios.csv", "radar_portatil.csv", "radares.csv"])
+            # + lombadas (3), pedágios (4), radar portátil (5), buracos (6), acidentes com moto (8)
             with open(os.path.join(d, "GO", "radares.csv"), encoding="utf-8") as f:
                 rows = list(csv.DictReader(f))
             with open(os.path.join(d, "GO", "manifesto.json"), encoding="utf-8") as f:
@@ -102,8 +103,8 @@ class Pack(unittest.TestCase):
                                   "tiles", "counts", "files"})
         self.assertEqual(m["counts"], {"cameras": 2, "cameras_with_limit": 2, "cameras_inactive": 0,
                                        "sections": 1, "red_lights": 0, "limits": 2, "structs": 1, "bumps": 0, "tolls": 0,
-                                       "portable_radar": 0, "potholes": 0})
-        self.assertEqual((m["schema"], m["artifact_built_at"], m["sources"]), (7, "2026-09-30T00:00:00Z",
+                                       "portable_radar": 0, "potholes": 0, "moto_accidents": 0})
+        self.assertEqual((m["schema"], m["artifact_built_at"], m["sources"]), (8, "2026-09-30T00:00:00Z",
                                                                              [{"name": "teste"}]))
         want = {tile_of(-16.0, -49.0), tile_of(-16.1, -49.1), tile_of(-16.3, -49.3)}
         self.assertEqual(m["tiles"], [list(t) for t in sorted(want)])

@@ -111,6 +111,13 @@ rodovia e sentido. `direction` é o sentido avaliado (`INCREASING` ou `DECREASIN
 sentido do tráfego. Só a malha do DNIT (as concessões não entram no levantamento). No `catalogo.json`, a entrada
 `potholes` (pacote no schema 6).
 
+**Trechos com muitos acidentes com moto (CSV, só por estado):** `road,km_from,km_to,accidents,rider_deaths,months,wkt`.
+Dos dados abertos de acidentes da PRF (o corte por pessoa), os km de rodovia federal com 5 ou mais acidentes com
+motocicleta, motoneta ou ciclomotor nos 12 meses mais novos publicados, juntados quando seguidos na mesma BR.
+`accidents` é a soma desses acidentes no trecho, `rider_deaths` os motociclistas mortos neles, `months` a janela
+(`AAAA-MM/AAAA-MM`) e `wkt` a linha da rodovia pelo SNV. Só contagens por lugar, sem data, hora nem pessoa. No
+`catalogo.json`, a entrada `moto_accidents` (pacote no schema 8).
+
 Todos em UTF-8, coordenadas em graus decimais (WGS84/SIRGAS 2000).
 
 ## Converter para GeoJSON

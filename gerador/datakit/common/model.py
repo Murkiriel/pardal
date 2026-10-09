@@ -162,6 +162,26 @@ class RoughKm:
 
 
 @dataclass(frozen=True)
+class AccidentZone:
+    """Trecho de rodovia federal com muitos acidentes com moto nos 12 meses mais novos da PRF (accident_spots.py), com
+    a linha da BR pelo SNV. A linha vai como WKT (LINESTRING, lng lat)."""
+    road: str          # "BR-153"
+    km_from: float
+    km_to: float
+    accidents: int     # acidentes com moto no trecho
+    rider_deaths: int  # motociclistas mortos neles
+    months: str        # AAAA-MM/AAAA-MM: a janela de 12 meses
+    points: Tuple[Tuple[float, float], ...]  # (lat, lng)
+
+    HEADER = ("road", "km_from", "km_to", "accidents", "rider_deaths", "months", "wkt")
+
+    def row(self) -> List[str]:
+        line = ", ".join(f"{lng:.5f} {lat:.5f}" for lat, lng in self.points)
+        return [self.road, f"{self.km_from:.1f}", f"{self.km_to:.1f}", str(self.accidents), str(self.rider_deaths),
+                self.months, f"LINESTRING({line})"]
+
+
+@dataclass(frozen=True)
 class PotholeZone:
     """Trecho de rodovia federal com buracos (ICM do DNIT, potholes.py), com a linha da BR pelo SNV, desenhada no
     sentido do tráfego avaliado. A linha vai como WKT (LINESTRING, lng lat)."""

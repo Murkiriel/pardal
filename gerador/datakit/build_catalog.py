@@ -19,9 +19,9 @@ import sys
 from datetime import datetime, timezone
 from typing import Optional
 
-from datakit.build_pack import (BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, POTHOLES_FILE, RADAR_ZONES_FILE,
+from datakit.build_pack import (ACCIDENTS_FILE, BUMPS_FILE, CAMERAS_FILE, LIMITS_FILE, MANIFEST_FILE, POTHOLES_FILE, RADAR_ZONES_FILE,
                                  STRUCTS_FILE, TOLLS_FILE)
-from datakit.common import PotholeZone, RadarZone
+from datakit.common import AccidentZone, PotholeZone, RadarZone
 from datakit.common.ufs import SOURCE_HOME_UF, uf_name
 
 # Versão do formato do catálogo. 2 (2026-09-30): nome catalogo.json e etiquetas em inglês (name,
@@ -135,6 +135,12 @@ def build(packs_dir: str, dist_dir: str, base_url: str = "") -> dict:
             hole_dst = os.path.join(out, POTHOLES_FILE)
             shutil.copyfile(hole_src, hole_dst)
             entry["potholes"] = _file_ref(hole_dst, counts.get("potholes"), dist_dir)
+        # trechos com muitos acidentes com moto (pacote schema 8): só a UF que tem algum
+        acc_src = os.path.join(pdir, ACCIDENTS_FILE)
+        if os.path.exists(acc_src) and os.path.getsize(acc_src) > len(",".join(AccidentZone.HEADER)) + 1:
+            acc_dst = os.path.join(out, ACCIDENTS_FILE)
+            shutil.copyfile(acc_src, acc_dst)
+            entry["moto_accidents"] = _file_ref(acc_dst, counts.get("moto_accidents"), dist_dir)
         ufs[uf] = entry
 
     catalog = {
