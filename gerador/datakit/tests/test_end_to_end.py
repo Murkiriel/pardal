@@ -66,7 +66,7 @@ class _Antt:
 class EndToEnd(unittest.TestCase):
     def test_build_one_state(self):
         from datakit import build, failures
-        from datakit.sources import antt_pedagio, cet_sp, dnit_icm, inmetro, osm_pbf, prf_accidents, prf_fines, prf_portable_radar, rio, snv
+        from datakit.sources import antt_pedagio, cet_sp, dnit_icm, inmetro, osm_pbf, prf_accidents, prf_concessions, prf_fines, prf_portable_radar, rio, snv
 
         with tempfile.TemporaryDirectory() as tmp:
             raw = os.path.join(tmp, "raw")
@@ -92,6 +92,7 @@ class EndToEnd(unittest.TestCase):
                                       lambda: ("2026-10-03", [RadarStretch("RJ", 101, 10.0, 20.0)], 0)), \
                     mock.patch.object(prf_fines, "load", lambda raw_dir: (("2025-08", "2026-07"), Counter())), \
                     mock.patch.object(prf_accidents, "load", lambda raw_dir: (("2025-09", "2026-08"), [])), \
+                    mock.patch.object(prf_concessions, "load", lambda: []), \
                     mock.patch.object(dnit_icm, "load",
                                       lambda: ("2026-08", [RoughKm("RJ", 101, 10.0, 11.0, False, "BAD")])), \
                     mock.patch.object(inmetro, "load", lambda raw_dir: []), \

@@ -59,6 +59,7 @@ class BuildContext:
         self._prf_fines: Optional[Mapping[Tuple[str, int, int], int]] = None
         self._prf_fines_read = False
         self._moto_accidents: Optional[tuple] = None
+        self._prf_concessions: Optional[list] = None
         self._potholes: Optional[tuple] = None
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
@@ -162,6 +163,19 @@ class BuildContext:
                 failures.record("DNIT (buracos, ICM)", e)
                 self._potholes = ("", [])
         return self._potholes
+
+    def prf_concessions(self) -> list:
+        """Os equipamentos da planilha dos radares das concessões que a PRF mostra (sources/prf_concessions), lidos uma
+        vez por execução; falha vira [], registrada (o Pardal segue com ANTT e DNIT)."""
+        if self._prf_concessions is None:
+            from datakit.sources import prf_concessions
+            try:
+                self._prf_concessions = prf_concessions.load()
+                print(f"[build] PRF: {len(self._prf_concessions)} equipamentos das concessões com coordenada")
+            except Exception as e:  # noqa: BLE001 - uma fonte fora do ar não derruba a geração
+                failures.record("PRF (radares das concessões)", e)
+                self._prf_concessions = []
+        return self._prf_concessions
 
     def prf_moto_accidents(self) -> tuple:
         """((primeiro mês, último mês), trechos com muitos acidentes com moto no país) da PRF, lidos uma vez por

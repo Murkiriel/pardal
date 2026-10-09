@@ -29,6 +29,7 @@ from datakit.common.ufassign import UfAssigner
 from datakit.common.ufs import SOURCE_HOME_UF, UF_BBOX, geofabrik_region, uf_bbox
 from datakit.context import BuildContext
 from datakit.sources import dnit, antt, der_go, der_sp, der_pe, der_mg, municipal, bh, df_detran, rio, cet_sp, eptc
+from datakit.sources import prf_concessions
 
 # Fontes oficiais de radares, na ordem do manifest. Cada módulo expõe fetch(ctx) -> SourceData
 # (datakit/context.py).
@@ -148,6 +149,10 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     print(f"[build] {uf}: Inmetro por endereço: {addressed['confirmed']} radares confirmados "
           f"({addressed['limits_filled']} ganharam limite, {addressed['reactivated']} voltaram a ativo), "
           f"{addressed['new']} novos")
+    # a planilha das concessões que a PRF mostra: inoperante ou vencido sai inativo; ativo que falta entra
+    conc = [r for r in ctx.prf_concessions() if r.uf == uf]
+    cams, conc_stats = prf_concessions.apply(cams, conc, ctx.snv_routes() if conc else None)
+    print(f"[build] {uf}: PRF (concessões): {conc_stats['retired']} radares inativos, {conc_stats['added']} novos")
     off_by_src = {n: split.points(uf, ("limites", n), pts) for n, pts in nat["official_limits"].items()}
     off_l = [x for pts in off_by_src.values() for x in pts]
     lims = merge_limits(override_limits(off_l, osm_l))
@@ -158,6 +163,7 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     sources += [{"name": f"{n} (limites)", "count": len(pts)} for n, pts in off_by_src.items()]
     if status:
         sources.append({"name": "Inmetro (situação)", "snv": nat["snv_version"], **status})
+    sources.append({"name": "PRF (radares das concessões)", **conc_stats})
     sources.append({"name": "Inmetro (endereços, CNEFE)", "count": len(by_address), **addressed})
     valid_from, stretches = ctx.prf_portable_radar()
     mine = [s for s in stretches if s.uf == uf]

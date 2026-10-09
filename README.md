@@ -57,7 +57,7 @@ interesse, e o limite é um valor da via, não um lugar.
 |---|---|
 | `kind` | `FIXED` (radar de velocidade ou lombada eletrônica), `SECTION` (radar de trecho, com o fim em `end_lat,end_lng`), `RED_LIGHT` (avanço de sinal) |
 | `limit_kmh` | Limite fiscalizado, quando a fonte informa (veículo leve) |
-| `source` | De onde veio o ponto (`OSM`, `DNIT`, `ANTT`, `DER-SP`, `RIO`, `INMETRO`…). Quando mais de uma fonte traz o mesmo radar, elas vêm juntas com `+` (ex.: `DNIT+OSM`, confirmado por duas fontes independentes). `INMETRO` sozinho é um radar que só o cadastro de aferições do Inmetro conhece, com a posição tirada do endereço (ver as perguntas frequentes) |
+| `source` | De onde veio o ponto (`OSM`, `DNIT`, `ANTT`, `DER-SP`, `RIO`, `INMETRO`, `PRF`…). Quando mais de uma fonte traz o mesmo radar, elas vêm juntas com `+` (ex.: `DNIT+OSM`, confirmado por duas fontes independentes). `INMETRO` sozinho é um radar que só o cadastro de aferições do Inmetro conhece, com a posição tirada do endereço (ver as perguntas frequentes) |
 | `active` | `0` quando o radar está desativado ou com a aferição do Inmetro vencida |
 | `direction_deg` | Sentido fiscalizado: rumo do trânsito que o radar fiscaliza, em graus a partir do norte (0 = norte, 90 = leste, 180 = sul, 270 = oeste). Vazio quando o radar fiscaliza os dois sentidos ou a fonte não informa |
 
@@ -207,6 +207,9 @@ fontes e manter a mesma licença em bases derivadas.
 | DNIT — Controle de Velocidade (PNCV) | Radares das rodovias federais, com o sentido fiscalizado | Dado aberto governamental |
 | DNIT — Sistema Nacional de Viação | Quilometragem das BRs, usada para casar com o Inmetro e para converter o sentido (crescente/decrescente) em rumo | Dado aberto governamental |
 | PRF — Trechos aptos à fiscalização com radar portátil | A relação vigente (UF, BR, km inicial e final), posta na rodovia pelo SNV | Dado aberto governamental |
+| PRF — Infrações | As multas de velocidade (art. 218) dos 12 meses mais novos, só a contagem por trecho apto ao radar portátil | Dado aberto governamental |
+| PRF — Acidentes (agrupados por pessoa) | Os km com 5 ou mais acidentes com moto nos 12 meses mais novos, com os motociclistas mortos, só contagens | Dado aberto governamental |
+| PRF — Radares fixos (planilha das concessões que a página oficial mostra) | A situação de cada equipamento das concessões federais (ativo, inoperante, estudo ou aferição vencidos) e a coordenada dos ativos; o radar inoperante ou vencido sai inativo, o ativo que nenhuma outra fonte tem entra com `source=PRF` | Sem licença escrita: tabela externa (Apps Script) apontada pela página da PRF |
 | DNIT — Condições do Pavimento (ICM) | Os km com panela ruim ou péssima do levantamento mais novo, postos na rodovia pelo SNV | Dado aberto governamental |
 | ANTT — Radar | Radares das concessões federais, com situação e sentido | CC-BY |
 | ANTT — Sinalização | Placas de velocidade máxima das concessões federais, por sentido | CC-BY |
