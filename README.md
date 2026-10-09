@@ -101,7 +101,9 @@ entre os dois km (`LINESTRING(lng lat, ...)`, pelo SNV do DNIT; simplificada a 1
 do SNV vira um pedaço por linha; contornos e acessos ("BR-101 (Contorno viário)") ficam de fora (o km não é o da BR).
 `speed_fines_12m` (desde o schema 7) são as multas de velocidade (art. 218 do CTB) que a PRF aplicou nos km do trecho
 nos 12 meses mais novos dos dados abertos dela, só a contagem: diz onde a PRF de fato fiscaliza, não onde haverá radar;
-vazio quando a fonte faltou na geração, `0` quando não houve multa. No `catalogo.json`, a entrada `portable_radar`
+vazio quando a fonte faltou na geração, `0` quando não houve multa. Em SC entram também os locais do radar portátil
+nas rodovias estaduais que a SIE publica (`road` = `SC-401`...): cada local vira o trecho entre os dois marcos
+quilométricos do OSM que o cercam, pelo caminho da rodovia, sem as multas. No `catalogo.json`, a entrada `portable_radar`
 (pacote no schema 5).
 
 **Trechos com buracos (CSV, só por estado):** `road,km_from,km_to,direction,level,month,wkt`. Do levantamento mensal
@@ -210,6 +212,7 @@ fontes e manter a mesma licença em bases derivadas.
 | PRF — Infrações | As multas de velocidade (art. 218) dos 12 meses mais novos, só a contagem por trecho apto ao radar portátil | Dado aberto governamental |
 | PRF — Acidentes (agrupados por pessoa) | Os km com 5 ou mais acidentes com moto nos 12 meses mais novos, com os motociclistas mortos, só contagens | Dado aberto governamental |
 | PRF — Radares fixos (planilha das concessões que a página oficial mostra) | A situação de cada equipamento das concessões federais (ativo, inoperante, estudo ou aferição vencidos) e a coordenada dos ativos; o radar inoperante ou vencido sai inativo, o ativo que nenhuma outra fonte tem entra com `source=PRF` | Sem licença escrita: tabela externa (Apps Script) apontada pela página da PRF |
+| SIE-SC — Locais de operação do radar portátil | Rodovia SC, km e sentido; o km posto na via entre os marcos quilométricos do OSM | Dado aberto governamental |
 | DNIT — Condições do Pavimento (ICM) | Os km com panela ruim ou péssima do levantamento mais novo, postos na rodovia pelo SNV | Dado aberto governamental |
 | ANTT — Radar | Radares das concessões federais, com situação e sentido | CC-BY |
 | ANTT — Sinalização | Placas de velocidade máxima das concessões federais, por sentido | CC-BY |

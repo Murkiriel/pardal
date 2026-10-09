@@ -60,6 +60,7 @@ class BuildContext:
         self._prf_fines_read = False
         self._moto_accidents: Optional[tuple] = None
         self._prf_concessions: Optional[list] = None
+        self._sc_portable: Optional[tuple] = None
         self._potholes: Optional[tuple] = None
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
@@ -163,6 +164,20 @@ class BuildContext:
                 failures.record("DNIT (buracos, ICM)", e)
                 self._potholes = ("", [])
         return self._potholes
+
+    def sc_portable_radar(self, pbf: str) -> tuple:
+        """(trechos, pontos de fora) do radar portátil de SC (sources/sc_portable_radar), com o extrato `pbf` da região
+        sul; lidos uma vez por execução; falha vira ([], 0), registrada."""
+        if self._sc_portable is None:
+            from datakit.sources import sc_portable_radar
+            try:
+                self._sc_portable = sc_portable_radar.zones(pbf)
+                print(f"[build] SIE-SC: {len(self._sc_portable[0])} trechos de radar portátil "
+                      f"({self._sc_portable[1]} pontos sem marcos do OSM em volta)")
+            except Exception as e:  # noqa: BLE001 - uma fonte fora do ar não derruba a geração
+                failures.record("SIE-SC (radar portátil)", e)
+                self._sc_portable = ([], 0)
+        return self._sc_portable
 
     def prf_concessions(self) -> list:
         """Os equipamentos da planilha dos radares das concessões que a PRF mostra (sources/prf_concessions), lidos uma

@@ -171,6 +171,10 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
                                         ctx.prf_speed_fines() if mine else None)
     sources.append({"name": "PRF (trechos aptos ao radar portátil)", "valid_from": valid_from, "count": len(zones),
                     "unplaced": unplaced})
+    if uf == "SC":   # o radar portátil das rodovias estaduais de SC, pelos marcos do OSM do extrato da região
+        sc_zones, sc_out = ctx.sc_portable_radar(ex.path)
+        zones = zones + sc_zones
+        sources.append({"name": "SIE-SC (radar portátil)", "count": len(sc_zones), "unplaced": sc_out})
     month, rough = ctx.dnit_potholes()
     rough_here = [r for r in rough if r.uf == uf]
     holes, holes_out = potholes.place(uf, month, rough_here, ctx.snv_routes() if rough_here else None)
