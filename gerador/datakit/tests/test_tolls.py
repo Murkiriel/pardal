@@ -85,7 +85,7 @@ class MergeAndPack(unittest.TestCase):
             {"lat": "-17.000000", "lng": "-49.500000", "kind": "FREE_FLOW", "name": "", "source": "OSM"},
             {"lat": "-16.510000", "lng": "-49.020000", "kind": "PLAZA", "name": "P2 GOIANÁPOLIS", "source": "ANTT"},
         ])
-        self.assertEqual((m["schema"], m["counts"]["tolls"]), (6, 2))  # 6 desde os buracos
+        self.assertEqual((m["schema"], m["counts"]["tolls"]), (7, 2))  # 7 desde as multas por trecho
         self.assertIn("pedagios.csv", m["files"])
         self.assertEqual((cat["ufs"]["GO"]["tolls"]["file"], cat["ufs"]["GO"]["tolls"]["count"]), ("estados/GO/pedagios.csv", 2))
         self.assertNotIn("tolls", cat["ufs"]["AC"])

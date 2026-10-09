@@ -93,13 +93,16 @@ mesmo pedágio nas duas fontes, a até 300 m, fica um só, com o nome da ANTT. `
 `FREE_FLOW` (pórtico eletrônico, sem parar). Sem preço: as tabelas de tarifa publicadas estão desatualizadas. No
 `catalogo.json`, a entrada `tolls` (pacote no schema 4).
 
-**Trechos aptos ao radar portátil (CSV, só por estado):** `road,km_from,km_to,valid_from,wkt`. A relação que a PRF
+**Trechos aptos ao radar portátil (CSV, só por estado):** `road,km_from,km_to,valid_from,wkt,speed_fines_12m`. A relação que a PRF
 publica (Res. Contran 798/2020, art. 7º): os trechos das rodovias federais onde a fiscalização de velocidade com
 equipamento portátil **pode** acontecer, não a posição de um radar. `road` é a BR (`BR-060`), `km_from`/`km_to` o
 trecho na quilometragem do SNV, `valid_from` o início da validade da lista vigente da PRF e `wkt` a linha da rodovia
 entre os dois km (`LINESTRING(lng lat, ...)`, pelo SNV do DNIT; simplificada a 15 m). O trecho que atravessa duas linhas
 do SNV vira um pedaço por linha; contornos e acessos ("BR-101 (Contorno viário)") ficam de fora (o km não é o da BR).
-No `catalogo.json`, a entrada `portable_radar` (pacote no schema 5).
+`speed_fines_12m` (desde o schema 7) são as multas de velocidade (art. 218 do CTB) que a PRF aplicou nos km do trecho
+nos 12 meses mais novos dos dados abertos dela, só a contagem: diz onde a PRF de fato fiscaliza, não onde haverá radar;
+vazio quando a fonte faltou na geração, `0` quando não houve multa. No `catalogo.json`, a entrada `portable_radar`
+(pacote no schema 5).
 
 **Trechos com buracos (CSV, só por estado):** `road,km_from,km_to,direction,level,month,wkt`. Do levantamento mensal
 de condições do pavimento do DNIT (ICM), os km com **panela (buraco) ruim ou péssima**, juntados quando seguidos na mesma

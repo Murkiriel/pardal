@@ -122,8 +122,9 @@ class Shape(unittest.TestCase):
     def test_the_row_carries_the_line_as_wkt(self):
         from datakit.common import RadarZone
         z = RadarZone("BR-020", 10.0, 20.5, "2026-10-03", ((-16.0, -49.4), (-16.012346, -49.3)))
-        self.assertEqual(["BR-020", "10.0", "20.5", "2026-10-03", "LINESTRING(-49.40000 -16.00000, -49.30000 -16.01235)"], z.row())
-        self.assertEqual(("road", "km_from", "km_to", "valid_from", "wkt"), RadarZone.HEADER)
+        # sem as multas (fonte fora), a última coluna vai vazia (test_speed_fines)
+        self.assertEqual(["BR-020", "10.0", "20.5", "2026-10-03", "LINESTRING(-49.40000 -16.00000, -49.30000 -16.01235)", ""], z.row())
+        self.assertEqual(("road", "km_from", "km_to", "valid_from", "wkt", "speed_fines_12m"), RadarZone.HEADER)
 
 
 class Context(unittest.TestCase):
@@ -162,8 +163,8 @@ class PackAndCatalog(unittest.TestCase):
                 rows = list(csv.DictReader(f))
             cat = build_catalog.build(packs, dist)
         self.assertEqual([{"road": "BR-020", "km_from": "10.0", "km_to": "20.0", "valid_from": "2026-10-03",
-                           "wkt": "LINESTRING(-49.40000 -16.00000, -49.30000 -16.00000)"}], rows)
-        self.assertEqual((m["schema"], m["counts"]["portable_radar"]), (6, 1))  # 6 desde os buracos (test_potholes)
+                           "wkt": "LINESTRING(-49.40000 -16.00000, -49.30000 -16.00000)", "speed_fines_12m": ""}], rows)
+        self.assertEqual((m["schema"], m["counts"]["portable_radar"]), (7, 1))  # 7 desde as multas por trecho (test_speed_fines)
         self.assertIn("radar_portatil.csv", m["files"])
         self.assertEqual((cat["ufs"]["GO"]["portable_radar"]["file"], cat["ufs"]["GO"]["portable_radar"]["count"]),
                          ("estados/GO/radar_portatil.csv", 1))

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Mapping, Optional, Tuple
 
 from datakit import failures
 from datakit.common.model import Camera, Limit
@@ -56,6 +56,8 @@ class BuildContext:
         self._tolls: list = []
         self._antt_tolls: Optional[list] = None
         self._prf_radar: Optional[tuple] = None
+        self._prf_fines: Optional[Mapping[Tuple[str, int, int], int]] = None
+        self._prf_fines_read = False
         self._potholes: Optional[tuple] = None
         self._osm: Optional[tuple] = None
         self._inmetro_points: Dict[str, List[Camera]] = {}
@@ -159,6 +161,20 @@ class BuildContext:
                 failures.record("DNIT (buracos, ICM)", e)
                 self._potholes = ("", [])
         return self._potholes
+
+    def prf_speed_fines(self) -> Optional[Mapping[Tuple[str, int, int], int]]:
+        """Multas de velocidade da PRF por (UF, BR, km) nos 12 meses mais novos, lidas uma vez por execução; falha vira
+        None, registrada (o radar_portatil.csv sai com a coluna vazia)."""
+        if not self._prf_fines_read:
+            from datakit import failures
+            from datakit.sources import prf_fines
+            self._prf_fines_read = True
+            try:
+                (first, last), self._prf_fines = prf_fines.load(self.raw_dir)
+                print(f"[build] PRF: {sum(self._prf_fines.values())} multas de velocidade de {first} a {last}")
+            except Exception as e:  # noqa: BLE001 - uma fonte fora do ar não derruba a geração
+                failures.record("PRF (multas de velocidade)", e)
+        return self._prf_fines
 
     def prf_portable_radar(self) -> tuple:
         """(início da validade, trechos) da lista vigente da PRF de trechos aptos ao radar portátil, baixada uma vez por

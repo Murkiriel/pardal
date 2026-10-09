@@ -5,12 +5,15 @@ vértice) é cortada entre os dois km (MeasuredLine.slice). Um trecho que atrave
 quebras) vira um pedaço por linha, cada um com o seu km; o trecho de uma BR sem linha no SNV do estado fica de fora e é
 contado. O km do SNV cai a 226 m da coordenada na mediana (lrs.py): para trechos de ~10 km, basta.
 
+Cada trecho leva as multas de velocidade da PRF dos seus km (sources/prf_fines, por UF, BR e km inteiro), as mesmas em
+todos os pedaços dele; o km k conta para o trecho que vai de k até k + 1 dentro dele.
+
 A geometria é simplificada (Douglas-Peucker, SIMPLIFY_M): as curvas ficam, os vértices de reta saem.
 """
 from __future__ import annotations
 
 import math
-from typing import List, Sequence, Tuple
+from typing import List, Mapping, Optional, Sequence, Tuple
 
 from datakit.common import RadarStretch, RadarZone
 
@@ -49,8 +52,15 @@ def simplify(points: Sequence[Point], tol_m: float) -> List[Point]:
     return [p for p, k in zip(pts, keep) if k]
 
 
-def place(uf: str, valid_from: str, stretches: Sequence[RadarStretch], routes) -> Tuple[List[RadarZone], int]:
-    """(pedaços com geometria, trechos da UF sem linha no SNV) dos trechos de `uf`; `routes` é SnvRoutes ou None."""
+def stretch_fines(s: RadarStretch, fines: Mapping[Tuple[str, int, int], int]) -> int:
+    """Multas de velocidade nos km do trecho: do km inteiro do começo até antes do fim."""
+    return sum(fines.get((s.uf, s.br, k), 0) for k in range(math.floor(s.km_from), math.ceil(s.km_to)))
+
+
+def place(uf: str, valid_from: str, stretches: Sequence[RadarStretch], routes,
+          fines: Optional[Mapping[Tuple[str, int, int], int]] = None) -> Tuple[List[RadarZone], int]:
+    """(pedaços com geometria, trechos da UF sem linha no SNV) dos trechos de `uf`; `routes` é SnvRoutes ou None;
+    `fines`, as multas por (UF, BR, km), ou None sem a fonte (os pedaços ficam sem a contagem)."""
     zones: List[RadarZone] = []
     unplaced = 0
     for s in stretches:
@@ -68,7 +78,8 @@ def place(uf: str, valid_from: str, stretches: Sequence[RadarStretch], routes) -
         if not pieces:
             unplaced += 1
             continue
+        count = None if fines is None else stretch_fines(s, fines)
         for lo, hi, pts in pieces:
             zones.append(RadarZone(f"BR-{s.br:03d}", round(lo, 3), round(hi, 3), valid_from,
-                                   tuple(simplify(pts, SIMPLIFY_M))))
+                                   tuple(simplify(pts, SIMPLIFY_M)), count))
     return zones, unplaced

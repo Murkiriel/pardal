@@ -103,7 +103,7 @@ class Pack(unittest.TestCase):
         self.assertEqual(m["counts"], {"cameras": 2, "cameras_with_limit": 2, "cameras_inactive": 0,
                                        "sections": 1, "red_lights": 0, "limits": 2, "structs": 1, "bumps": 0, "tolls": 0,
                                        "portable_radar": 0, "potholes": 0})
-        self.assertEqual((m["schema"], m["artifact_built_at"], m["sources"]), (6, "2026-09-30T00:00:00Z",
+        self.assertEqual((m["schema"], m["artifact_built_at"], m["sources"]), (7, "2026-09-30T00:00:00Z",
                                                                              [{"name": "teste"}]))
         want = {tile_of(-16.0, -49.0), tile_of(-16.1, -49.1), tile_of(-16.3, -49.3)}
         self.assertEqual(m["tiles"], [list(t) for t in sorted(want)])

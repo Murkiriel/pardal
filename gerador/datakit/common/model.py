@@ -132,18 +132,22 @@ class RadarStretch:
 @dataclass(frozen=True)
 class RadarZone:
     """Pedaço de trecho apto ao radar portátil (PRF) com a geometria da BR pelo SNV (radar_zones.py). Diz onde a
-    fiscalização PODE acontecer, não a posição de um radar. A linha vai como WKT (LINESTRING, lng lat)."""
+    fiscalização PODE acontecer, não a posição de um radar. A linha vai como WKT (LINESTRING, lng lat). `speed_fines`:
+    multas de velocidade da PRF nos km do trecho nos 12 meses mais novos publicados (sources/prf_fines); None quando a
+    fonte faltou (a coluna vai vazia), 0 quando não houve multa."""
     road: str  # "BR-060"
     km_from: float
     km_to: float
     valid_from: str  # AAAA-MM-DD: o início da validade da lista da PRF
     points: Tuple[Tuple[float, float], ...]  # (lat, lng)
+    speed_fines: Optional[int] = None
 
-    HEADER = ("road", "km_from", "km_to", "valid_from", "wkt")
+    HEADER = ("road", "km_from", "km_to", "valid_from", "wkt", "speed_fines_12m")
 
     def row(self) -> List[str]:
         line = ", ".join(f"{lng:.5f} {lat:.5f}" for lat, lng in self.points)
-        return [self.road, f"{self.km_from:.1f}", f"{self.km_to:.1f}", self.valid_from, f"LINESTRING({line})"]
+        fines = "" if self.speed_fines is None else str(self.speed_fines)
+        return [self.road, f"{self.km_from:.1f}", f"{self.km_to:.1f}", self.valid_from, f"LINESTRING({line})", fines]
 
 
 @dataclass(frozen=True)

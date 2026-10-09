@@ -161,7 +161,8 @@ def build_one(uf: str, ctx: BuildContext, packs_dir: str, split: "_Split | None"
     sources.append({"name": "Inmetro (endereços, CNEFE)", "count": len(by_address), **addressed})
     valid_from, stretches = ctx.prf_portable_radar()
     mine = [s for s in stretches if s.uf == uf]
-    zones, unplaced = radar_zones.place(uf, valid_from, mine, ctx.snv_routes() if mine else None)
+    zones, unplaced = radar_zones.place(uf, valid_from, mine, ctx.snv_routes() if mine else None,
+                                        ctx.prf_speed_fines() if mine else None)
     sources.append({"name": "PRF (trechos aptos ao radar portátil)", "valid_from": valid_from, "count": len(zones),
                     "unplaced": unplaced})
     month, rough = ctx.dnit_potholes()

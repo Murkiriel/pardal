@@ -20,8 +20,9 @@ from datakit.common import (Bump, Camera, CameraKind, Limit, PotholeZone, RadarZ
                              merge_limits)
 from datakit.common.ufs import uf_bbox
 
-SCHEMA = 6  # 1 = base (radares+limites); 2 = + estruturas.csv (ponte/túnel); 3 = + lombadas.csv; 4 = + pedagios.csv;
-# 5 = + radar_portatil.csv (trechos aptos ao radar portátil da PRF); 6 = + buracos.csv (ICM do DNIT).
+SCHEMA = 7  # 1 = base (radares+limites); 2 = + estruturas.csv (ponte/túnel); 3 = + lombadas.csv; 4 = + pedagios.csv;
+# 5 = + radar_portatil.csv (trechos aptos ao radar portátil da PRF); 6 = + buracos.csv (ICM do DNIT);
+# 7 = + speed_fines_12m no radar_portatil.csv (multas de velocidade da PRF por trecho).
 # Leitor tolera ausência.
 # Nomes dos arquivos: os mesmos do pacote ao repositório publicado (estados/<UF>/radares.csv...).
 CAMERAS_FILE = "radares.csv"
