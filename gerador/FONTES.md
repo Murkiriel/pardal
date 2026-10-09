@@ -45,6 +45,10 @@ endereços (geocodificador).
 - **DER-MG**: 708 radares fixos com limite (tabela HTML, atualizada 2026-09-29).
 - **DER-PR, DAER-RS, DER-ES**: listas em PDF (a obrigação vem da Res. Contran 798/2020).
   DAER-RS não publica o ponto exato dos pardais, só os trechos.
+  DER-PR (conferido em 2026-10-09): a página "Fiscalização por equipamento fixo" traz um só PDF, o da EPR Litoral
+  Pioneiro (12 controladores nas PR-407, PR-151 e PR-092, rodovia + km, sem coordenada). É concessão federal da ANTT:
+  nos sete municípios do PDF o pacote do PR já tem os radares da ANTT (Arapoti 4, Sengés 2, Siqueira Campos 2, Castro,
+  Carambeí, Piraí do Sul, Paranaguá). Sem ganho; e sem malha estadual do PR com km em aberto, o km não teria onde cair.
 - **Inmetro**: 8.192 válidos com rodovia+km no país.
 
 Referência linear disponível:
