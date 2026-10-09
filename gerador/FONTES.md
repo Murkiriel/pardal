@@ -49,6 +49,13 @@ endereços (geocodificador).
   Pioneiro (12 controladores nas PR-407, PR-151 e PR-092, rodovia + km, sem coordenada). É concessão federal da ANTT:
   nos sete municípios do PDF o pacote do PR já tem os radares da ANTT (Arapoti 4, Sengés 2, Siqueira Campos 2, Castro,
   Carambeí, Piraí do Sul, Paranaguá). Sem ganho; e sem malha estadual do PR com km em aberto, o km não teria onde cair.
+- **SIE-SC, radar portátil** (conferido em 2026-10-09): SC não tem radar fixo estadual; a SIE publica os locais de
+  operação do radar portátil da PMRv (`sie.sc.gov.br/webdocs/sie/consultamultas/radares/`, PDF de 12 páginas, válido
+  desde 16/05/2023): 596 pontos em rodovias SC, cada um com código, rodovia, km, sentido (crescente/decrescente),
+  município e limite. Sem coordenada e sem malha estadual com km em aberto; o OSM tem 3.958 marcos quilométricos
+  (`highway=milestone` com `distance` e `ref`) em 67 rodovias SC: 462 dos 596 pontos ficam entre dois marcos da própria
+  rodovia, 327 com marco a até 5 km dos dois lados (SC-161, SC-157, SC-453, SC-305 sem marcos). Posição: pelo caminho
+  das vias `ref=SC-N` entre os dois marcos, não pela reta.
 - **Inmetro**: 8.192 válidos com rodovia+km no país.
 
 Referência linear disponível:
